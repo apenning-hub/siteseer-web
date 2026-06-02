@@ -1,0 +1,175 @@
+---
+import Base from '../layouts/Base.astro';
+
+// ── SWAP IMAGES HERE ── drop files in /public/images and point a slot at them.
+// landscape = window/desktop shots · portrait = phone screenshots
+const img = {
+  heroProduct: '/images/product-hero.png',   // hero desktop window (LANDSCAPE)
+  everyPhoneL: '/images/product-hero.png',    // every-device left phone (PORTRAIT)
+  everyWindow: '/images/product-hero.png',    // every-device centre window (LANDSCAPE)
+  everyPhoneR: '/images/product-hero.png',    // every-device right phone (PORTRAIT)
+  groundUp:    '/images/product-process.jpg', // built-from-ground-up framed (LANDSCAPE)
+  lookPhone1:  '/images/product-hero.png',    // first-look phone 1 (PORTRAIT)
+  lookPhone2:  '/images/product-hero.png',    // first-look phone 2 (PORTRAIT)
+  lookPhone3:  '/images/product-hero.png',    // first-look phone 3 (PORTRAIT)
+};
+
+const pillars = [
+  { no: '01', h: '3D models', p: 'Real buildings, modelled to construction-grade detail and made explorable from any angle, at any stage of the build.' },
+  { no: '02', h: 'Game engines & gamification', p: 'Unreal-powered, interactive and rewarding — learning that feels like play, not a lecture, on hardware students already own.' },
+  { no: '03', h: 'Construction knowledge', p: 'Sequencing, structure and trade detail, encoded by the people who teach the discipline — not generic 3D.' },
+];
+
+const capabilities = [
+  { ic: '▦', h: 'Immersive by default', p: 'Walk an active build from any angle, and pause it at footings, frame, lock-up or fit-out.' },
+  { ic: '◷', h: 'Construction knowledge', p: 'Sequencing, structure and trade detail, encoded by the educators who teach it — not generic 3D.' },
+  { ic: '✓', h: 'Safe & repeatable', p: 'Zero site risk. No PPE or inductions — replay any stage as many times as it takes.' },
+  { ic: '◆', h: 'On any device', p: 'Runs on the Windows & macOS laptops students already own. No headset required.' },
+  { ic: '⚡', h: 'Gamified & engaging', p: 'Interactive and rewarding — learning that feels like play, not a lecture.' },
+  { ic: '⇆', h: 'Tailored depth', p: 'Tune to any skill level, from first-years to final-year cohorts.' },
+];
+
+const outcomes = [
+  { ic: '★', h: 'Engaged students', p: 'Learning that feels like play, not a lecture.' },
+  { ic: '⚙', h: 'Relevant skills', p: 'Real sites, real sequencing, from day one.' },
+  { ic: '↗', h: 'Industry-ready', p: 'Confident entry into construction.' },
+];
+
+const roadmapA = ['Augmented Reality','Learning Outcome Tracking','Customizable Analytics','Progress Monitoring','Data-Driven Insights','Curriculum Improvement','Content Library','Custom Curriculum Integration','Virtual Classrooms','Community & Forums','Interactive Building Phases'];
+const roadmapB = ['iOS & Android App','In-Environment Tutorials','Scenario-Based Modules','Assessment & Certification','Analytics Dashboard','Detailed Reporting','Feedback Tools','Modular Learning Paths','Real-Time Collaboration','Interactive Questing','Multiplayer Environments'];
+---
+<Base>
+  <!-- HERO -->
+  <section class="band band-red grain hero tc">
+    <div class="wrap" style="position:relative;z-index:2;max-width:920px;">
+      <span class="kick reveal d1"><span class="ln"></span>Construction digital learning<span class="ln"></span></span>
+      <h1 class="h1 druk"><span class="reveal d2">Building</span><span class="reveal d3">Information</span></h1>
+      <p class="lead reveal d4">We turn complex <b>building information</b> into immersive 3D worlds students can walk through, question and remember — built in real <b>game engines</b>, grounded in real construction knowledge.</p>
+      <div class="reveal d5" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a class="btn btn-onred btn-lg" href="#contact">Start a pilot →</a>
+        <a class="btn btn-ghostred btn-lg" href="#contact">Join the waitlist</a>
+      </div>
+      <div class="proof reveal d6">A decade in use · 1,000+ students · Built in Unreal Engine</div>
+    </div>
+    <div class="wrap reveal d6" style="position:relative;z-index:2;max-width:980px;margin:50px auto -84px;">
+      <div class="window">
+        <div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — structural steel · ground floor</span></div>
+        <img class="win-shot" src={img.heroProduct} alt="SiteSeer construction environment" />
+      </div>
+    </div>
+    <div style="height:84px;"></div>
+  </section>
+
+  <!-- EXPERTISE -->
+  <section class="band" id="expertise">
+    <div class="wrap">
+      <div class="eyebrow">What we do</div>
+      <h2 class="sh druk" style="max-width:14ch">Experts in construction digital learning<span class="dot">.</span></h2>
+      <div class="pillars">
+        {pillars.map((p) => (
+          <div class="glass-light glass pill"><div class="no">{p.no}</div><h4>{p.h}</h4><p>{p.p}</p></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROVEN -->
+  <section class="band band-ink" id="proven">
+    <div class="wrap">
+      <div class="eyebrow">Proven. Better.</div>
+      <div class="split">
+        <div>
+          <h2 class="sh druk">A decade of real<br />classroom results<span class="dot">.</span></h2>
+          <p class="stext">When it's impossible to get students onto a construction site to connect theory to practice, SiteSeer is the solution — safe, repeatable, and on the devices they already carry.</p>
+        </div>
+        <div class="statstrip">
+          <div class="statc glass"><div class="num">1,000+</div><div class="cap">Students taught</div></div>
+          <div class="statc glass"><div class="num">10 yrs</div><div class="cap">In real classrooms</div></div>
+          <div class="statc glass"><div class="num">2</div><div class="cap">Platforms today</div></div>
+          <div class="statc glass"><div class="num">0</div><div class="cap">Site-safety risk</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVERY DEVICE -->
+  <section class="band tc" id="platform">
+    <div class="wrap narrow">
+      <div class="eyebrow">Everything, everywhere</div>
+      <h2 class="sh druk">On every device<span class="dot">.</span></h2>
+      <p class="stext">Stream the whole build on a personal laptop — no headset, no lab, no booking a site visit. The same environment, on every device.</p>
+      <div class="chips"><div class="chip">✔ Windows</div><div class="chip">✔ macOS</div><div class="chip soon">iOS <span class="tag">SOON</span></div><div class="chip soon">Android <span class="tag">SOON</span></div></div>
+    </div>
+    <div class="wrap">
+      <div class="devices">
+        <div class="phone"><div class="scr"><img src={img.everyPhoneL} alt="SiteSeer on phone" /></div></div>
+        <div class="window"><div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — desktop</span></div><img class="win-shot" src={img.everyWindow} style="height:330px" alt="SiteSeer on desktop" /></div>
+        <div class="phone"><div class="scr"><img src={img.everyPhoneR} alt="SiteSeer on phone" /></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section class="band band-red grain tc" id="capabilities">
+    <div class="wrap">
+      <div class="eyebrow">Why institutions choose SiteSeer</div>
+      <h2 class="sh druk">Where gaming, education &amp; construction meet<span class="dot">.</span></h2>
+      <div class="fgrid" style="margin-top:38px;">
+        {capabilities.map((c) => (
+          <div class="glass fitem"><div class="ic">{c.ic}</div><h5>{c.h}</h5><p>{c.p}</p></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- BUILT FROM THE GROUND UP -->
+  <section class="band">
+    <div class="wrap">
+      <div class="split">
+        <div>
+          <div class="eyebrow">Built from the ground up</div>
+          <h2 class="sh druk">Meticulously accurate<span class="dot">.</span></h2>
+          <p class="stext">Purpose-built for students of all ages and experience levels, on construction-grade models — better than a real visit, because the information is accessible at <b>any</b> stage of the build.</p>
+          <div class="fgrid" style="grid-template-columns:1fr 1fr;margin-top:30px;">
+            <div class="glass-light glass fitem"><div class="ic">◳</div><h5>Construction-grade</h5><p>Modelled to real detail, every trade.</p></div>
+            <div class="glass-light glass fitem"><div class="ic">⇆</div><h5>Tailorable depth</h5><p>Tune the experience to the cohort.</p></div>
+          </div>
+        </div>
+        <div class="framed"><img src={img.groundUp} alt="SiteSeer construction stages" /></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUTCOMES -->
+  <section class="band band-red grain tc" id="outcomes">
+    <div class="wrap narrow">
+      <div class="eyebrow">Job-ready graduates, built here</div>
+      <h2 class="sh druk">Your future in construction starts here<span class="dot">.</span></h2>
+      <div class="fgrid">
+        {outcomes.map((o) => (
+          <div class="glass fitem"><div class="ic">{o.ic}</div><h5>{o.h}</h5><p>{o.p}</p></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FIRST LOOK -->
+  <section class="band band-ink tc" id="demo">
+    <div class="wrap narrow"><div class="eyebrow" style="color:var(--red);opacity:1">Your first look</div><h2 class="sh druk">See it for yourself<span class="dot">.</span></h2><p class="stext">Explore a demo and start imagining how SiteSeer fits your program.</p></div>
+    <div class="wrap"><div class="phonerow">
+      <div class="phone reveal d2"><div class="scr"><img src={img.lookPhone1} alt="preview 1" /></div></div>
+      <div class="phone reveal d3"><div class="scr"><img src={img.lookPhone2} alt="preview 2" /></div></div>
+      <div class="phone reveal d4"><div class="scr"><img src={img.lookPhone3} alt="preview 3" /></div></div>
+    </div></div>
+    <div class="wrap narrow"><div style="display:flex;gap:12px;justify-content:center;margin-top:44px;flex-wrap:wrap;"><a class="btn btn-red btn-lg" href="#contact">Start a pilot →</a><a class="btn btn-onred btn-lg" href="#contact">Join the waitlist</a></div></div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="band tc" id="roadmap">
+    <div class="wrap"><div class="eyebrow">On the roadmap</div><h2 class="sh druk">Upcoming features<span class="dot">.</span></h2></div>
+    <div class="marquee">
+      <div class="mrow">{[...roadmapA, ...roadmapA].map((f) => <span>{f}</span>)}</div>
+      <div class="mrow rev">{[...roadmapB, ...roadmapB].map((f) => <span>{f}</span>)}</div>
+    </div>
+  </section>
+</Base>

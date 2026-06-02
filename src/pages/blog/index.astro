@@ -1,0 +1,36 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const fmt = (d: Date) => d.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+<Base
+  title="Blog — SiteSeer"
+  description="Research-led, plain-English writing on construction education, the skills shortage, and the tertiary / GTO / RTO / TAFE landscape."
+>
+  <section>
+    <div class="wrap">
+      <div class="page-head">
+        <div class="eyebrow">The SiteSeer blog</div>
+        <h1 class="sh druk">Construction education, in focus<span class="dot">.</span></h1>
+        <p class="stext narrow">Research-led, plain-English writing on the skills shortage, digital learning, and the tertiary / GTO / RTO / TAFE landscape — for educators and policymakers alike.</p>
+      </div>
+      <div class="bloglist">
+        {posts.map((post) => (
+          <a class="postcard" href={`/blog/${post.id}/`}>
+            <div class="pc-top"></div>
+            <div class="pc-body">
+              <div class="pc-tags">{post.data.tags.slice(0, 2).map((t) => <span class="tagpill">{t}</span>)}</div>
+              <h3>{post.data.title}</h3>
+              <p class="pc-desc">{post.data.description}</p>
+              <div class="pc-meta">{fmt(post.data.pubDate)} · {post.data.author}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

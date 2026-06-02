@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = (d: Date) => d.toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Base title={`${post.data.title} — SiteSeer`} description={post.data.description}>
+  <article class="post">
+    <a class="back-link" href="/blog">← All posts</a>
+    <div class="post-meta">
+      <span>{fmt(post.data.pubDate)}</span><span>·</span><span>{post.data.author}</span>
+      {post.data.tags.map((t) => <span class="tagpill">{t}</span>)}
+    </div>
+    <h1>{post.data.title}</h1>
+    <p class="lede">{post.data.description}</p>
+    <div class="prose"><Content /></div>
+  </article>
+</Base>

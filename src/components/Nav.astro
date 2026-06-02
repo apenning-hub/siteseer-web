@@ -1,0 +1,27 @@
+---
+// Simplified header: 4 links + one CTA. Anchor links are absolute so they
+// work from blog pages too.
+const links = [
+  { label: 'Platform', href: '/#platform' },
+  { label: 'Evidence', href: '/#proven' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Contact', href: '/#contact' },
+];
+---
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="/" aria-label="SiteSeer home">
+      <svg width="32" height="32" viewBox="0 0 34 34" aria-hidden="true">
+        <rect width="34" height="34" rx="9" fill="#e6332a" />
+        <path d="M8 16.5 L17 9 L26 16.5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linejoin="round" stroke-linecap="round" />
+        <line x1="10.5" y1="21.2" x2="23.5" y2="21.2" stroke="#fff" stroke-width="2.4" stroke-linecap="round" />
+        <line x1="10.5" y1="25.6" x2="23.5" y2="25.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" />
+      </svg>
+      <span class="wm"><span class="n" style="display:block">SITESEER</span><span class="t" style="display:block">BUILDING INFORMATION</span></span>
+    </a>
+    <nav class="navlinks">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+    <a class="btn btn-red" href="/#contact">Start a pilot</a>
+  </div>
+</header>
