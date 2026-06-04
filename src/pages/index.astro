@@ -3,15 +3,17 @@ import Base from '../layouts/Base.astro';
 
 // ── SWAP IMAGES HERE ── drop files in /public/images and point a slot at them.
 // landscape = window/desktop shots · portrait = phone screenshots
+// b = base path so images resolve correctly on GitHub Pages (subpath) and in prod.
+const b = import.meta.env.BASE_URL;
 const img = {
-  heroProduct: '/images/product-hero.png',   // hero desktop window (LANDSCAPE)
-  everyPhoneL: '/images/product-hero.png',    // every-device left phone (PORTRAIT)
-  everyWindow: '/images/product-hero.png',    // every-device centre window (LANDSCAPE)
-  everyPhoneR: '/images/product-hero.png',    // every-device right phone (PORTRAIT)
-  groundUp:    '/images/product-process.jpg', // built-from-ground-up framed (LANDSCAPE)
-  lookPhone1:  '/images/product-hero.png',    // first-look phone 1 (PORTRAIT)
-  lookPhone2:  '/images/product-hero.png',    // first-look phone 2 (PORTRAIT)
-  lookPhone3:  '/images/product-hero.png',    // first-look phone 3 (PORTRAIT)
+  heroProduct: `${b}images/product-hero.png`,   // hero desktop window (LANDSCAPE)
+  everyPhoneL: `${b}images/product-hero.png`,    // every-device left phone (PORTRAIT)
+  everyWindow: `${b}images/product-hero.png`,    // every-device centre window (LANDSCAPE)
+  everyPhoneR: `${b}images/product-hero.png`,    // every-device right phone (PORTRAIT)
+  groundUp:    `${b}images/product-process.jpg`, // built-from-ground-up framed (LANDSCAPE)
+  lookPhone1:  `${b}images/product-hero.png`,    // first-look phone 1 (PORTRAIT)
+  lookPhone2:  `${b}images/product-hero.png`,    // first-look phone 2 (PORTRAIT)
+  lookPhone3:  `${b}images/product-hero.png`,    // first-look phone 3 (PORTRAIT)
 };
 
 const pillars = [

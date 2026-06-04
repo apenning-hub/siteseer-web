@@ -2,7 +2,7 @@
 
 @font-face{
   font-family:'Druk Wide Bold';
-  src:url('/fonts/DrukWideBold.ttf') format('truetype');
+  src:url('../fonts/DrukWideBold.ttf') format('truetype');
   font-weight:700; font-display:swap;
 }
 

@@ -1,16 +1,17 @@
 ---
 // Simplified header: 4 links + one CTA. Anchor links are absolute so they
 // work from blog pages too.
+const base = import.meta.env.BASE_URL; // "/siteseer-web/" on GH Pages, "/" in prod
 const links = [
-  { label: 'Platform', href: '/#platform' },
-  { label: 'Evidence', href: '/#proven' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Platform', href: `${base}#platform` },
+  { label: 'Evidence', href: `${base}#proven` },
+  { label: 'Blog', href: `${base}blog` },
+  { label: 'Contact', href: `${base}#contact` },
 ];
 ---
 <header class="nav">
   <div class="wrap nav-in">
-    <a class="brand" href="/" aria-label="SiteSeer home">
+    <a class="brand" href={base} aria-label="SiteSeer home">
       <svg width="32" height="32" viewBox="0 0 34 34" aria-hidden="true">
         <rect width="34" height="34" rx="9" fill="#e6332a" />
         <path d="M8 16.5 L17 9 L26 16.5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linejoin="round" stroke-linecap="round" />
@@ -22,6 +23,6 @@ const links = [
     <nav class="navlinks">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
     </nav>
-    <a class="btn btn-red" href="/#contact">Start a pilot</a>
+    <a class="btn btn-red" href={`${base}#contact`}>Start a pilot</a>
   </div>
 </header>
