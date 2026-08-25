@@ -551,7 +551,42 @@ git commit -m "feat: target beta.siteseer.education on Cloudflare Pages, noindex
 
 ## Task 6: OAuth broker
 
-> **Verify before building.** The Decap/Sveltia popup handshake below is written from the documented protocol, but the exact message format has changed between major versions. Before writing code, check the current Sveltia CMS authentication docs. **If they differ from what is written here, deploy the official `sveltia-cms-auth` Cloudflare Worker instead of these two functions** and skip to Task 7 — an official broker is preferable to a hand-rolled one that must track upstream changes.
+> **RESOLVED — the sketch below is superseded.** The protocol was verified against
+> primary source: `sveltia/sveltia-cms`'s own `src/lib/services/backends/git/shared/auth.js`
+> (the CMS-side handshake) and `sveltia/sveltia-cms-auth`'s `src/index.js` (the
+> official broker, read in full). The two independently agree.
+>
+> **Build this as a faithful port of the official ~250-line worker into a Pages
+> Function**, not from the sketch below. Same runtime — Workers and Pages Functions
+> both run the same Web APIs — so the port is a copy, not a reimplementation. The
+> separate Worker was rejected because "someone must notice upstream changed and
+> redeploy" is true of both options, so it buys nothing while costing a second
+> deployment, dashboard, secret set and URL for a non-technical maintainer.
+>
+> **Three errors in the sketch below, kept as a record of what not to repeat:**
+>
+> 1. **The postMessage target origin was hardcoded.** The real protocol is a
+>    handshake: the popup sends `authorizing:github` with `*` (safe — no secret),
+>    the CMS echoes it back, and only then does the popup send the token to the
+>    *browser-verified* origin it learned from that echo. Never `*`, and never a
+>    hardcoded value. This is the security-critical step.
+> 2. **`redirect_uri` was sent at both steps.** The official broker sends it at
+>    neither, relying on the OAuth App having exactly one registered callback.
+> 3. **The CSRF cookie shape was invented.** Upstream uses
+>    `csrf-token=${provider}_${token}` with `HttpOnly; Path=/; Max-Age=600;
+>    SameSite=Lax; Secure`.
+>
+> **Two deliberate divergences from upstream, both required:**
+>
+> - **Paths stay `/api/auth` and `/api/auth/callback`**, not the default `/auth`
+>   and `/callback`. `docs/LAUNCH-CHECKLIST.md` already tells the owner to register
+>   `/api/auth/callback` as the OAuth callback URL, and they may have acted on it.
+>   `auth_endpoint` is a real configurable field (`DEFAULT_AUTH_PATH = 'auth'` in
+>   the CMS's `github/constants.js`), so `auth_endpoint: api/auth` is legitimate.
+> - **`ALLOWED_DOMAINS` defaults to both `beta.siteseer.education` and
+>   `siteseer.education`**, so promoting off the beta subdomain later needs no
+>   allow-list edit. That class of promotion-time trap fails months afterwards with
+>   no obvious cause.
 
 **Files:**
 - Create: `functions/api/auth/index.js`
