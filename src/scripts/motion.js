@@ -62,3 +62,30 @@ function initSpotlight() {
 }
 
 initSpotlight();
+
+/* ---------- scroll-triggered entrances ---------- */
+function initReveals() {
+  const items = document.querySelectorAll('.reveal');
+  if (!items.length) return;
+
+  // No observer support, or motion is unwanted: show everything immediately.
+  if (reduceMotion.matches || !('IntersectionObserver' in window)) {
+    for (const item of items) item.classList.add('in');
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    },
+    { threshold: 0.15, rootMargin: '0px 0px -5% 0px' }
+  );
+
+  for (const item of items) observer.observe(item);
+}
+
+initReveals();

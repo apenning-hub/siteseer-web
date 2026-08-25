@@ -29,7 +29,7 @@
   --band-y:clamp(48px, 8vw, 96px);
 }
 *{ box-sizing:border-box; margin:0; padding:0; }
-html{ scroll-behavior:smooth; }
+@media (prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth; } }
 body{ font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:var(--ink); background:var(--paper); font-size:15.5px; }
 .druk{ font-family:'Druk Wide Bold','Arial Black',sans-serif; text-transform:uppercase; }
 .wrap{ max-width:1200px; margin:0 auto; padding:0 var(--s7); }
@@ -231,10 +231,22 @@ a{ color:inherit; }
 .fpartners{ display:flex; gap:var(--s4); justify-content:center; align-items:center; flex-wrap:wrap; margin:var(--s4) 0; font-size:13px; color:rgba(255,255,255,.8); } .fpartners .d{ width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.35); }
 
 /* ===== entrance animation ===== */
-@keyframes rise{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
-.reveal{ opacity:0; animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
-.d1{animation-delay:.05s}.d2{animation-delay:.14s}.d3{animation-delay:.24s}.d4{animation-delay:.34s}.d5{animation-delay:.46s}.d6{animation-delay:.58s}
-@media (prefers-reduced-motion:reduce){ .reveal{ animation:none; opacity:1; } .mrow{ animation:none; } }
+/* Content is visible by default. The opacity:0 starting state only applies
+   when JS is present, so a failed script can never hide the page. */
+.reveal{ opacity:1; transform:none; }
+.js .reveal{
+  opacity:0; transform:translateY(18px);
+  transition:opacity .7s cubic-bezier(.2,.7,.2,1),
+             transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.js .reveal.in{ opacity:1; transform:none; }
+.d1{transition-delay:.05s}.d2{transition-delay:.14s}.d3{transition-delay:.24s}
+.d4{transition-delay:.34s}.d5{transition-delay:.46s}.d6{transition-delay:.58s}
+
+@media (prefers-reduced-motion:reduce){
+  .js .reveal{ opacity:1; transform:none; transition:none; }
+  .mrow{ animation:none; }
+}
 
 /* ===== blog ===== */
 .page-head{ padding:var(--s8) 0 var(--s2); text-align:center; }
