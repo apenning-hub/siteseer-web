@@ -35,6 +35,7 @@ const pillars = (await getCollection('pillars')).sort(byIndex).map((e) => e.data
 const capabilities = (await getCollection('capabilities')).sort(byIndex).map((e) => e.data);
 const outcomes = (await getCollection('outcomes')).sort(byIndex).map((e) => e.data);
 const stats = (await getCollection('stats')).sort(byIndex).map((e) => e.data);
+const partners = (await getCollection('partners')).sort(byIndex).map((e) => e.data);
 const roadmap = (await getEntry('roadmap', 'roadmap'))!.data;
 const roadmapA = roadmap.rowA;
 const roadmapB = roadmap.rowB;
@@ -182,6 +183,35 @@ const inlineBold = (s: string) =>
       <div class="phone reveal d4"><div class="scr"><img src={img.lookPhone3} alt="SiteSeer running on a phone" /></div></div>
     </div></div>
     <div class="wrap narrow"><div style="display:flex;gap:12px;justify-content:center;margin-top:44px;flex-wrap:wrap;"><a class="btn btn-red btn-lg" href="#contact">Start a pilot →</a><a class="btn btn-onred btn-lg" href="#contact">Join the waitlist</a></div></div>
+  </section>
+
+  <!-- PARTNERS -->
+  <!-- Heading is deliberately neutral. An earlier draft read "Backed by", which
+       claimed a funding relationship that does not exist. The blurbs are still
+       awaiting the owner's sign-off — they are factual claims about real
+       organisations (plan Task 11 item 5). -->
+  <section class="band" id="partners">
+    <div class="wrap">
+      <div class="eyebrow reveal d1">Partners</div>
+      <h2 class="sh druk reveal d1">Who we work with<span class="dot">.</span></h2>
+      {[
+        { group: 'Partner', label: 'Partners' },
+        { group: 'Supported by', label: 'Supported by' },
+      ].map(({ group, label }) => (
+        <div class="pgroup">
+          <h3 class="pgroup-label">{label}</h3>
+          <div class="fgrid">
+            {partners.filter((p) => p.group === group).map((p, i) => (
+              <div class={`glass-light glass fitem reveal d${Math.min(i + 2, 6)}`}>
+                <div class="prole">{p.role}</div>
+                <h4>{p.name}</h4>
+                <p>{p.blurb}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   </section>
 
   <!-- ROADMAP -->
