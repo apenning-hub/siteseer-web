@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "group": "Partner", "name": "Adelaide University", "role": "Teaching partner", "blurb": "Piloting SiteSeer in undergraduate architecture and construction courses." },
+    { "group": "Partner", "name": "AU Online", "role": "Delivery partner", "blurb": "Bringing SiteSeer into fully online construction teaching." },
+    { "group": "Partner", "name": "TAFE SA", "role": "Vocational partner", "blurb": "Demonstration program across vocational construction pathways." },
+    { "group": "Partner", "name": "Unreal Engine Academic Partner", "role": "Technology", "blurb": "Built in Unreal Engine, under Epic's academic partner program." },
+    { "group": "Supported by", "name": "ICC", "role": "Venture support", "blurb": "Backed through the Innovation & Collaboration Centre's venture programs." },
+    { "group": "Supported by", "name": "Bates Smart", "role": "Industry support", "blurb": "Industry guidance on how practice actually documents and sequences a build." },
+    { "group": "Supported by", "name": "CSIRO ON", "role": "Research translation", "blurb": "Research translation through the CSIRO ON program." }
+  ]
+}

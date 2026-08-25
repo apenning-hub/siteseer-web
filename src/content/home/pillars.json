@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "no": "01", "h": "3D models", "p": "Real buildings, modelled to construction-grade detail and made explorable from any angle, at any stage of the build." },
+    { "no": "02", "h": "Game engines & gamification", "p": "Unreal-powered, interactive and rewarding — learning that feels like play, not a lecture, on hardware students already own." },
+    { "no": "03", "h": "Construction knowledge", "p": "Sequencing, structure and trade detail, encoded by the people who teach the discipline — not generic 3D." }
+  ]
+}
