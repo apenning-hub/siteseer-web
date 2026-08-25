@@ -114,11 +114,23 @@ Create `src/content/home/hero.json`:
 ```json
 {
   "kick": "Construction digital learning",
-  "headline": ["Walk the", "build before", "it exists"],
-  "lead": "SiteSeer turns complex building information into immersive 3D worlds students can walk through — built in real game engines, on hardware they already own.",
-  "proof": "Used in real classrooms for over a decade."
+  "headline": ["Building", "Information"],
+  "lead": "We turn complex **building information** into immersive 3D worlds students can walk through, question and remember — built in real **game engines**, grounded in real construction knowledge.",
+  "proof": "A decade in use · 1,000+ students · Built in Unreal Engine"
 }
 ```
+
+> **This is the verified live copy**, transcribed from `index.astro` and checked
+> character by character. An earlier draft of this plan carried an invented hero
+> that differed in three of four fields — caught only because the implementer
+> checked the markup instead of trusting the plan. If this ever disagrees with
+> `index.astro`, the markup wins.
+>
+> `lead` carries `**bold**` markdown, converted from the two `<b>` pairs in the
+> live markup, because the author must never see a tag. Two consequences, both
+> recorded in `src/content/home/README.md`: whatever renders the hero must
+> **convert** the emphasis rather than interpolate the string, and the CMS `lead`
+> field must be a rich-text widget restricted to bold.
 
 Create `src/content/home/pillars.json`:
 
@@ -727,7 +739,10 @@ collections:
         fields:
           - { name: kick, label: Eyebrow, widget: string }
           - { name: headline, label: Headline lines, widget: list, hint: One entry per line of the big headline. }
-          - { name: lead, label: Lead paragraph, widget: text }
+          # Rich text, restricted to bold. The renderer supports inline bold only:
+      # anything else this widget can emit (links, italics, headings) would print
+      # as raw markdown into the most-read sentence on the site.
+      - { name: lead, label: Lead paragraph, widget: markdown, buttons: [bold], editor_components: [], minimal: true }
           - { name: proof, label: Proof line, widget: string }
 
       - name: partners
