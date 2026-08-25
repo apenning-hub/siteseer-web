@@ -663,6 +663,38 @@ This task deliberately ends **red**. The checker is the failing test for Task 4.
 - Create: `scripts/check-contrast.mjs`
 - Modify: `package.json`
 
+- [ ] **Step 0: Add a structural sanity check before anything else**
+
+The parser walks brace depth and is not string-aware. An unbalanced `{` inside a
+quoted value desynchronises it, and **everything after that point silently
+disappears** — the checker would report a clean sweep having examined a fraction
+of the file. That limitation is documented and deliberately unfixed (fixing it
+needs a tokeniser this file should not become), so guard against it at the
+checker level instead, where it costs three lines and no parsing logic:
+
+```js
+/**
+ * The parser is not string-aware, so an unbalanced brace inside a quoted value
+ * would desynchronise the walk and silently swallow every rule after it. A
+ * checker reporting "all pass" having read a third of the file is the exact
+ * failure this script exists to prevent, so refuse to run on a sheet whose
+ * rule count is wildly out of step with its brace count.
+ */
+function assertSheetFullyRead(css, ruleCount) {
+  const openBraces = (css.match(/\{/g) ?? []).length;
+  if (ruleCount < openBraces * 0.8) {
+    throw new Error(
+      `Read only ${ruleCount} rules from a stylesheet with ${openBraces} opening braces. ` +
+      `The parser has probably desynchronised — check for an unbalanced brace inside a quoted value.`
+    );
+  }
+}
+```
+
+Call it in both `check-contrast.mjs` and `check-spacing.mjs` before running any
+assertions. The 0.8 ratio allows for at-blocks, whose braces do not each yield a
+rule; it is a smoke alarm, not a precise count.
+
 - [ ] **Step 1: Write the checker**
 
 Create `scripts/check-contrast.mjs`:
