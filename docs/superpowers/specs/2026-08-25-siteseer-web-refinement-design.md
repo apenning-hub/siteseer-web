@@ -30,6 +30,21 @@ The Webflow site at `siteseer.education` is not touched by any of this.
 
 ## 2. Approach
 
+This spec is delivered as **two implementation plans**, sequenced. They split along the
+line where the requirements changed, and each ships something whole:
+
+| Plan | Covers | Spec sections |
+|---|---|---|
+| **A — the site itself** | Spacing scale, colour split and contrast fixes, focus states, mobile nav, marquee control, landmarks, heading order, motion rework | §3, §4, §5, §6, §11 (contrast + axe) |
+| **B — authoring and launch** | Content collections, partners section, Sveltia CMS, OAuth broker, Cloudflare move, `noindex` | §7, §8, §9, §10, §11 (frontmatter validation), §12 |
+
+Plan A is self-contained and verifiable on its own. Plan B depends on A only in that
+restructuring `index.astro` is cheaper once the CSS has settled. Running them as one plan
+would mean the hosting and CMS changes start moving underneath the visual work before it
+has been reviewed.
+
+### Within Plan A
+
 Three sequenced passes in a single `global.css`. The stylesheet is 166 lines; splitting
 it into layers would bury the real changes in move noise. Each pass is independently
 reviewable:
@@ -40,7 +55,7 @@ reviewable:
 | 2 | Accessibility | Focus rings, mobile nav, marquee control |
 | 3 | Motion | Hover lifts gone, spotlight in, entrances rewired |
 
-Passes 4 and 5 (content collections, CMS + hosting) follow and are structural rather
+The remaining work (content collections, CMS + hosting) is Plan B and is structural rather
 than visual.
 
 ---
