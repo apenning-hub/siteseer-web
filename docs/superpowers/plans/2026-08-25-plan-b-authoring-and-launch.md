@@ -114,11 +114,23 @@ Create `src/content/home/hero.json`:
 ```json
 {
   "kick": "Construction digital learning",
-  "headline": ["Walk the", "build before", "it exists"],
-  "lead": "SiteSeer turns complex building information into immersive 3D worlds students can walk through — built in real game engines, on hardware they already own.",
-  "proof": "Used in real classrooms for over a decade."
+  "headline": ["Building", "Information"],
+  "lead": "We turn complex **building information** into immersive 3D worlds students can walk through, question and remember — built in real **game engines**, grounded in real construction knowledge.",
+  "proof": "A decade in use · 1,000+ students · Built in Unreal Engine"
 }
 ```
+
+> **This is the verified live copy**, transcribed from `index.astro` and checked
+> character by character. An earlier draft of this plan carried an invented hero
+> that differed in three of four fields — caught only because the implementer
+> checked the markup instead of trusting the plan. If this ever disagrees with
+> `index.astro`, the markup wins.
+>
+> `lead` carries `**bold**` markdown, converted from the two `<b>` pairs in the
+> live markup, because the author must never see a tag. Two consequences, both
+> recorded in `src/content/home/README.md`: whatever renders the hero must
+> **convert** the emphasis rather than interpolate the string, and the CMS `lead`
+> field must be a rich-text widget restricted to bold.
 
 Create `src/content/home/pillars.json`:
 
@@ -537,120 +549,85 @@ git commit -m "feat: target beta.siteseer.education on Cloudflare Pages, noindex
 
 ---
 
-## Task 6: OAuth broker
+## Task 6: OAuth broker — DONE (`ee3c2f8`, `6841f3d`)
 
-> **Verify before building.** The Decap/Sveltia popup handshake below is written from the documented protocol, but the exact message format has changed between major versions. Before writing code, check the current Sveltia CMS authentication docs. **If they differ from what is written here, deploy the official `sveltia-cms-auth` Cloudflare Worker instead of these two functions** and skip to Task 7 — an official broker is preferable to a hand-rolled one that must track upstream changes.
+Built as a faithful port of `sveltia/sveltia-cms-auth` at commit
+`25f56e1ed4a96cb25fcb96469c9c99fb6d3713bc`, split across three files under
+`functions/api/auth/` — `_shared.js` (helpers, not routable), `index.js`
+(`/api/auth`), `callback.js` (`/api/auth/callback`).
 
-**Files:**
-- Create: `functions/api/auth/index.js`
-- Create: `functions/api/auth/callback.js`
+**The code is not reproduced here.** Inlining 500 lines of someone else's
+maintained source into a plan would create a second copy to drift. Read the
+files; each carries the upstream URL, the pinned commit and the date.
 
-- [ ] **Step 1: Write the authorize endpoint**
+### The protocol, verified against primary source
 
-Create `functions/api/auth/index.js`:
+The CMS opens `${base_url}/${auth_endpoint}?provider=github&site_id=<hostname>&scope=repo,user`.
+The popup then: announces `authorizing:github` to its opener with `'*'` (safe — no
+secret), waits for the opener to echo it back, and sends the token **only to the
+origin of that echo**. The origin is browser-set and therefore unforgeable, which
+is the entire point. Never `'*'`, never a hardcoded value.
 
-```js
-/**
- * Starts the GitHub OAuth handshake for Sveltia CMS.
- * The CMS opens this in a popup; we redirect to GitHub, which redirects back
- * to ./callback. A random state value is round-tripped in an HttpOnly cookie
- * to prevent CSRF on the callback.
- */
-export async function onRequest({ request, env }) {
-  const url = new URL(request.url);
+### Two sanctioned divergences from upstream
 
-  if (!env.GITHUB_CLIENT_ID) {
-    return new Response('GITHUB_CLIENT_ID is not configured', { status: 500 });
-  }
+1. **Paths `/api/auth` and `/api/auth/callback`**, not upstream's `/auth` and
+   `/callback`. `docs/LAUNCH-CHECKLIST.md` had already told the owner to register
+   the former, so changing it would silently invalidate instructions they may have
+   acted on.
+2. **`ALLOWED_DOMAINS` defaults to `beta.siteseer.education, siteseer.education`**
+   where upstream defaults to unrestricted.
 
-  const state = crypto.randomUUID();
-  const authorize = new URL('https://github.com/login/oauth/authorize');
-  authorize.searchParams.set('client_id', env.GITHUB_CLIENT_ID);
-  authorize.searchParams.set('redirect_uri', `${url.origin}/api/auth/callback`);
-  authorize.searchParams.set('scope', url.searchParams.get('scope') || 'repo,user');
-  authorize.searchParams.set('state', state);
+### The vulnerability this task introduced, and the fix
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: authorize.toString(),
-      'Set-Cookie': `oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
-    },
-  });
-}
-```
+The first attempt wrote `env.ALLOWED_DOMAINS ?? DEFAULT_ALLOWED_DOMAINS`. `??`
+falls back only on `null`/`undefined`, so an **empty** value — which the Cloudflare
+dashboard saves without complaint — skipped the default. `trustedPatterns` then
+became `[]`, and the guard `hasToken && trustedPatterns.length && !isTrusted(origin)`
+short-circuited on the zero length, so **the origin check never ran and the popup
+would post a live `repo,user` token to any origin that echoed the handshake.**
 
-- [ ] **Step 2: Write the callback endpoint**
+Fixed in `6841f3d` with `env.ALLOWED_DOMAINS?.trim() || DEFAULT_ALLOWED_DOMAINS`
+— `||` alone is insufficient, since a whitespace-only string is truthy — plus a
+**fail-closed guard** in both routes refusing to run when the allow-list resolves
+to zero patterns (a value like `",,,"` is truthy but yields nothing).
 
-Create `functions/api/auth/callback.js`:
+`outputHTML` and its internal guard are verbatim upstream and must stay that way.
+Guarantee a non-empty allow-list at the call site instead.
 
-```js
-/**
- * Completes the GitHub OAuth handshake and hands the token to the CMS popup
- * via postMessage, then the popup closes itself.
- */
-function respond(status, payload, origin) {
-  const message = `authorization:github:${status}:${JSON.stringify(payload)}`;
-  const body = `<!doctype html><meta charset="utf-8"><title>Signing in…</title><body>
-<script>
-  (function () {
-    var message = ${JSON.stringify(message)};
-    var origin = ${JSON.stringify(origin)};
-    function send() { window.opener && window.opener.postMessage(message, origin); }
-    window.addEventListener('message', send, { once: true });
-    send();
-    setTimeout(function () { window.close(); }, 1000);
-  })();
-</script>
-<p>Signing in…</p></body>`;
-  return new Response(body, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
-  });
-}
+### Known weaknesses, deliberately unchanged
 
-export async function onRequest({ request, env }) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get('code');
-  const state = url.searchParams.get('state');
-  const expected = (request.headers.get('Cookie') || '').match(/oauth_state=([^;]+)/)?.[1];
+All inherited from upstream, all confirmed present and left alone:
 
-  if (!code || !state || state !== expected) {
-    return respond('error', { message: 'Invalid or expired OAuth state' }, url.origin);
-  }
+- **Login CSRF via a sibling subdomain.** Anything able to set a
+  `Domain=.siteseer.education` cookie can plant a `state`; only the first
+  `csrf-token` cookie in the header is considered. Requires subdomain control.
+  Worth re-reading before the apex domain goes live.
+- `JSON.stringify(content)` is not passed through `serialize()` and sits inside a
+  single-quoted JS string.
+- `console.warn` echoes the attacker-supplied `scope` string into logs.
+- No `Cache-Control: no-store` on the token-bearing HTML.
 
-  const response = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      client_id: env.GITHUB_CLIENT_ID,
-      client_secret: env.GITHUB_CLIENT_SECRET,
-      code,
-    }),
-  });
+Upstream wins on all four. Fixing them here would forfeit the diffability that
+justified porting in the first place; they belong upstream as issues.
 
-  const data = await response.json();
-  if (!data.access_token) {
-    return respond('error', { message: data.error_description || 'Token exchange failed' }, url.origin);
-  }
+### Promotion caveat
 
-  return respond('success', { token: data.access_token, provider: 'github' }, url.origin);
-}
-```
+The `ALLOWED_DOMAINS` default already covers the apex, so the allow-list needs no
+edit at promotion — **but the GitHub OAuth App's callback URL does.** Without
+re-registering it, GitHub returns the author to the beta domain while their CSRF
+cookie was set host-only on the apex; the cookie is not sent and the flow dies at
+`UNSUPPORTED_BACKEND` with nothing pointing at the cause. Recorded in
+`docs/LAUNCH-CHECKLIST.md` step 3.
 
-- [ ] **Step 3: Verify locally**
+### `backend:` block for Task 7
 
-```bash
-npx --yes wrangler pages dev dist --compatibility-date=2026-08-25
-```
-
-Then: `curl -sI 'http://localhost:8788/api/auth?scope=repo' | head -3`
-Expected: `HTTP/1.1 302` with a `Location:` header pointing at `github.com/login/oauth/authorize`. Without secrets configured locally it will instead return `500 GITHUB_CLIENT_ID is not configured` — also a correct result, and proof the function is routed.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add functions/
-git commit -m "feat(cms): add GitHub OAuth broker as a Cloudflare Pages Function"
+```yaml
+backend:
+  name: github
+  repo: apenning-hub/siteseer-web
+  branch: main
+  base_url: https://beta.siteseer.education
+  auth_endpoint: api/auth
 ```
 
 ---
@@ -727,7 +704,10 @@ collections:
         fields:
           - { name: kick, label: Eyebrow, widget: string }
           - { name: headline, label: Headline lines, widget: list, hint: One entry per line of the big headline. }
-          - { name: lead, label: Lead paragraph, widget: text }
+          # Rich text, restricted to bold. The renderer supports inline bold only:
+      # anything else this widget can emit (links, italics, headings) would print
+      # as raw markdown into the most-read sentence on the site.
+      - { name: lead, label: Lead paragraph, widget: markdown, buttons: [bold], editor_components: [], minimal: true }
           - { name: proof, label: Proof line, widget: string }
 
       - name: partners
