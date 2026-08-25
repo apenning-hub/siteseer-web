@@ -44,6 +44,15 @@ test('parseRootTokens is not fooled by a comment mentioning a token', () => {
   assert.ok(!Object.keys(tokens).some((k) => k.includes(' ')));
 });
 
+test('parseRootTokens ignores a commented-out declaration', () => {
+  // Without comment stripping the last match wins, so a commented-out value
+  // silently REPLACES the live one and the checker measures a colour that is
+  // not on the site. Task 4 rewrites :root and adds comments to it, so
+  // "comment out the old value beside the new one" is a realistic edit.
+  const css = ':root{ --red:#e6332a; /* was --red: #ff0000; */ }';
+  assert.deepEqual(parseRootTokens(css), { '--red': '#e6332a' });
+});
+
 test('parseRootTokens ignores properties declared outside :root', () => {
   assert.deepEqual(parseRootTokens('.x{ --nope:#fff; }'), {});
 });
@@ -70,6 +79,21 @@ test('parseDeclarations skips the :root block', () => {
 
 test('parseDeclarations does not match longhand as shorthand', () => {
   assert.equal(parseDeclarations('.a{ max-width:100px; }', ['width']).length, 0);
+});
+
+test('parseDeclarations exposes @keyframes steps as bare selectors', () => {
+  // Documented, not endorsed: the brace matcher cannot see that `from` is
+  // nested inside @keyframes, so it surfaces as a top-level selector. Inert
+  // while no keyframe declares spacing — but if a checker ever reports a
+  // violation against a selector named `from` or `to`, this is why.
+  //
+  // In practice only `to` appears: the first regex match pairs the
+  // `@keyframes rise` selector with a body that (due to the unbalanced
+  // brace) swallows the entire `from{ margin-top:18px; }` step, and that
+  // whole match is discarded because its selector starts with `@`.
+  const css = '@keyframes rise{ from{ margin-top:18px; } to{ margin-top:0; } }';
+  const selectors = parseDeclarations(css, ['margin']).map((d) => d.selector);
+  assert.deepEqual(selectors, ['to']);
 });
 
 test('it works on the real stylesheet, not just the fixture', () => {
