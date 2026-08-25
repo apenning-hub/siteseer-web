@@ -82,8 +82,15 @@ test('hexToRgb parses with and without a leading hash', () => {
 test('relativeLuminance hits the known endpoints', () => {
   assert.equal(relativeLuminance([0, 0, 0]), 0);
   assert.equal(relativeLuminance([255, 255, 255]), 1);
-  // Endpoints do not constrain the coefficients — a mid-tone does.
-  assert.ok(Math.abs(relativeLuminance([128, 128, 128]) - 0.2159) < 0.0005);
+  // Primary channels pin the coefficients exactly, since srgbToLinear(255) is 1.
+  // A neutral grey cannot do this — r === g === b factors the coefficients into
+  // their sum, so the result is invariant under any permutation of them.
+  assert.equal(relativeLuminance([255, 0, 0]), 0.2126);
+  assert.equal(relativeLuminance([0, 255, 0]), 0.7152);
+  assert.equal(relativeLuminance([0, 0, 255]), 0.0722);
+  // The s/12.92 dark branch is otherwise only reached at s = 0, where both
+  // branches agree and the divisor is unpinned.
+  assert.ok(Math.abs(relativeLuminance([5, 5, 5]) - 0.0015176) < 0.0000005);
 });
 
 test('hexToRgb rejects anything that is not a 6-digit hex', () => {
@@ -119,6 +126,10 @@ test('blend composites a translucent foreground over a background', () => {
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 0.5), [128, 128, 128]);
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 1), [255, 255, 255]);
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 0), [0, 0, 0]);
+  // A coloured ground is the only case that tests the background term at all —
+  // over black, bg[i] * (1 - alpha) is always zero. Every real caller in Task 3
+  // composites translucent white over a coloured band.
+  assert.deepEqual(blend([255, 255, 255], [230, 51, 42], 0.5), [243, 153, 149]);
 });
 
 test('requiredRatio applies the WCAG large-text thresholds', () => {
@@ -126,6 +137,10 @@ test('requiredRatio applies the WCAG large-text thresholds', () => {
   assert.equal(requiredRatio({ px: 24 }), 3);
   assert.equal(requiredRatio({ px: 19, bold: true }), 3);
   assert.equal(requiredRatio({ px: 18, bold: true }), 4.5);
+  // Without a non-bold pair in the 18.66-24px window, dropping the `bold &&`
+  // guard goes unnoticed — and Task 3's `.post .lede` row is exactly that case.
+  assert.equal(requiredRatio({ px: 19 }), 4.5);
+  assert.equal(requiredRatio({ px: 18.66, bold: true }), 3);
 });
 ```
 
@@ -190,7 +205,7 @@ export function requiredRatio({ px, bold = false }) {
 - [ ] **Step 5: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 9 tests, 0 failures
+Expected: PASS — 9 tests, 0 failures (13 assertions groups after review hardening)
 
 - [ ] **Step 6: Commit**
 
