@@ -97,6 +97,65 @@ function countRules(css) {
  *   separate rule at alpha .78. The spec's 0.90 matches the `.band-ink`
  *   variant exactly, so that's the pairing implemented below; `.foot .stext`
  *   (alpha .78) is a distinct, uncovered pair, not a wrong value in this one.
+ *
+ * COMPLETENESS SWEEP (second pass, after the `.foot .stext` gap above was
+ * confirmed real): a full re-read of every `color:` declaration in the
+ * stylesheet surfaced ten more real, rendered pairs the original 20 didn't
+ * cover. Four of them are currently-failing bugs that would otherwise ship
+ * unnoticed — this materially changes the "the first failure will be a
+ * missing token" framing, since plain `--red` (as opposed to `--red-deep`)
+ * fails AA at small sizes today, independent of any missing token:
+ *
+ *   - `.foot .stext`  — white/.78 on `--ink`. Required by the coordinator.
+ *     Distinct from `.stext (on ink)` above (that's `.band-ink`'s .90 rule).
+ *   - `.win-pill`     — literal `#8a8a8a` on literal `#0e0e10` (mock browser
+ *     chrome pill). Neither colour is a token, so nothing here depends on
+ *     the palette fix — included for completeness, not because Task 4
+ *     touches it.
+ *   - `.wm .n`        — plain opaque `--ink` on `--paper`. Sounds like it
+ *     should be redundant with `.navlinks a`, but that row has alpha .62;
+ *     this is the *only* row testing the fully-opaque ink/paper pair, which
+ *     is also effectively the site's implicit `body` default.
+ *   - `.btn-ink`      — plain opaque white on `--ink`. Same reasoning: every
+ *     other white-on-ink row is translucent (.60–.90); this is the only
+ *     fully-opaque one.
+ *   - `.pill .no`     — plain `--red` (not `--red-deep`) on `--paper`.
+ *     FAILS today at 4.10:1. `.back-link` (below) shares this exact colour
+ *     pair; `.sh .dot` also shares it but is large text (needs only 3:1, so
+ *     it passes) and is a single decorative glyph, not included separately.
+ *   - `.back-link`    — same `--red`/`--paper` pair as `.pill .no`, listed
+ *     separately because it's a different, real, named element ("← Back to
+ *     blog") a reader would otherwise assume is unchecked. FAILS at 4.10:1.
+ *   - `.chip .tag`    — plain `--red` on white (the `.chip` background).
+ *     FAILS at 4.31:1.
+ *   - `.tagpill`      — plain `--red` text on `.tagpill`'s own background,
+ *     which is `rgba(230,51,42,.08)` — i.e. `--red` at 8% composited over
+ *     the white `.postcard` behind it, not over `--paper` directly. FAILS at
+ *     3.85:1 — the tint is so faint it barely helps.
+ *   - `.chip.soon`    — asked for by the coordinator. `opacity:.6` on the
+ *     whole element composites BOTH the chip's own white background and its
+ *     ink text independently over whatever is behind the whole component
+ *     (assumed `--paper`: `.chips` isn't nested in any band section in this
+ *     file). This is a different shape from every alpha row above, where
+ *     only the foreground is translucent — here the local "background" the
+ *     text sits on is itself a blend, not a flat colour, so it needs its own
+ *     two-step composite (see `compute()` below).
+ *   - `.eyebrow (on band-ink)` — `.band-ink .eyebrow,.band-red .eyebrow`
+ *     sets white/.85 (not `--red-deep`) when `.eyebrow` sits on a band. Only
+ *     the `--ink` variant is computable today (`--band-red-light` doesn't
+ *     exist yet, and would just be another instance of the already-caught
+ *     missing-token failure).
+ *
+ * Deliberately NOT added (real, but redundant or unresolvable without
+ * guessing at markup this file doesn't show):
+ *   - `.mrow span` / `.post-meta` — same `--muted`/`--paper` pair already
+ *     covered five times over.
+ *   - `.sh .dot` (base and `.band-ink`/`.band-red` variants) and
+ *     `.mrow span::before` — single decorative glyphs, not body content.
+ *   - `.btn-ghostred` — background `rgba(255,255,255,.12)` composited over
+ *     whatever band it's placed on in the markup, which isn't visible from
+ *     the CSS alone. Guessing the backdrop would be inventing a pairing, not
+ *     reading one off the stylesheet — flagged here rather than guessed.
  */
 const PAIRS = [
   { label: '.eyebrow',           fg: '--red-deep',   bg: '--paper', px: 11.5, bold: true },
@@ -119,10 +178,42 @@ const PAIRS = [
   { label: '.statc .cap',        fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.65 },
   { label: '.credits',           fg: '#ffffff',      bg: '--ink',             px: 13,   bold: false, alpha: 0.60 },
   { label: '.fpartners',         fg: '#ffffff',      bg: '--ink',             px: 13,   bold: false, alpha: 0.80 },
+
+  // --- completeness sweep additions (see comment block above) ---
+  { label: '.foot .stext',            fg: '#ffffff',  bg: '--ink',    px: 16,   bold: false, alpha: 0.78 },
+  { label: '.win-pill',               fg: '#8a8a8a',  bg: '#0e0e10',  px: 11,   bold: false },
+  { label: '.wm .n',                  fg: '--ink',    bg: '--paper',  px: 15,   bold: false },
+  { label: '.btn-ink',                fg: '#ffffff',  bg: '--ink',    px: 14,   bold: true },
+  { label: '.pill .no',               fg: '--red',    bg: '--paper',  px: 13,   bold: false },
+  { label: '.back-link',              fg: '--red',    bg: '--paper',  px: 13.5, bold: false },
+  { label: '.chip .tag',              fg: '--red',    bg: '#ffffff',  px: 10,   bold: true },
+  { label: '.eyebrow (on band-ink)',  fg: '#ffffff',  bg: '--ink',    px: 11.5, bold: true, alpha: 0.85 },
+  {
+    // `.tagpill`'s own background is `rgba(230,51,42,.08)` — --red composited
+    // at 8% over the white `.postcard` behind it, not over --paper directly.
+    label: '.tagpill', px: 10.5, bold: true,
+    compute(tokens) {
+      const red = resolveSimple('--red', tokens);
+      const white = resolveSimple('#ffffff', tokens);
+      return { fg: red, bg: blend(red, white, 0.08) };
+    },
+  },
+  {
+    // `opacity:.6` on the whole `.chip.soon` element composites both its own
+    // white background AND its ink text independently over whatever's truly
+    // behind the component (assumed --paper — see comment block above).
+    label: '.chip.soon', px: 13.5, bold: true,
+    compute(tokens) {
+      const ink = resolveSimple('--ink', tokens);
+      const white = resolveSimple('#ffffff', tokens);
+      const paper = resolveSimple('--paper', tokens);
+      return { fg: blend(ink, paper, 0.6), bg: blend(white, paper, 0.6) };
+    },
+  },
 ];
 
 /** Resolve a pair's colour spec (a `--token` name or a literal `#hex`) to RGB. */
-function resolveRgb(spec, tokens) {
+function resolveSimple(spec, tokens) {
   if (spec.startsWith('--')) {
     const value = tokens[spec];
     if (value === undefined) {
@@ -146,10 +237,15 @@ function main() {
 
   for (const pair of PAIRS) {
     try {
-      const bgRgb = resolveRgb(pair.bg, tokens);
-      let fgRgb = resolveRgb(pair.fg, tokens);
-      if (pair.alpha !== undefined) {
-        fgRgb = blend(fgRgb, bgRgb, pair.alpha);
+      let fgRgb, bgRgb;
+      if (pair.compute) {
+        ({ fg: fgRgb, bg: bgRgb } = pair.compute(tokens));
+      } else {
+        bgRgb = resolveSimple(pair.bg, tokens);
+        fgRgb = resolveSimple(pair.fg, tokens);
+        if (pair.alpha !== undefined) {
+          fgRgb = blend(fgRgb, bgRgb, pair.alpha);
+        }
       }
       const ratio = contrastRatio(fgRgb, bgRgb);
       const required = requiredRatio({ px: pair.px, bold: pair.bold });
