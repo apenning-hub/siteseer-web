@@ -158,55 +158,55 @@ function countRules(css) {
  *     reading one off the stylesheet — flagged here rather than guessed.
  */
 const PAIRS = [
-  { label: '.eyebrow',           fg: '--red-deep',   bg: '--paper', px: 11.5, bold: true },
-  { label: '.prose a',           fg: '--red-deep',   bg: '--paper', px: 16.5, bold: false },
+  { label: '.eyebrow',           fg: '--red-deep',   bg: '--paper', px: 11, bold: true },
+  { label: '.prose a',           fg: '--red-deep',   bg: '--paper', px: 18, bold: false },
   { label: '.stext',             fg: '--muted',      bg: '--paper', px: 16,   bold: false },
-  { label: '.pill p',            fg: '--muted',      bg: '--paper', px: 14.5, bold: false },
+  { label: '.pill p',            fg: '--muted',      bg: '--paper', px: 14, bold: false },
   { label: '.pc-desc',           fg: '--muted',      bg: '--paper', px: 14,   bold: false },
-  { label: '.pc-meta',           fg: '--muted',      bg: '--paper', px: 12.5, bold: false },
-  { label: '.post .lede',        fg: '--muted',      bg: '--paper', px: 19,   bold: false },
-  { label: '.prose (body)',      fg: '--prose-ink',  bg: '--paper', px: 16.5, bold: false },
+  { label: '.pc-meta',           fg: '--muted',      bg: '--paper', px: 12, bold: false },
+  { label: '.post .lede',        fg: '--muted',      bg: '--paper', px: 20,   bold: false },
+  { label: '.prose (body)',      fg: '--prose-ink',  bg: '--paper', px: 18, bold: false },
   { label: '.navlinks a',        fg: '--ink',        bg: '--paper', px: 14,   bold: false, alpha: 0.62 },
   { label: '.btn-onred label',   fg: '--red-deep',   bg: '#ffffff', px: 14,   bold: true },
-  { label: '.chip',              fg: '--ink',        bg: '#ffffff', px: 13.5, bold: true },
+  { label: '.chip',              fg: '--ink',        bg: '#ffffff', px: 14, bold: true },
   { label: '.btn-red label',     fg: '#ffffff',      bg: '--red-deep',        px: 14,   bold: true },
   // Band text is opaque white (translucent white cannot reach AA on any red
   // still recognisable as this brand — see :root comment). Every gradient
   // stop is tested for every band text element, not just the (formerly
   // mis-identified) lightest one, so no future stop reorder can hide the
   // real worst case from this checker again.
-  { label: '.lead (on band, light stop)',  fg: '#ffffff', bg: '--band-red-light', px: 18.5, bold: false },
-  { label: '.lead (on band, mid stop)',    fg: '#ffffff', bg: '--band-red-mid',   px: 18.5, bold: false },
-  { label: '.lead (on band, deep stop)',   fg: '#ffffff', bg: '--band-red-deep',  px: 18.5, bold: false },
+  { label: '.lead (on band, light stop)',  fg: '#ffffff', bg: '--band-red-light', px: 18,   bold: false },
+  { label: '.lead (on band, mid stop)',    fg: '#ffffff', bg: '--band-red-mid',   px: 18,   bold: false },
+  { label: '.lead (on band, deep stop)',   fg: '#ffffff', bg: '--band-red-deep',  px: 18,   bold: false },
   { label: '.stext (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 16,   bold: false },
   { label: '.stext (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 16,   bold: false },
   { label: '.stext (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 16,   bold: false },
-  { label: '.proof (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 12.5, bold: false },
-  { label: '.proof (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 12.5, bold: false },
-  { label: '.proof (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 12.5, bold: false },
-  { label: '.h1 (on band, light stop)',    fg: '#ffffff', bg: '--band-red-light', px: 44,   bold: false },
-  { label: '.h1 (on band, mid stop)',      fg: '#ffffff', bg: '--band-red-mid',   px: 44,   bold: false },
-  { label: '.h1 (on band, deep stop)',     fg: '#ffffff', bg: '--band-red-deep',  px: 44,   bold: false },
+  { label: '.proof (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 12,   bold: false },
+  { label: '.proof (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 12,   bold: false },
+  { label: '.proof (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 12,   bold: false },
+  { label: '.h1 (on band, light stop)',    fg: '#ffffff', bg: '--band-red-light', px: 40,   bold: false },
+  { label: '.h1 (on band, mid stop)',      fg: '#ffffff', bg: '--band-red-mid',   px: 40,   bold: false },
+  { label: '.h1 (on band, deep stop)',     fg: '#ffffff', bg: '--band-red-deep',  px: 40,   bold: false },
   { label: '.stext (on ink)',    fg: '#ffffff',      bg: '--ink',             px: 16,   bold: false, alpha: 0.90 },
-  { label: '.statc .cap',        fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.65 },
-  { label: '.credits',           fg: '#ffffff',      bg: '--ink',             px: 13,   bold: false, alpha: 0.60 },
-  { label: '.fpartners',         fg: '#ffffff',      bg: '--ink',             px: 13,   bold: false, alpha: 0.80 },
+  { label: '.statc .cap',        fg: '#ffffff',      bg: '--ink',             px: 11,   bold: false, alpha: 0.65 },
+  { label: '.credits',           fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.60 },
+  { label: '.fpartners',         fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.80 },
 
   // --- completeness sweep additions (see comment block above) ---
   { label: '.foot .stext',            fg: '#ffffff',  bg: '--ink',    px: 16,   bold: false, alpha: 0.78 },
   { label: '.win-pill',               fg: '#8a8a8a',  bg: '#0e0e10',  px: 11,   bold: false },
-  { label: '.wm .n',                  fg: '--ink',    bg: '--paper',  px: 15,   bold: false },
+  { label: '.wm .n',                  fg: '--ink',    bg: '--paper',  px: 16,   bold: false },
   { label: '.btn-ink',                fg: '#ffffff',  bg: '--ink',    px: 14,   bold: true },
-  { label: '.pill .no',               fg: '--red-deep',    bg: '--paper',  px: 13,   bold: false },
-  { label: '.back-link',              fg: '--red-deep',    bg: '--paper',  px: 13.5, bold: false },
-  { label: '.chip .tag',              fg: '--red-deep',    bg: '#ffffff',  px: 10,   bold: true },
-  { label: '.eyebrow (on band-ink)',  fg: '#ffffff',  bg: '--ink',    px: 11.5, bold: true, alpha: 0.85 },
+  { label: '.pill .no',               fg: '--red-deep',    bg: '--paper',  px: 12,   bold: false },
+  { label: '.back-link',              fg: '--red-deep',    bg: '--paper',  px: 14, bold: false },
+  { label: '.chip .tag',              fg: '--red-deep',    bg: '#ffffff',  px: 11,   bold: true },
+  { label: '.eyebrow (on band-ink)',  fg: '#ffffff',  bg: '--ink',    px: 11, bold: true, alpha: 0.85 },
   {
     // `.tagpill`'s own background is `rgba(230,51,42,.08)` — the literal
     // `--red` rgb composited at 8% over the white `.postcard` behind it (that
     // tint is intentionally left on `--red`, not `--red-deep` — see :root
     // comment). The text itself is `--red-deep`.
-    label: '.tagpill', px: 10.5, bold: true,
+    label: '.tagpill', px: 11, bold: true,
     compute(tokens) {
       const red = resolveSimple('--red', tokens);
       const redDeep = resolveSimple('--red-deep', tokens);
@@ -218,7 +218,7 @@ const PAIRS = [
     // `opacity:.6` on the whole `.chip.soon` element composites both its own
     // white background AND its ink text independently over whatever's truly
     // behind the component (assumed --paper — see comment block above).
-    label: '.chip.soon', px: 13.5, bold: true,
+    label: '.chip.soon', px: 14, bold: true,
     compute(tokens) {
       const ink = resolveSimple('--ink', tokens);
       const white = resolveSimple('#ffffff', tokens);
