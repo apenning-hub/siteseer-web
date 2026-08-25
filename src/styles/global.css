@@ -77,9 +77,11 @@ a{ color:inherit; }
 }
 
 /* ===== buttons ===== */
-.btn{ font-family:inherit; font-weight:600; font-size:14px; padding:var(--s3) var(--s5); border-radius:11px; border:none; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; text-decoration:none; display:inline-block; }
-.btn-red{ background:var(--red-deep); color:#fff; box-shadow:0 6px 18px rgba(230,51,42,.28); } .btn-red:hover{ transform:translateY(-2px); }
-.btn-onred{ background:#fff; color:var(--red-deep); } .btn-onred:hover{ transform:translateY(-2px); }
+.btn{ font-family:inherit; font-weight:600; font-size:14px; padding:var(--s3) var(--s5); border-radius:11px; border:none; cursor:pointer; transition:background .2s ease, box-shadow .2s ease; text-decoration:none; display:inline-block; }
+.btn-red{ background:var(--red-deep); color:#fff; box-shadow:0 6px 18px rgba(230,51,42,.28); transition:background .2s ease, box-shadow .2s ease; }
+.btn-red:hover{ background:#b52119; box-shadow:0 3px 10px rgba(230,51,42,.34); }
+.btn-onred{ background:#fff; color:var(--red-deep); transition:background .2s ease; }
+.btn-onred:hover{ background:var(--soft); }
 .btn-ghostred{ background:rgba(255,255,255,.12); color:#fff; border:1.5px solid rgba(255,255,255,.5); backdrop-filter:blur(8px); } .btn-ghostred:hover{ background:rgba(255,255,255,.2); }
 .btn-ink{ background:var(--ink); color:#fff; } .btn-lg{ font-size:15px; padding:var(--s4) var(--s6); }
 
@@ -121,9 +123,9 @@ a{ color:inherit; }
 .band-ink .stext,.band-red .stext{ color:#fff; }
 
 /* ===== glass card system ===== */
-.glass{ background:rgba(255,255,255,.08); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); border:1px solid rgba(255,255,255,.18); border-radius:22px; box-shadow:0 10px 40px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.35); position:relative; overflow:hidden; color:#fff; transition:transform .22s ease, background .22s ease; }
+.glass{ background:rgba(255,255,255,.08); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); border:1px solid rgba(255,255,255,.18); border-radius:22px; box-shadow:0 10px 40px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.35); position:relative; overflow:hidden; color:#fff; transition:background .22s ease; }
 .glass::after{ content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,0) 42%); }
-.glass:hover{ transform:translateY(-4px); background:rgba(255,255,255,.13); }
+.glass:hover{ background:rgba(255,255,255,.13); }
 .glass-light{ background:rgba(255,255,255,.6); -webkit-backdrop-filter:blur(18px) saturate(160%); backdrop-filter:blur(18px) saturate(160%); border:1px solid rgba(255,255,255,.75); box-shadow:0 10px 34px rgba(21,18,15,.08), inset 0 1px 0 rgba(255,255,255,.9); color:var(--ink); }
 .glass-light::after{ background:linear-gradient(135deg, rgba(255,255,255,.5), transparent 45%); }
 
@@ -211,8 +213,8 @@ a{ color:inherit; }
 /* ===== blog ===== */
 .page-head{ padding:var(--s8) 0 var(--s2); text-align:center; }
 .bloglist{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s5); padding:var(--s7) 0 var(--s9); }
-.postcard{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:20px; overflow:hidden; background:#fff; text-decoration:none; color:inherit; transition:transform .2s ease, box-shadow .2s ease; }
-.postcard:hover{ transform:translateY(-4px); box-shadow:0 18px 40px rgba(21,18,15,.1); }
+.postcard{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:20px; overflow:hidden; background:#fff; text-decoration:none; color:inherit; transition:box-shadow .2s ease; }
+.postcard:hover{ box-shadow:0 18px 40px rgba(21,18,15,.1); }
 .postcard .pc-top{ height:8px; background:linear-gradient(90deg,var(--red),var(--red-deep)); }
 .postcard .pc-body{ padding:var(--s5); display:flex; flex-direction:column; gap:var(--s2); flex:1; }
 .postcard .pc-tags{ display:flex; gap:var(--s2); flex-wrap:wrap; }
