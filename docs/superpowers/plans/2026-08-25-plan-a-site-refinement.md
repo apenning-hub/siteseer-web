@@ -50,9 +50,14 @@ Replace the `"scripts"` block in `package.json` with:
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node --test tests/"
+    "test": "node --test \"tests/**/*.test.mjs\""
   },
 ```
+
+> Node 25.8.2 does not recurse into a bare directory: `node --test tests/` treats
+> `tests` as a single test file and fails. The glob form keeps the same scoping and
+> is verified working. Every later task invokes `npm test`, so nothing downstream
+> depends on the bare-directory form.
 
 - [ ] **Step 2: Write the failing test**
 
