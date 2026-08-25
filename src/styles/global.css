@@ -74,6 +74,15 @@ a{ color:inherit; }
 /* Never remove the ring for keyboard users; mouse users don't see it anyway. */
 :where(a, button):focus:not(:focus-visible){ outline:none; }
 
+/* ===== skip link (WCAG 2.4.1) ===== */
+.skip{
+  position:absolute; left:var(--s2); top:var(--s2); z-index:100;
+  background:var(--ink); color:#fff; font-size:14px; font-weight:600;
+  padding:var(--s3) var(--s4); border-radius:8px; text-decoration:none;
+  transform:translateY(-200%);
+}
+.skip:focus{ transform:translateY(0); }
+
 /* ===== bands / headings ===== */
 .band{ padding:var(--band-y) 0; position:relative; overflow:hidden; }
 .band-ink{ background:var(--ink); color:#fff; }

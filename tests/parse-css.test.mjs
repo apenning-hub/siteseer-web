@@ -223,13 +223,12 @@ test('it works on the real stylesheet, not just the fixture', () => {
   // will actually run against. The exact count matters: a loose `> N`
   // threshold let a `break`-after-first-match mutant survive undetected.
   //
-  // Still 26, not more: the depth-aware walk now correctly sees the one rule
+  // Was 26 as of Task 2: the depth-aware walk correctly sees the one rule
   // the old regex scan discarded in this file (`.navlinks{ display:none; }`,
   // the first rule inside the sole @media block) — but that rule doesn't
-  // declare padding, so this particular count is unchanged. The defect was
-  // real regardless (`.navlinks` was invisible to every checker, not just
-  // this one), and Task 6 rewrites this exact block, so the fix still
-  // matters even though this assertion can't show it.
+  // declare padding, so that particular fix didn't move this count. It is
+  // now 27: Plan A Task 9 adds one new selector, `.skip` (the skip link),
+  // whose own `padding:var(--s3) var(--s4)` declaration is the 27th.
   const here = dirname(fileURLToPath(import.meta.url));
   const css = readFileSync(resolve(here, '../src/styles/global.css'), 'utf8');
   const tokens = parseRootTokens(css);
@@ -245,5 +244,5 @@ test('it works on the real stylesheet, not just the fixture', () => {
   }
   assert.equal(tokens['--red'], '#e6332a');
   assert.equal(tokens['--ink'], '#15120f');
-  assert.equal(parseDeclarations(css, ['padding']).length, 26);
+  assert.equal(parseDeclarations(css, ['padding']).length, 27);
 });
