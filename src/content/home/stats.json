@@ -1,8 +1,20 @@
 {
   "items": [
-    { "num": "1,000+", "cap": "Students taught" },
-    { "num": "10 yrs", "cap": "In real classrooms" },
-    { "num": "2", "cap": "Platforms today" },
-    { "num": "0", "cap": "Site-safety risk" }
+    {
+      "num": "1,000+",
+      "cap": "Students taught"
+    },
+    {
+      "num": "10 yrs",
+      "cap": "In real classrooms"
+    },
+    {
+      "num": "2",
+      "cap": "Platforms today"
+    },
+    {
+      "num": "0",
+      "cap": "Site-safety risk"
+    }
   ]
 }

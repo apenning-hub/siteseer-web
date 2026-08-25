@@ -1,4 +1,28 @@
 {
-  "rowA": ["Augmented Reality", "Learning Outcome Tracking", "Customizable Analytics", "Progress Monitoring", "Data-Driven Insights", "Curriculum Improvement", "Content Library", "Custom Curriculum Integration", "Virtual Classrooms", "Community & Forums", "Interactive Building Phases"],
-  "rowB": ["iOS & Android App", "In-Environment Tutorials", "Scenario-Based Modules", "Assessment & Certification", "Analytics Dashboard", "Detailed Reporting", "Feedback Tools", "Modular Learning Paths", "Real-Time Collaboration", "Interactive Questing", "Multiplayer Environments"]
+  "rowA": [
+    "Augmented Reality",
+    "Learning Outcome Tracking",
+    "Customizable Analytics",
+    "Progress Monitoring",
+    "Data-Driven Insights",
+    "Curriculum Improvement",
+    "Content Library",
+    "Custom Curriculum Integration",
+    "Virtual Classrooms",
+    "Community & Forums",
+    "Interactive Building Phases"
+  ],
+  "rowB": [
+    "iOS & Android App",
+    "In-Environment Tutorials",
+    "Scenario-Based Modules",
+    "Assessment & Certification",
+    "Analytics Dashboard",
+    "Detailed Reporting",
+    "Feedback Tools",
+    "Modular Learning Paths",
+    "Real-Time Collaboration",
+    "Interactive Questing",
+    "Multiplayer Environments"
+  ]
 }

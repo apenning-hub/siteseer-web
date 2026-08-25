@@ -20,21 +20,39 @@ const blog = defineCollection({
  * Astro's file() loader wants a top-level array of { id, ... }; the JSON is
  * shaped as { items: [...] } because that is what the CMS list widget writes,
  * so these parsers bridge the two.
+ *
+ * `id` is POSITIONAL, not identity — it changes when the author reorders items
+ * in the CMS. Never link to it, persist it, or use it in a URL.
  */
-const listParser = (text: string) =>
-  JSON.parse(text).items.map((item: Record<string, unknown>, index: number) => ({
-    id: String(index),
+const listParser = (text: string) => {
+  const parsed = JSON.parse(text);
+  if (!Array.isArray(parsed?.items)) {
+    throw new Error('Expected { "items": [...] } — got ' + JSON.stringify(parsed).slice(0, 80));
+  }
+  return parsed.items.map((item: Record<string, unknown>, index: number) => ({
     ...item,
+    id: String(index),
   }));
+};
 
-const singletonParser = (id: string) => (text: string) => [{ id, ...JSON.parse(text) }];
+const singletonParser = (id: string) => (text: string) => [{ ...JSON.parse(text), id }];
+
+// hero.lead carries inline bold and nothing else. The renderer converts only
+// double-asterisk emphasis, so any other construct the CMS might emit would
+// print as literal source in the most-read sentence on the site. Strip the
+// well-formed bold spans, then nothing markup-ish may remain.
+const BOLD_ONLY = /[*_`~\[\]<>#|]/;
+const boldOnlyMarkdown = (s: string) => !BOLD_ONLY.test(s.replace(/\*\*[^*\n]+\*\*/g, ''));
 
 const hero = defineCollection({
   loader: file('src/content/home/hero.json', { parser: singletonParser('hero') }),
   schema: z.object({
     kick: z.string(),
     headline: z.array(z.string()),
-    lead: z.string(),
+    lead: z.string().refine(boldOnlyMarkdown, {
+      message:
+        'hero.lead supports inline bold (double asterisks) only. Remove italics, links, headings, code or raw HTML — the hero renderer prints them literally.',
+    }),
     proof: z.string(),
   }),
 });
@@ -64,10 +82,12 @@ const roadmap = defineCollection({
   schema: z.object({ rowA: z.array(z.string()), rowB: z.array(z.string()) }),
 });
 
+export const PARTNER_GROUPS = ['Partner', 'Supported by'] as const;
+
 const partners = defineCollection({
   loader: file('src/content/home/partners.json', { parser: listParser }),
   schema: z.object({
-    group: z.enum(['Partner', 'Supported by']),
+    group: z.enum(PARTNER_GROUPS),
     name: z.string(),
     role: z.string(),
     blurb: z.string(),

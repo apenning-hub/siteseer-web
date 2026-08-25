@@ -1,10 +1,34 @@
 {
   "items": [
-    { "ic": "▦", "h": "Immersive by default", "p": "Walk an active build from any angle, and pause it at footings, frame, lock-up or fit-out." },
-    { "ic": "◷", "h": "Construction knowledge", "p": "Sequencing, structure and trade detail, encoded by the educators who teach it — not generic 3D." },
-    { "ic": "✓", "h": "Safe & repeatable", "p": "Zero site risk. No PPE or inductions — replay any stage as many times as it takes." },
-    { "ic": "◆", "h": "On any device", "p": "Runs on the Windows & macOS laptops students already own. No headset required." },
-    { "ic": "⚡", "h": "Gamified & engaging", "p": "Interactive and rewarding — learning that feels like play, not a lecture." },
-    { "ic": "⇆", "h": "Tailored depth", "p": "Tune to any skill level, from first-years to final-year cohorts." }
+    {
+      "ic": "▦",
+      "h": "Immersive by default",
+      "p": "Walk an active build from any angle, and pause it at footings, frame, lock-up or fit-out."
+    },
+    {
+      "ic": "◷",
+      "h": "Construction knowledge",
+      "p": "Sequencing, structure and trade detail, encoded by the educators who teach it — not generic 3D."
+    },
+    {
+      "ic": "✓",
+      "h": "Safe & repeatable",
+      "p": "Zero site risk. No PPE or inductions — replay any stage as many times as it takes."
+    },
+    {
+      "ic": "◆",
+      "h": "On any device",
+      "p": "Runs on the Windows & macOS laptops students already own. No headset required."
+    },
+    {
+      "ic": "⚡",
+      "h": "Gamified & engaging",
+      "p": "Interactive and rewarding — learning that feels like play, not a lecture."
+    },
+    {
+      "ic": "⇆",
+      "h": "Tailored depth",
+      "p": "Tune to any skill level, from first-years to final-year cohorts."
+    }
   ]
 }
