@@ -3,7 +3,12 @@ import Base from '../../layouts/Base.astro';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  // Drafts still render in `npm run dev` so the author can preview them, but
+  // are never built into a production deploy. Without this filter a draft is
+  // hidden from the blog index while remaining live at a guessable URL.
+  const posts = await getCollection('blog', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true
+  );
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
