@@ -3,17 +3,17 @@
     {
       "no": "01",
       "h": "3D models",
-      "p": "Real buildings, modelled to construction-grade detail and made explorable from any angle, at any stage of the build."
+      "p": "Real buildings, modelled to construction-grade detail. Every stage is there, from footings to fit-out."
     },
     {
       "no": "02",
       "h": "Game engines & gamification",
-      "p": "Unreal-powered, interactive and rewarding — learning that feels like play, not a lecture, on hardware students already own."
+      "p": "Built in Unreal Engine. The site runs in real time, and moving through it works the way a game does."
     },
     {
       "no": "03",
       "h": "Construction knowledge",
-      "p": "Sequencing, structure and trade detail, encoded by the people who teach the discipline — not generic 3D."
+      "p": "Sequencing, structure and trade detail, put there by the people who teach construction. It is a building, not a visualisation."
     }
   ]
 }

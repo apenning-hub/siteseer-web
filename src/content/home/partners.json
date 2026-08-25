@@ -10,13 +10,13 @@
       "group": "Partner",
       "name": "AU Online",
       "role": "Delivery partner",
-      "blurb": "Bringing SiteSeer into fully online construction teaching."
+      "blurb": "Delivering SiteSeer to students who study construction entirely online."
     },
     {
       "group": "Partner",
       "name": "TAFE SA",
       "role": "Vocational partner",
-      "blurb": "Demonstration program across vocational construction pathways."
+      "blurb": "Demonstrating SiteSeer across vocational construction pathways."
     },
     {
       "group": "Partner",
@@ -28,19 +28,19 @@
       "group": "Supported by",
       "name": "ICC",
       "role": "Venture support",
-      "blurb": "Backed through the Innovation & Collaboration Centre's venture programs."
+      "blurb": "Supported through the Innovation & Collaboration Centre's venture programs."
     },
     {
       "group": "Supported by",
       "name": "Bates Smart",
       "role": "Industry support",
-      "blurb": "Industry guidance on how practice actually documents and sequences a build."
+      "blurb": "Guidance from practice on how a build is documented and sequenced."
     },
     {
       "group": "Supported by",
       "name": "CSIRO ON",
       "role": "Research translation",
-      "blurb": "Research translation through the CSIRO ON program."
+      "blurb": "Part of CSIRO's ON program for moving research into practice."
     }
   ]
 }
