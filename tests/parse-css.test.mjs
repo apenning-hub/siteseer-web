@@ -238,7 +238,7 @@ test('it works on the real stylesheet, not just the fixture', () => {
   // assertion — it can't tell a wanted token from an accidental one — so
   // also name every token the contrast checker depends on, so a rename or
   // drop fails here rather than silently downstream.
-  assert.equal(Object.keys(tokens).length, 11);
+  assert.equal(Object.keys(tokens).length, 21);
   for (const t of ['--red', '--red-deep', '--band-red-light', '--band-red-mid',
                    '--band-red-deep', '--ink', '--paper', '--muted', '--prose-ink']) {
     assert.ok(t in tokens, `missing token ${t}`);
