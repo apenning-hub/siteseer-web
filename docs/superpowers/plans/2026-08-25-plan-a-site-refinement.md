@@ -82,6 +82,18 @@ test('hexToRgb parses with and without a leading hash', () => {
 test('relativeLuminance hits the known endpoints', () => {
   assert.equal(relativeLuminance([0, 0, 0]), 0);
   assert.equal(relativeLuminance([255, 255, 255]), 1);
+  // Endpoints do not constrain the coefficients — a mid-tone does.
+  assert.ok(Math.abs(relativeLuminance([128, 128, 128]) - 0.2159) < 0.0005);
+});
+
+test('hexToRgb rejects anything that is not a 6-digit hex', () => {
+  // Task 3 feeds raw :root token strings straight into hexToRgb. If this
+  // throw ever became a silent [0,0,0], an unparseable token would score
+  // ~19:1 against --paper — a fabricated pass on the check the whole
+  // accessibility effort is gated on.
+  assert.throws(() => hexToRgb('rgba(21,18,15,.10)'), /6-digit hex/);
+  assert.throws(() => hexToRgb('#fff'), /6-digit hex/);
+  assert.throws(() => hexToRgb(''), /6-digit hex/);
 });
 
 test('contrastRatio returns 21 for black on white', () => {
@@ -140,16 +152,16 @@ export function hexToRgb(hex) {
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
 }
 
-function channelLuminance(channel) {
+function srgbToLinear(channel) {
   const s = channel / 255;
   return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
 }
 
 export function relativeLuminance([r, g, b]) {
   return (
-    0.2126 * channelLuminance(r) +
-    0.7152 * channelLuminance(g) +
-    0.0722 * channelLuminance(b)
+    0.2126 * srgbToLinear(r) +
+    0.7152 * srgbToLinear(g) +
+    0.0722 * srgbToLinear(b)
   );
 }
 
@@ -168,10 +180,8 @@ export function blend(fg, bg, alpha) {
 
 /**
  * AA threshold for a given text size. "Large" is >=24px, or >=18.66px bold.
- * Pass { graphic: true } for non-text contrast (icons, borders) which is 3.0.
  */
-export function requiredRatio({ px, bold = false, graphic = false }) {
-  if (graphic) return 3;
+export function requiredRatio({ px, bold = false }) {
   const large = px >= 24 || (bold && px >= 18.66);
   return large ? 3 : 4.5;
 }
@@ -180,7 +190,7 @@ export function requiredRatio({ px, bold = false, graphic = false }) {
 - [ ] **Step 5: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 8 tests, 0 failures
+Expected: PASS — 9 tests, 0 failures
 
 - [ ] **Step 6: Commit**
 
@@ -308,7 +318,7 @@ export function parseDeclarations(css, properties) {
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 13 tests total, 0 failures
+Expected: PASS — 14 tests total, 0 failures
 
 - [ ] **Step 5: Commit**
 
@@ -1498,11 +1508,52 @@ With `npm run preview` running, confirm each of these by keyboard alone:
 - [ ] No element moves on hover anywhere on the site
 - [ ] Sections animate in as they scroll into view, not before
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Wire the checks into CI**
+
+Every check in this plan is currently manual — nothing runs them on push. This
+must be a **separate workflow** from deployment: Plan B deletes
+`.github/workflows/deploy.yml` when the site moves to Cloudflare Pages, and the
+checks have to survive that.
+
+Create `.github/workflows/checks.yml`:
+
+```yaml
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check:contrast
+      - run: npm run check:spacing
+      - run: npm run build
+```
+
+Node 22 rather than 25: the `node --test` glob in `package.json` works on both,
+and CI should track an LTS release rather than the local machine's version.
+
+- [ ] **Step 6: Verify the workflow parses**
+
+Run: `npx --yes js-yaml .github/workflows/checks.yml > /dev/null && echo "workflow parses"`
+Expected: `workflow parses`
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add package.json
-git commit -m "chore: add axe accessibility check script"
+git add package.json .github/workflows/checks.yml
+git commit -m "chore: add axe check script and run all checks in CI"
 ```
 
 ---
