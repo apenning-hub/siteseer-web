@@ -549,155 +549,85 @@ git commit -m "feat: target beta.siteseer.education on Cloudflare Pages, noindex
 
 ---
 
-## Task 6: OAuth broker
+## Task 6: OAuth broker — DONE (`ee3c2f8`, `6841f3d`)
 
-> **RESOLVED — the sketch below is superseded.** The protocol was verified against
-> primary source: `sveltia/sveltia-cms`'s own `src/lib/services/backends/git/shared/auth.js`
-> (the CMS-side handshake) and `sveltia/sveltia-cms-auth`'s `src/index.js` (the
-> official broker, read in full). The two independently agree.
->
-> **Build this as a faithful port of the official ~250-line worker into a Pages
-> Function**, not from the sketch below. Same runtime — Workers and Pages Functions
-> both run the same Web APIs — so the port is a copy, not a reimplementation. The
-> separate Worker was rejected because "someone must notice upstream changed and
-> redeploy" is true of both options, so it buys nothing while costing a second
-> deployment, dashboard, secret set and URL for a non-technical maintainer.
->
-> **Three errors in the sketch below, kept as a record of what not to repeat:**
->
-> 1. **The postMessage target origin was hardcoded.** The real protocol is a
->    handshake: the popup sends `authorizing:github` with `*` (safe — no secret),
->    the CMS echoes it back, and only then does the popup send the token to the
->    *browser-verified* origin it learned from that echo. Never `*`, and never a
->    hardcoded value. This is the security-critical step.
-> 2. **`redirect_uri` was sent at both steps.** The official broker sends it at
->    neither, relying on the OAuth App having exactly one registered callback.
-> 3. **The CSRF cookie shape was invented.** Upstream uses
->    `csrf-token=${provider}_${token}` with `HttpOnly; Path=/; Max-Age=600;
->    SameSite=Lax; Secure`.
->
-> **Two deliberate divergences from upstream, both required:**
->
-> - **Paths stay `/api/auth` and `/api/auth/callback`**, not the default `/auth`
->   and `/callback`. `docs/LAUNCH-CHECKLIST.md` already tells the owner to register
->   `/api/auth/callback` as the OAuth callback URL, and they may have acted on it.
->   `auth_endpoint` is a real configurable field (`DEFAULT_AUTH_PATH = 'auth'` in
->   the CMS's `github/constants.js`), so `auth_endpoint: api/auth` is legitimate.
-> - **`ALLOWED_DOMAINS` defaults to both `beta.siteseer.education` and
->   `siteseer.education`**, so promoting off the beta subdomain later needs no
->   allow-list edit. That class of promotion-time trap fails months afterwards with
->   no obvious cause.
+Built as a faithful port of `sveltia/sveltia-cms-auth` at commit
+`25f56e1ed4a96cb25fcb96469c9c99fb6d3713bc`, split across three files under
+`functions/api/auth/` — `_shared.js` (helpers, not routable), `index.js`
+(`/api/auth`), `callback.js` (`/api/auth/callback`).
 
-**Files:**
-- Create: `functions/api/auth/index.js`
-- Create: `functions/api/auth/callback.js`
+**The code is not reproduced here.** Inlining 500 lines of someone else's
+maintained source into a plan would create a second copy to drift. Read the
+files; each carries the upstream URL, the pinned commit and the date.
 
-- [ ] **Step 1: Write the authorize endpoint**
+### The protocol, verified against primary source
 
-Create `functions/api/auth/index.js`:
+The CMS opens `${base_url}/${auth_endpoint}?provider=github&site_id=<hostname>&scope=repo,user`.
+The popup then: announces `authorizing:github` to its opener with `'*'` (safe — no
+secret), waits for the opener to echo it back, and sends the token **only to the
+origin of that echo**. The origin is browser-set and therefore unforgeable, which
+is the entire point. Never `'*'`, never a hardcoded value.
 
-```js
-/**
- * Starts the GitHub OAuth handshake for Sveltia CMS.
- * The CMS opens this in a popup; we redirect to GitHub, which redirects back
- * to ./callback. A random state value is round-tripped in an HttpOnly cookie
- * to prevent CSRF on the callback.
- */
-export async function onRequest({ request, env }) {
-  const url = new URL(request.url);
+### Two sanctioned divergences from upstream
 
-  if (!env.GITHUB_CLIENT_ID) {
-    return new Response('GITHUB_CLIENT_ID is not configured', { status: 500 });
-  }
+1. **Paths `/api/auth` and `/api/auth/callback`**, not upstream's `/auth` and
+   `/callback`. `docs/LAUNCH-CHECKLIST.md` had already told the owner to register
+   the former, so changing it would silently invalidate instructions they may have
+   acted on.
+2. **`ALLOWED_DOMAINS` defaults to `beta.siteseer.education, siteseer.education`**
+   where upstream defaults to unrestricted.
 
-  const state = crypto.randomUUID();
-  const authorize = new URL('https://github.com/login/oauth/authorize');
-  authorize.searchParams.set('client_id', env.GITHUB_CLIENT_ID);
-  authorize.searchParams.set('redirect_uri', `${url.origin}/api/auth/callback`);
-  authorize.searchParams.set('scope', url.searchParams.get('scope') || 'repo,user');
-  authorize.searchParams.set('state', state);
+### The vulnerability this task introduced, and the fix
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: authorize.toString(),
-      'Set-Cookie': `oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
-    },
-  });
-}
-```
+The first attempt wrote `env.ALLOWED_DOMAINS ?? DEFAULT_ALLOWED_DOMAINS`. `??`
+falls back only on `null`/`undefined`, so an **empty** value — which the Cloudflare
+dashboard saves without complaint — skipped the default. `trustedPatterns` then
+became `[]`, and the guard `hasToken && trustedPatterns.length && !isTrusted(origin)`
+short-circuited on the zero length, so **the origin check never ran and the popup
+would post a live `repo,user` token to any origin that echoed the handshake.**
 
-- [ ] **Step 2: Write the callback endpoint**
+Fixed in `6841f3d` with `env.ALLOWED_DOMAINS?.trim() || DEFAULT_ALLOWED_DOMAINS`
+— `||` alone is insufficient, since a whitespace-only string is truthy — plus a
+**fail-closed guard** in both routes refusing to run when the allow-list resolves
+to zero patterns (a value like `",,,"` is truthy but yields nothing).
 
-Create `functions/api/auth/callback.js`:
+`outputHTML` and its internal guard are verbatim upstream and must stay that way.
+Guarantee a non-empty allow-list at the call site instead.
 
-```js
-/**
- * Completes the GitHub OAuth handshake and hands the token to the CMS popup
- * via postMessage, then the popup closes itself.
- */
-function respond(status, payload, origin) {
-  const message = `authorization:github:${status}:${JSON.stringify(payload)}`;
-  const body = `<!doctype html><meta charset="utf-8"><title>Signing in…</title><body>
-<script>
-  (function () {
-    var message = ${JSON.stringify(message)};
-    var origin = ${JSON.stringify(origin)};
-    function send() { window.opener && window.opener.postMessage(message, origin); }
-    window.addEventListener('message', send, { once: true });
-    send();
-    setTimeout(function () { window.close(); }, 1000);
-  })();
-</script>
-<p>Signing in…</p></body>`;
-  return new Response(body, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
-  });
-}
+### Known weaknesses, deliberately unchanged
 
-export async function onRequest({ request, env }) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get('code');
-  const state = url.searchParams.get('state');
-  const expected = (request.headers.get('Cookie') || '').match(/oauth_state=([^;]+)/)?.[1];
+All inherited from upstream, all confirmed present and left alone:
 
-  if (!code || !state || state !== expected) {
-    return respond('error', { message: 'Invalid or expired OAuth state' }, url.origin);
-  }
+- **Login CSRF via a sibling subdomain.** Anything able to set a
+  `Domain=.siteseer.education` cookie can plant a `state`; only the first
+  `csrf-token` cookie in the header is considered. Requires subdomain control.
+  Worth re-reading before the apex domain goes live.
+- `JSON.stringify(content)` is not passed through `serialize()` and sits inside a
+  single-quoted JS string.
+- `console.warn` echoes the attacker-supplied `scope` string into logs.
+- No `Cache-Control: no-store` on the token-bearing HTML.
 
-  const response = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({
-      client_id: env.GITHUB_CLIENT_ID,
-      client_secret: env.GITHUB_CLIENT_SECRET,
-      code,
-    }),
-  });
+Upstream wins on all four. Fixing them here would forfeit the diffability that
+justified porting in the first place; they belong upstream as issues.
 
-  const data = await response.json();
-  if (!data.access_token) {
-    return respond('error', { message: data.error_description || 'Token exchange failed' }, url.origin);
-  }
+### Promotion caveat
 
-  return respond('success', { token: data.access_token, provider: 'github' }, url.origin);
-}
-```
+The `ALLOWED_DOMAINS` default already covers the apex, so the allow-list needs no
+edit at promotion — **but the GitHub OAuth App's callback URL does.** Without
+re-registering it, GitHub returns the author to the beta domain while their CSRF
+cookie was set host-only on the apex; the cookie is not sent and the flow dies at
+`UNSUPPORTED_BACKEND` with nothing pointing at the cause. Recorded in
+`docs/LAUNCH-CHECKLIST.md` step 3.
 
-- [ ] **Step 3: Verify locally**
+### `backend:` block for Task 7
 
-```bash
-npx --yes wrangler pages dev dist --compatibility-date=2026-08-25
-```
-
-Then: `curl -sI 'http://localhost:8788/api/auth?scope=repo' | head -3`
-Expected: `HTTP/1.1 302` with a `Location:` header pointing at `github.com/login/oauth/authorize`. Without secrets configured locally it will instead return `500 GITHUB_CLIENT_ID is not configured` — also a correct result, and proof the function is routed.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add functions/
-git commit -m "feat(cms): add GitHub OAuth broker as a Cloudflare Pages Function"
+```yaml
+backend:
+  name: github
+  repo: apenning-hub/siteseer-web
+  branch: main
+  base_url: https://beta.siteseer.education
+  auth_endpoint: api/auth
 ```
 
 ---
