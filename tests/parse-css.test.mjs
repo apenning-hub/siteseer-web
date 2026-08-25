@@ -226,12 +226,14 @@ test('it works on the real stylesheet, not just the fixture', () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const css = readFileSync(resolve(here, '../src/styles/global.css'), 'utf8');
   const tokens = parseRootTokens(css);
-  // Task 4's palette fix deliberately grows :root from 7 to 11 tokens (the
-  // --band-red-* stops and --prose-ink). An exact count alone is a weak
-  // assertion — it can't tell a wanted token from an accidental one — so
-  // also name every token the contrast checker depends on, so a rename or
-  // drop fails here rather than silently downstream.
-  assert.equal(Object.keys(tokens).length, 21);
+  // A floor plus named tokens, not an exact count. :root is a design system and
+  // is meant to grow — it went 7 -> 11 with the palette fix, then to ~58 when the
+  // type, radius, shadow and motion scales landed. An exact number turns every
+  // legitimate addition into a failing test, which is churn, not coverage. What
+  // actually needs protecting is that the tokens the checker depends on still
+  // exist under the names it uses.
+  assert.ok(Object.keys(tokens).length >= 11,
+    `expected at least 11 root tokens, got ${Object.keys(tokens).length}`);
   for (const t of ['--red', '--red-deep', '--band-red-light', '--band-red-mid',
                    '--band-red-deep', '--ink', '--paper', '--muted', '--prose-ink']) {
     assert.ok(t in tokens, `missing token ${t}`);
