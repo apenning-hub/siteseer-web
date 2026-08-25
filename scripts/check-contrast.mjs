@@ -170,10 +170,23 @@ const PAIRS = [
   { label: '.btn-onred label',   fg: '--red-deep',   bg: '#ffffff', px: 14,   bold: true },
   { label: '.chip',              fg: '--ink',        bg: '#ffffff', px: 13.5, bold: true },
   { label: '.btn-red label',     fg: '#ffffff',      bg: '--red-deep',        px: 14,   bold: true },
-  { label: '.lead (on band)',    fg: '#ffffff',      bg: '--band-red-light',  px: 18.5, bold: false, alpha: 0.94 },
-  { label: '.stext (on band)',   fg: '#ffffff',      bg: '--band-red-light',  px: 16,   bold: false, alpha: 0.90 },
-  { label: '.proof (on band)',   fg: '#ffffff',      bg: '--band-red-light',  px: 12.5, bold: false, alpha: 0.82 },
-  { label: '.h1 (on band)',      fg: '#ffffff',      bg: '--band-red-light',  px: 44,   bold: false },
+  // Band text is opaque white (translucent white cannot reach AA on any red
+  // still recognisable as this brand — see :root comment). Every gradient
+  // stop is tested for every band text element, not just the (formerly
+  // mis-identified) lightest one, so no future stop reorder can hide the
+  // real worst case from this checker again.
+  { label: '.lead (on band, light stop)',  fg: '#ffffff', bg: '--band-red-light', px: 18.5, bold: false },
+  { label: '.lead (on band, mid stop)',    fg: '#ffffff', bg: '--band-red-mid',   px: 18.5, bold: false },
+  { label: '.lead (on band, deep stop)',   fg: '#ffffff', bg: '--band-red-deep',  px: 18.5, bold: false },
+  { label: '.stext (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 16,   bold: false },
+  { label: '.stext (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 16,   bold: false },
+  { label: '.stext (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 16,   bold: false },
+  { label: '.proof (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 12.5, bold: false },
+  { label: '.proof (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 12.5, bold: false },
+  { label: '.proof (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 12.5, bold: false },
+  { label: '.h1 (on band, light stop)',    fg: '#ffffff', bg: '--band-red-light', px: 44,   bold: false },
+  { label: '.h1 (on band, mid stop)',      fg: '#ffffff', bg: '--band-red-mid',   px: 44,   bold: false },
+  { label: '.h1 (on band, deep stop)',     fg: '#ffffff', bg: '--band-red-deep',  px: 44,   bold: false },
   { label: '.stext (on ink)',    fg: '#ffffff',      bg: '--ink',             px: 16,   bold: false, alpha: 0.90 },
   { label: '.statc .cap',        fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.65 },
   { label: '.credits',           fg: '#ffffff',      bg: '--ink',             px: 13,   bold: false, alpha: 0.60 },
@@ -184,18 +197,21 @@ const PAIRS = [
   { label: '.win-pill',               fg: '#8a8a8a',  bg: '#0e0e10',  px: 11,   bold: false },
   { label: '.wm .n',                  fg: '--ink',    bg: '--paper',  px: 15,   bold: false },
   { label: '.btn-ink',                fg: '#ffffff',  bg: '--ink',    px: 14,   bold: true },
-  { label: '.pill .no',               fg: '--red',    bg: '--paper',  px: 13,   bold: false },
-  { label: '.back-link',              fg: '--red',    bg: '--paper',  px: 13.5, bold: false },
-  { label: '.chip .tag',              fg: '--red',    bg: '#ffffff',  px: 10,   bold: true },
+  { label: '.pill .no',               fg: '--red-deep',    bg: '--paper',  px: 13,   bold: false },
+  { label: '.back-link',              fg: '--red-deep',    bg: '--paper',  px: 13.5, bold: false },
+  { label: '.chip .tag',              fg: '--red-deep',    bg: '#ffffff',  px: 10,   bold: true },
   { label: '.eyebrow (on band-ink)',  fg: '#ffffff',  bg: '--ink',    px: 11.5, bold: true, alpha: 0.85 },
   {
-    // `.tagpill`'s own background is `rgba(230,51,42,.08)` — --red composited
-    // at 8% over the white `.postcard` behind it, not over --paper directly.
+    // `.tagpill`'s own background is `rgba(230,51,42,.08)` — the literal
+    // `--red` rgb composited at 8% over the white `.postcard` behind it (that
+    // tint is intentionally left on `--red`, not `--red-deep` — see :root
+    // comment). The text itself is `--red-deep`.
     label: '.tagpill', px: 10.5, bold: true,
     compute(tokens) {
       const red = resolveSimple('--red', tokens);
+      const redDeep = resolveSimple('--red-deep', tokens);
       const white = resolveSimple('#ffffff', tokens);
-      return { fg: red, bg: blend(red, white, 0.08) };
+      return { fg: redDeep, bg: blend(red, white, 0.08) };
     },
   },
   {

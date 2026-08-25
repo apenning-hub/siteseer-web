@@ -233,7 +233,16 @@ test('it works on the real stylesheet, not just the fixture', () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const css = readFileSync(resolve(here, '../src/styles/global.css'), 'utf8');
   const tokens = parseRootTokens(css);
-  assert.equal(Object.keys(tokens).length, 7);
+  // Task 4's palette fix deliberately grows :root from 7 to 11 tokens (the
+  // --band-red-* stops and --prose-ink). An exact count alone is a weak
+  // assertion — it can't tell a wanted token from an accidental one — so
+  // also name every token the contrast checker depends on, so a rename or
+  // drop fails here rather than silently downstream.
+  assert.equal(Object.keys(tokens).length, 11);
+  for (const t of ['--red', '--red-deep', '--band-red-light', '--band-red-mid',
+                   '--band-red-deep', '--ink', '--paper', '--muted', '--prose-ink']) {
+    assert.ok(t in tokens, `missing token ${t}`);
+  }
   assert.equal(tokens['--red'], '#e6332a');
   assert.equal(tokens['--ink'], '#15120f');
   assert.equal(parseDeclarations(css, ['padding']).length, 26);
