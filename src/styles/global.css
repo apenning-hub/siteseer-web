@@ -22,6 +22,21 @@
   /* Band rhythm: a clamp, not a breakpoint, so it scales smoothly. */
   --band-y:clamp(48px, 8vw, 96px);
 
+  /* Interactive target floors — WCAG 2.2 AA 2.5.8. --tap-min is the 24px
+     criterion floor, for the one place the layout genuinely cannot give more:
+     the 70px header bar, where a taller link drags its hover underline away
+     from the text it belongs to. --tap is the 44px platform convention (iOS
+     44pt / Android 48dp), used everywhere there is room — the mobile nav
+     panel, the back link, the marquee toggle.
+
+     Deliberately NOT folded into the spacing scale. --tap-min happens to equal
+     --s5 and --tap sits between --s7 and --s8, but that is arithmetic, not
+     meaning: these are floors on a hit area and they move only if WCAG or the
+     platform conventions move, whereas the spacing scale is page rhythm and is
+     free to be retuned. Writing var(--s5) here would hide a conformance
+     requirement inside a design decision. */
+  --tap-min:24px; --tap:44px;
+
   /* Type scale. One ramp, integers only — the half-pixel sizes this replaced
      were nudges, not steps. Seven text steps at roughly 1.12–1.2:
        micro  uppercase labels (eyebrow, tag pill, stat caption, role)
@@ -114,9 +129,23 @@ a{ color:inherit; }
    and would read as a sentence. Kept as drawn. */
 .wm .t{ font-size:8px; letter-spacing:.30em; color:var(--muted); margin-top:var(--s1); font-weight:600; }
 .navlinks{ display:flex; gap:var(--s6); font-size:var(--fs-ui); }
-.navlinks a{ color:var(--ink); opacity:.62; text-decoration:none; position:relative; padding-bottom:var(--s1); transition:opacity var(--dur-1) var(--ease); }
-.navlinks a::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--red); transition:width var(--dur-2) var(--ease); }
-.navlinks a:hover{ opacity:1; } .navlinks a:hover::after{ width:100%; }
+/* Scoped off the CTA on purpose. `.navlinks a` is (0,1,1) and out-specifies
+   both `.btn` and `.btn-red` at (0,1,0), so the unscoped rule was quietly
+   overriding the pilot button inside the mobile panel: its white label became
+   --ink, and `padding-bottom:var(--s1)` collapsed the button's 12px bottom
+   padding to 4px. Excluding it restores the button's own styling. */
+.navlinks a:not(.navlinks-cta){
+  color:var(--ink); opacity:.62; text-decoration:none; position:relative;
+  /* WCAG 2.2 AA 2.5.8. The bar is fixed at 70px and cannot grow, and a 44px
+     link here would drag the hover underline (::after, bottom:0) well clear of
+     its text — so the header takes the 24px floor. Padding is symmetric where
+     it used to be bottom-only, which keeps the underline exactly 2px under the
+     text AND centres the links in the bar; they previously sat 2px high. */
+  padding-block:var(--s1); min-height:var(--tap-min);
+  transition:opacity var(--dur-1) var(--ease);
+}
+.navlinks a:not(.navlinks-cta)::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--red); transition:width var(--dur-2) var(--ease); }
+.navlinks a:not(.navlinks-cta):hover{ opacity:1; } .navlinks a:not(.navlinks-cta):hover::after{ width:100%; }
 
 /* ===== mobile nav disclosure ===== */
 .navtoggle{
@@ -139,7 +168,18 @@ a{ color:inherit; }
     padding:var(--s5) var(--s5) var(--s6);
   }
   .nav[data-open='true'] .navlinks{ display:flex; }
-  .navlinks a{ opacity:1; font-size:var(--fs-lead); }
+  /* The panel has room the 70px bar does not, so these get the full 44px
+     convention rather than the 24px floor — and `align-self:stretch` makes the
+     whole row tappable instead of just the word. The 16px `gap` above keeps
+     adjacent targets clearly apart. */
+  .navlinks a:not(.navlinks-cta){
+    opacity:1; font-size:var(--fs-lead);
+    display:flex; align-items:center; align-self:stretch;
+    min-height:var(--tap); padding-block:var(--s2);
+  }
+  /* The sliding underline is a hover affordance and there is no hover here.
+     Left in, it would draw a 2px rule the full width of the panel. */
+  .navlinks a:not(.navlinks-cta)::after{ display:none; }
   .navlinks-cta{ display:inline-block; margin-top:var(--s2); }
 }
 
@@ -328,13 +368,24 @@ picture{ display:contents; }
 .marquee:hover .mrow{ animation-play-state:paused; }
 
 .marquee-toggle{
-  display:block; margin:var(--s4) auto 0;
+  /* 35px cleared the 24px AA floor but sat under the platform convention, and
+     this is a standalone centred control with nothing constraining it — so it
+     takes the full 44px. `width:fit-content` keeps `margin:auto` centring it as
+     a block; a flex container without it would stretch across the band. */
+  display:flex; align-items:center; justify-content:center;
+  min-height:var(--tap); width:fit-content; margin:var(--s4) auto 0;
   background:none; border:1px solid var(--line); border-radius:var(--r-pill); --r-focus:var(--r-pill);
   font-family:inherit; font-size:var(--fs-ui); font-weight:600; color:var(--muted);
   padding:var(--s2) var(--s4); cursor:pointer;
   transition:color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
 .marquee-toggle:hover{ color:var(--ink); border-color:var(--muted); }
+/* motion.js sets `toggle.hidden = true` under prefers-reduced-motion, where the
+   animation never runs and the control is meaningless. An author `display`
+   declaration beats the UA sheet's `[hidden]{display:none}` whatever their
+   specificity, so without this the button stayed visible. Pre-existing — the
+   rule above already declared `display` — but surfaced by touching it. */
+.marquee-toggle[hidden]{ display:none; }
 .marquee.is-paused .mrow{ animation-play-state:paused; }
 
 /* ===== footer ===== */
@@ -392,7 +443,13 @@ picture{ display:contents; }
    runs large next to Inter), so it tracks the prose size instead of pinning
    another absolute size into the sheet. */
 .prose code{ background:var(--soft); padding:2px 6px; border-radius:var(--r1); font-size:.9em; }
-.back-link{ display:inline-block; margin-bottom:var(--s5); font-size:var(--fs-ui); font-weight:600; color:var(--red-deep); text-decoration:none; }
+/* WCAG 2.2 AA 2.5.8. "← All posts" was a ~19px-tall lone link — not a link in
+   a sentence, so the inline exception does not apply. It stands alone above the
+   article with nothing beside it, so it takes the full 44px rather than the
+   floor. The bottom margin drops a step to compensate: the flex centring
+   already contributes ~13px of clear space below the text, so --s3 + that ≈ the
+   24px gap the old --s5 gave. */
+.back-link{ display:inline-flex; align-items:center; min-height:var(--tap); margin-bottom:var(--s3); font-size:var(--fs-ui); font-weight:600; color:var(--red-deep); text-decoration:none; }
 
 /* ===== responsive ===== */
 @media (max-width:880px){
