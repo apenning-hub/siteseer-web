@@ -16,7 +16,16 @@ test('hexToRgb parses with and without a leading hash', () => {
 test('relativeLuminance hits the known endpoints', () => {
   assert.equal(relativeLuminance([0, 0, 0]), 0);
   assert.equal(relativeLuminance([255, 255, 255]), 1);
-  assert.ok(Math.abs(relativeLuminance([128, 128, 128]) - 0.2159) < 0.0005);
+});
+
+test('relativeLuminance weights each primary channel correctly', () => {
+  assert.equal(relativeLuminance([255, 0, 0]), 0.2126);
+  assert.equal(relativeLuminance([0, 255, 0]), 0.7152);
+  assert.equal(relativeLuminance([0, 0, 255]), 0.0722);
+});
+
+test('relativeLuminance exercises the linear (low-s) branch of the gamma curve', () => {
+  assert.ok(Math.abs(relativeLuminance([5, 5, 5]) - 0.0015176) < 0.0000005);
 });
 
 test('hexToRgb rejects anything that is not a 6-digit hex', () => {
@@ -48,6 +57,7 @@ test('blend composites a translucent foreground over a background', () => {
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 0.5), [128, 128, 128]);
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 1), [255, 255, 255]);
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 0), [0, 0, 0]);
+  assert.deepEqual(blend([255, 255, 255], [230, 51, 42], 0.5), [243, 153, 149]);
 });
 
 test('requiredRatio applies the WCAG large-text thresholds', () => {
@@ -55,4 +65,6 @@ test('requiredRatio applies the WCAG large-text thresholds', () => {
   assert.equal(requiredRatio({ px: 24 }), 3);
   assert.equal(requiredRatio({ px: 19, bold: true }), 3);
   assert.equal(requiredRatio({ px: 18, bold: true }), 4.5);
+  assert.equal(requiredRatio({ px: 19 }), 4.5);
+  assert.equal(requiredRatio({ px: 18.66, bold: true }), 3);
 });
