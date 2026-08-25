@@ -137,12 +137,12 @@ a{ color:inherit; }
 .postcard::before{
   content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
   opacity:0; transition:opacity .3s ease;
-  background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),
+  background:radial-gradient(140px circle at var(--mx,50%) var(--my,50%),
              rgba(255,255,255,.22), transparent 60%);
 }
 /* On white cards a white spotlight is invisible — use a faint brand wash. */
 .postcard::before{
-  background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),
+  background:radial-gradient(140px circle at var(--mx,50%) var(--my,50%),
              rgba(230,51,42,.10), transparent 60%);
 }
 .glass:hover::before,
@@ -178,7 +178,7 @@ a{ color:inherit; }
 
 /* ===== pillars ===== */
 .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4); margin-top:var(--s2); }
-.pill{ padding:var(--s5); border-radius:20px; }
+.pill{ padding:var(--s6); border-radius:20px; }
 .pill .no{ font-family:'Druk Wide Bold',sans-serif; font-size:13px; color:var(--red-deep); }
 .pill h3{ font-size:19px; margin:var(--s4) 0 var(--s2); font-weight:600; letter-spacing:-.01em; }
 .pill p{ font-size:14.5px; color:var(--muted); line-height:1.55; }

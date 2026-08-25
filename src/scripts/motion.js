@@ -82,7 +82,7 @@ function initReveals() {
         observer.unobserve(entry.target);
       }
     },
-    { threshold: 0.15, rootMargin: '0px 0px -5% 0px' }
+    { threshold: 0, rootMargin: '0px 0px -12% 0px' }
   );
 
   for (const item of items) observer.observe(item);
