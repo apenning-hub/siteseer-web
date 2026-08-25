@@ -6,8 +6,9 @@ import { dirname, resolve } from 'node:path';
 import { parseRootTokens, parseDeclarations } from '../scripts/lib/parse-css.mjs';
 
 // Deliberately hostile: a @font-face above :root, a comment containing the word
-// "red", two declarations on one line, a non-hex token, and a data: URL carrying
-// braces, quotes and a # character. Every one of these is in the real stylesheet.
+// "red", two declarations on one line, a non-hex token, and a data: URL whose
+// percent-encoded SVG payload contains no literal braces or hash. Every one of
+// these is in the real stylesheet.
 const SAMPLE = `
 @font-face{ font-family:'Druk Wide Bold'; src:url('../fonts/DrukWideBold.ttf'); }
 :root{
@@ -57,6 +58,25 @@ test('parseRootTokens ignores properties declared outside :root', () => {
   assert.deepEqual(parseRootTokens('.x{ --nope:#fff; }'), {});
 });
 
+test('parseRootTokens does not require a trailing semicolon', () => {
+  // CSS makes it optional on the last declaration. Task 4 rewrites :root
+  // wholesale; a dropped token is never checked and the report comes back clean.
+  assert.deepEqual(parseRootTokens(':root{ --red:#e6332a; --ink:#15120f }'),
+    { '--red': '#e6332a', '--ink': '#15120f' });
+  assert.deepEqual(parseRootTokens(':root{ --red:#e6332a }'), { '--red': '#e6332a' });
+});
+
+test('parseRootTokens tolerates whitespace before the brace', () => {
+  assert.deepEqual(parseRootTokens(':root {\n  --red: #e6332a;\n}'), { '--red': '#e6332a' });
+});
+
+test('parseRootTokens reads only the :root block, not the whole file', () => {
+  // A mutant that scanned the whole file survived the old suite, because the
+  // fixture had no :root block at all — it only proved "no :root, no tokens".
+  const css = ':root{ --red:#e6332a; } .dark-panel{ --red:#000000; --panel:#111111; }';
+  assert.deepEqual(parseRootTokens(css), { '--red': '#e6332a' });
+});
+
 test('parseDeclarations finds spacing declarations with their selector', () => {
   const values = parseDeclarations(SAMPLE, ['padding', 'margin']).map((d) => d.value);
   assert.ok(values.includes('96px 0'));
@@ -64,12 +84,18 @@ test('parseDeclarations finds spacing declarations with their selector', () => {
   assert.ok(values.includes('var(--s5)'));
 });
 
-test('parseDeclarations survives a data: URL containing braces and a hash', () => {
+test('parseDeclarations survives a percent-encoded data: URL sitting between rules', () => {
   // The .grain rule sits between :root and .band. If the brace matcher trips on
   // the encoded SVG, everything after it is silently invisible to the checker.
   const selectors = parseDeclarations(SAMPLE, ['padding']).map((d) => d.selector);
   assert.ok(selectors.includes('.band'), 'rules after the data: URL were skipped');
   assert.ok(selectors.includes('.wrap'));
+});
+
+test('parseDeclarations survives a value containing literal braces and a hash', () => {
+  const css = '.x{ content:"{}"; padding:8px; } .y{ color:#fff; margin:4px; }';
+  const found = parseDeclarations(css, ['padding', 'margin']);
+  assert.deepEqual(found.map((d) => `${d.selector}:${d.property}`), ['.x:padding', '.y:margin']);
 });
 
 test('parseDeclarations skips the :root block', () => {
@@ -81,28 +107,63 @@ test('parseDeclarations does not match longhand as shorthand', () => {
   assert.equal(parseDeclarations('.a{ max-width:100px; }', ['width']).length, 0);
 });
 
-test('parseDeclarations exposes @keyframes steps as bare selectors', () => {
-  // Documented, not endorsed: the brace matcher cannot see that `from` is
-  // nested inside @keyframes, so it surfaces as a top-level selector. Inert
-  // while no keyframe declares spacing — but if a checker ever reports a
-  // violation against a selector named `from` or `to`, this is why.
-  //
-  // In practice only `to` appears: the first regex match pairs the
-  // `@keyframes rise` selector with a body that (due to the unbalanced
-  // brace) swallows the entire `from{ margin-top:18px; }` step, and that
-  // whole match is discarded because its selector starts with `@`.
+test('parseDeclarations exposes @keyframes steps with their prelude as atRule', () => {
+  // Documented, not endorsed: `from`/`to` surface as bare selectors, but with
+  // the depth-aware walk both steps are now visible (the old regex scan lost
+  // `from` entirely). If a checker ever reports a violation against a
+  // selector named `from` or `to`, this is why — check `atRule` too.
   const css = '@keyframes rise{ from{ margin-top:18px; } to{ margin-top:0; } }';
-  const selectors = parseDeclarations(css, ['margin']).map((d) => d.selector);
-  assert.deepEqual(selectors, ['to']);
+  const found = parseDeclarations(css, ['margin']);
+  assert.deepEqual(found.map((d) => d.selector), ['from', 'to']);
+  assert.ok(found.every((d) => d.atRule === '@keyframes rise'));
+});
+
+test('parseDeclarations sees the first rule inside an at-block', () => {
+  // The regex scan discarded it. Whether a declaration was checked depended on
+  // its position in the block — and Task 6 rewrites the mobile media query.
+  const css = '@media (max-width:880px){ .hero{ padding:0 24px; } .wrap{ padding:0 16px; } }';
+  const found = parseDeclarations(css, ['padding']);
+  assert.deepEqual(found.map((d) => d.selector), ['.hero', '.wrap']);
+  assert.equal(found[0].atRule, '@media (max-width:880px)');
+});
+
+test('parseDeclarations descends into @supports but not @font-face', () => {
+  assert.equal(parseDeclarations('@supports (display:grid){ .g{ padding:9px; } }', ['padding']).length, 1);
+  assert.equal(parseDeclarations("@font-face{ font-family:'X'; src:url('x.ttf'); }", ['src']).length, 0);
+});
+
+test('parseDeclarations returns every matching declaration in a rule', () => {
+  // A `break`-after-first mutant survived: the real-file assertion was only
+  // `> 20`, which cannot detect losing five of twenty-six.
+  const found = parseDeclarations('.hero{ padding-top:70px; padding-bottom:0; }', ['padding']);
+  assert.equal(found.length, 2);
+  assert.deepEqual(found.map((d) => d.property), ['padding-top', 'padding-bottom']);
+});
+
+test('parseDeclarations strips comments before reading selectors', () => {
+  // Untested stripping here corrupted 10 real selectors into
+  // '/* ===== buttons ===== */ .btn' — counts right, selectors unusable.
+  const css = '/* ===== buttons ===== */\n.btn{ padding:13px 22px; }';
+  assert.equal(parseDeclarations(css, ['padding'])[0].selector, '.btn');
 });
 
 test('it works on the real stylesheet, not just the fixture', () => {
-  // A fixture proves the regex works. This proves it works on the file Task 3
-  // will actually run against.
+  // A fixture proves the walk works. This proves it works on the file Task 3
+  // will actually run against. The exact count matters: a loose `> N`
+  // threshold let a `break`-after-first-match mutant survive undetected.
+  //
+  // Still 26, not more: the depth-aware walk now correctly sees the one rule
+  // the old regex scan discarded in this file (`.navlinks{ display:none; }`,
+  // the first rule inside the sole @media block) — but that rule doesn't
+  // declare padding, so this particular count is unchanged. The defect was
+  // real regardless (`.navlinks` was invisible to every checker, not just
+  // this one), and Task 6 rewrites this exact block, so the fix still
+  // matters even though this assertion can't show it.
   const here = dirname(fileURLToPath(import.meta.url));
   const css = readFileSync(resolve(here, '../src/styles/global.css'), 'utf8');
   const tokens = parseRootTokens(css);
+  assert.equal(Object.keys(tokens).length, 7);
   assert.equal(tokens['--red'], '#e6332a');
   assert.equal(tokens['--ink'], '#15120f');
-  assert.ok(parseDeclarations(css, ['padding']).length > 20);
+  assert.equal(parseDeclarations(css, ['padding']).length, 26);
 });
