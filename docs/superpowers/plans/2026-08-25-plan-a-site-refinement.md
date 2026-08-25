@@ -874,7 +874,30 @@ Make these five replacements in `src/styles/global.css`:
 .prose a{ color:var(--red-deep); text-decoration:underline; text-underline-offset:2px; }
 ```
 
-Leave `--red` in place for `.sh .dot`, `.pill .no`, `.fitem .ic`, `.postcard .pc-top`, `.mrow span::before` and the SVG logo — those are large or graphic and pass at 3.0.
+Three more, found by the Task 3 pair sweep and **missed by the original audit**:
+
+```css
+/* .pill .no — was color:var(--red). 13px Druk Wide Bold is NOT large text:
+   the bold threshold is 18.66px. Ratio 4.10 against 4.50. */
+.pill .no{ font-family:'Druk Wide Bold',sans-serif; font-size:13px; color:var(--red-deep); }
+
+/* .chip .tag — was color:var(--red) on white. 10px bold, ratio 4.31. */
+.chip .tag{ font-size:10px; color:var(--red-deep); font-weight:700; }
+
+/* .back-link — was color:var(--red) on paper. 13.5px, ratio 4.10. */
+.back-link{ ... color:var(--red-deep); ... }
+```
+
+> **`.pill .no` was on the original "leave it alone" list, and that was wrong.**
+> It was classified as decorative alongside `.sh .dot` and the bullet glyphs. It
+> is not decorative — it is the "01 / 02 / 03" label, real 13px text, and bold
+> type only reaches the relaxed 3.0 threshold at 18.66px. Repointing all four
+> `--red` uses lifts them to 5.09–5.70.
+
+Leave `--red` in place for `.sh .dot`, `.fitem .ic`, `.postcard .pc-top`,
+`.mrow span::before` and the SVG logo — those are genuinely graphic or large and
+pass at 3.0. `.sh .dot` shares the failing red-on-paper ratio but is set at
+`clamp(26px,3.6vw,40px)`, so the large-text threshold applies and it passes.
 
 - [ ] **Step 4: Use the prose token**
 
@@ -1101,7 +1124,7 @@ Append these two lines inside the `:root` block, after the colour tokens:
 .prose ul,.prose ol{ margin:0 0 var(--s4) var(--s5); }
 .prose li{ margin-bottom:var(--s1); }
 .prose blockquote{ border-left:3px solid var(--red-deep); padding-left:var(--s4); margin:0 0 var(--s4); color:var(--muted); font-style:italic; }
-.back-link{ display:inline-block; margin-bottom:var(--s5); font-size:13.5px; font-weight:600; color:var(--red-deep); text-decoration:none; }
+.back-link{ display:inline-block; margin-bottom:var(--s5); font-size:13.5px; font-weight:600; text-decoration:none; }  /* colour handled in Task 4 */
 ```
 
 Note `.post` loses its horizontal padding entirely — Task 7 wraps it in `.wrap`, which supplies the gutters.
