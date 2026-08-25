@@ -7,13 +7,17 @@
  *
  * See _shared.js for the full porting note, and index.js for why the path is fixed
  * at `/api/auth/callback` rather than upstream's default `/callback` — this is the
- * exact URL the site owner has been told to register as the OAuth App's callback.
+ * exact URL the site owner has been told to register as the OAuth App's callback,
+ * per docs/LAUNCH-CHECKLIST.md (on `main`, not present in this worktree/commit).
  *
  * Deviations from upstream in this file:
  *  - Routing: Pages Functions dispatch by file path, so upstream's pathname switch
  *    (`/callback` or `/oauth/redirect`) is dropped — this file only ever serves
  *    `/api/auth/callback`.
- *  - ALLOWED_DOMAINS: falls back to DEFAULT_ALLOWED_DOMAINS (see _shared.js).
+ *  - ALLOWED_DOMAINS: falls back to DEFAULT_ALLOWED_DOMAINS (see _shared.js), and
+ *    refuses to start if the resolved value has zero usable patterns — this is the
+ *    file that can actually issue a token, so a silently-open allow-list matters
+ *    most right here (see the guard below).
  *
  * Everything else is unchanged, including the parts that matter most for security:
  *  - No `redirect_uri` is sent to GitHub at either the authorize or token-exchange
@@ -30,7 +34,12 @@
  * from this function — including the error paths below, none of which include env
  * values in their message text.
  */
-import { supportedProviders, outputHTML, DEFAULT_ALLOWED_DOMAINS } from './_shared.js';
+import {
+  supportedProviders,
+  outputHTML,
+  getDomainPatterns,
+  DEFAULT_ALLOWED_DOMAINS,
+} from './_shared.js';
 
 /**
  * @param {object} context - Cloudflare Pages Function context.
@@ -41,7 +50,10 @@ import { supportedProviders, outputHTML, DEFAULT_ALLOWED_DOMAINS } from './_shar
 export const onRequestGet = async ({ request, env }) => {
   const { origin, searchParams } = new URL(request.url);
   const { code, state } = Object.fromEntries(searchParams);
-  const allowedDomains = env.ALLOWED_DOMAINS ?? DEFAULT_ALLOWED_DOMAINS;
+  // `env.ALLOWED_DOMAINS` may be present but blank — the Cloudflare Pages dashboard saves an
+  // empty value without complaint — so a blank or whitespace-only value is treated as unset,
+  // same as a truly missing one.
+  const allowedDomains = env.ALLOWED_DOMAINS?.trim() || DEFAULT_ALLOWED_DOMAINS;
 
   const [, provider, csrfToken] =
     request.headers.get('Cookie')?.match(/\bcsrf-token=([a-z-]+?)_([0-9a-f]{32})\b/) ?? [];
@@ -51,6 +63,23 @@ export const onRequestGet = async ({ request, env }) => {
       allowedDomains,
       error: 'Your Git backend is not supported by the authenticator.',
       errorCode: 'UNSUPPORTED_BACKEND',
+    });
+  }
+
+  // Upstream treats an empty allow-list as "accept any origin" — a deliberate opt-in for its
+  // own operators. This port promises a safe default instead (DEFAULT_ALLOWED_DOMAINS in
+  // _shared.js), so a resolved value with zero usable patterns (e.g. "," or " , ", which survive
+  // the blank check above but parse to nothing) is a misconfiguration, not permission to hand a
+  // token to whatever origin echoes the handshake. Refuse rather than continue: this is the file
+  // that can actually issue a token, and outputHTML's own postMessage trust check — upstream's,
+  // not touched here — silently no-ops once its trustedPatterns list is empty. The only way to
+  // keep that check meaningful is to guarantee a non-empty allow-list before ever reaching it.
+  if (getDomainPatterns(allowedDomains).length === 0) {
+    return outputHTML({
+      provider,
+      error: 'ALLOWED_DOMAINS is set but empty. Refusing to run without an origin allow-list.',
+      errorCode: 'MISCONFIGURED_CLIENT',
+      allowedDomains: DEFAULT_ALLOWED_DOMAINS,
     });
   }
 

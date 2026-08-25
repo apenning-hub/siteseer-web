@@ -11,12 +11,17 @@
  *    `/api/auth` — upstream's pathname switch (`/auth` or `/oauth/authorize`) has
  *    nothing left to switch on and is dropped.
  *  - Path itself: the route is `/api/auth`, not upstream's default `/auth`. This is
- *    fixed, not a style choice — it matches `auth_endpoint: api/auth` in
- *    public/admin/config.yml (a real, documented Sveltia config field) and the
- *    callback URL the site owner has already registered with GitHub. Renaming
- *    either side without the other breaks sign-in with a redirect mismatch.
+ *    fixed, not a style choice — it matches `auth_endpoint: api/auth`, which a later
+ *    task will add to public/admin/config.yml (a real, documented Sveltia config
+ *    field, but that file doesn't exist in this worktree/commit yet), and the
+ *    callback URL the site owner has already registered with GitHub per
+ *    docs/LAUNCH-CHECKLIST.md (on `main`, not present here either). Renaming either
+ *    side without updating both the config and the GitHub OAuth App breaks sign-in
+ *    with a redirect mismatch.
  *  - ALLOWED_DOMAINS: falls back to DEFAULT_ALLOWED_DOMAINS instead of upstream's
- *    "unset means unrestricted" (see _shared.js for why).
+ *    "unset means unrestricted" (see _shared.js for why) — and, unlike upstream,
+ *    refuses to start at all if the resolved value has zero usable patterns, so a
+ *    blank or comma-only env var can't silently reopen the broker (see below).
  *
  * Everything else — scope resolution, the CSRF cookie, and which query params are
  * read — is upstream's logic unchanged.
@@ -42,13 +47,32 @@ import {
 export const onRequestGet = async ({ request, env }) => {
   const { origin, searchParams } = new URL(request.url);
   const { provider, site_id: domain, scope: requestedScope } = Object.fromEntries(searchParams);
-  const allowedDomains = env.ALLOWED_DOMAINS ?? DEFAULT_ALLOWED_DOMAINS;
+  // `env.ALLOWED_DOMAINS` may be present but blank — the Cloudflare Pages dashboard saves an
+  // empty value without complaint — so a blank or whitespace-only value is treated as unset,
+  // same as a truly missing one.
+  const allowedDomains = env.ALLOWED_DOMAINS?.trim() || DEFAULT_ALLOWED_DOMAINS;
 
   if (!provider || !supportedProviders.includes(provider)) {
     return outputHTML({
       allowedDomains,
       error: 'Your Git backend is not supported by the authenticator.',
       errorCode: 'UNSUPPORTED_BACKEND',
+    });
+  }
+
+  // Upstream treats an empty allow-list as "accept any origin" — a deliberate opt-in for its
+  // own operators. This port promises a safe default instead (DEFAULT_ALLOWED_DOMAINS above), so
+  // a resolved value with zero usable patterns (e.g. "," or " , ", which survive the blank check
+  // above but parse to nothing) is a misconfiguration, not permission to run open. Refuse rather
+  // than continue: outputHTML's own postMessage trust check silently no-ops when its
+  // trustedPatterns list is empty, and that check is upstream's and is not touched here — the
+  // only way to keep it meaningful is to guarantee a non-empty allow-list before reaching it.
+  if (getDomainPatterns(allowedDomains).length === 0) {
+    return outputHTML({
+      provider,
+      error: 'ALLOWED_DOMAINS is set but empty. Refusing to run without an origin allow-list.',
+      errorCode: 'MISCONFIGURED_CLIENT',
+      allowedDomains: DEFAULT_ALLOWED_DOMAINS,
     });
   }
 

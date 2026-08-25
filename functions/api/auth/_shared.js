@@ -93,6 +93,15 @@ export const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  *    someone tries to sign in from the new domain. Listing it now costs nothing — an unmatched
  *    pattern never matches anything — and removes that promotion-day trap.
  *
+ * That said, this default only covers the allow-list — it is not a promise that promotion off
+ * the beta subdomain is otherwise a no-op. The GitHub OAuth App's registered callback URL must
+ * also be updated to the new domain at that point (see docs/LAUNCH-CHECKLIST.md, on `main`, not
+ * present in this worktree/commit). If it isn't: GitHub redirects back to the old
+ * beta.siteseer.education/api/auth/callback while the CSRF cookie set by /api/auth was host-only
+ * on the new domain, so the cookie never arrives, the callback handler finds no provider in the
+ * (absent) cookie, and the flow dies at UNSUPPORTED_BACKEND with nothing pointing at the cause.
+ * The allow-list needs no edit at promotion time; the OAuth App does.
+ *
  * Override with the ALLOWED_DOMAINS env var (same comma-separated, wildcard-capable format as
  * upstream) if this list ever needs to change without a code deploy.
  */
