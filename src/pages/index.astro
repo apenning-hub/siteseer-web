@@ -32,7 +32,7 @@ import productProcess from '../images/product-process.jpg';
 //   .phone (220 wide)      220 × 472 box  → paints ~906px wide
 //   .phonerow centre phone 240 × 515 box  → paints ~988px wide
 //
-// One ladder spans all four, and because those six slots share one placeholder
+// One ladder spans all four, and because those seven slots share one placeholder
 // file, one shared `sizes` makes every slot resolve to the SAME candidate — so
 // the browser downloads a single derivative for the whole page rather than one
 // per slot. 992 is the 1× rung (covers the widest painted width, 988); 1866 is
@@ -48,7 +48,7 @@ const FORMATS: ('avif' | 'webp')[] = ['avif', 'webp'];
 // is lost, and it keeps a ~1 MB dead PNG out of the build output.
 const FALLBACK = 'jpeg' as const;
 
-/** Shared props for the six slots showing product-hero.png. alt is per-slot. */
+/** Shared props for the seven slots showing product-hero.png. alt is per-slot. */
 const heroShot = { src: productHero, widths: HERO_WIDTHS, sizes: HERO_SIZES, formats: FORMATS, fallbackFormat: FALLBACK };
 
 // ── COPY LIVES IN src/content/home/*.json ── so a non-technical author can edit
@@ -97,13 +97,23 @@ const inlineBold = (s: string) =>
       <span class="kick reveal d1"><span class="ln"></span>{hero.kick}<span class="ln"></span></span>
       <h1 class="h1 druk">{hero.headline.map((line, i) => <span class={`reveal d${i + 2}`}>{line}</span>)}</h1>
       <p class="lead reveal d4" set:html={inlineBold(hero.lead)}></p>
-      <div class="reveal d5" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <div class="reveal d5" style="display:flex;gap:var(--s3);justify-content:center;flex-wrap:wrap;">
         <a class="btn btn-onred btn-lg" href="#contact">Start a pilot →</a>
         <a class="btn btn-ghostred btn-lg" href="#contact">Join the waitlist</a>
       </div>
       <div class="proof reveal d6">{hero.proof}</div>
     </div>
-    <div class="wrap reveal d6" style="position:relative;z-index:2;max-width:980px;margin:50px auto -84px;">
+    {/* The two 84s are LEFT OFF THE SCALE deliberately, and they are one value,
+        not two: the -84px bottom margin here and the 84px spacer div below the
+        window are a matched pair. The negative margin pulls the following
+        sibling up by 84px and the spacer puts exactly that back, so the red
+        band ends flush with the window's bottom edge — they cancel, and they
+        only stay correct while they are equal. Snapping them to --s8 would
+        imply each can be retuned on its own, which is the one thing that would
+        break them. (They also cancel to a no-op: removing both would render
+        identically. Left in place — that is a structural edit, not a token
+        one.) The 50px above them is now --s7. */}
+    <div class="wrap reveal d6" style="position:relative;z-index:2;max-width:980px;margin:var(--s7) auto -84px;">
       <div class="window">
         <div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — structural steel · ground floor</span></div>
         <Picture
@@ -171,7 +181,11 @@ const inlineBold = (s: string) =>
     <div class="wrap">
       <div class="eyebrow">Why institutions choose SiteSeer</div>
       <h2 class="sh druk">Where gaming, education &amp; construction meet<span class="dot">.</span></h2>
-      <div class="fgrid" style="margin-top:38px;">
+      {/* was style="margin-top:38px" — a 6px nudge off `.fgrid`'s own
+          margin-top:var(--s6). 38 sits between --s6 and --s7 and maps to
+          neither, and the nearest step IS the component default, so the
+          override is deleted rather than snapped. */}
+      <div class="fgrid">
         {capabilities.map((c) => (
           <div class="glass fitem"><div class="ic" aria-hidden="true">{c.ic}</div><h3>{c.h}</h3><p>{c.p}</p></div>
         ))}
@@ -187,7 +201,7 @@ const inlineBold = (s: string) =>
           <div class="eyebrow">Built from the ground up</div>
           <h2 class="sh druk">Meticulously accurate<span class="dot">.</span></h2>
           <p class="stext">Purpose-built for students of all ages and experience levels, on construction-grade models — better than a real visit, because the information is accessible at <b>any</b> stage of the build.</p>
-          <div class="fgrid" style="grid-template-columns:1fr 1fr;margin-top:30px;">
+          <div class="fgrid" style="grid-template-columns:1fr 1fr;margin-top:var(--s6);">
             <div class="glass-light glass fitem"><div class="ic" aria-hidden="true">◳</div><h3>Construction-grade</h3><p>Modelled to real detail, every trade.</p></div>
             <div class="glass-light glass fitem"><div class="ic" aria-hidden="true">⇆</div><h3>Tailorable depth</h3><p>Tune the experience to the cohort.</p></div>
           </div>
@@ -233,7 +247,7 @@ const inlineBold = (s: string) =>
       <div class="phone reveal d3"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
       <div class="phone reveal d4"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
     </div></div>
-    <div class="wrap narrow"><div style="display:flex;gap:12px;justify-content:center;margin-top:44px;flex-wrap:wrap;"><a class="btn btn-red btn-lg" href="#contact">Start a pilot →</a><a class="btn btn-onred btn-lg" href="#contact">Join the waitlist</a></div></div>
+    <div class="wrap narrow"><div style="display:flex;gap:var(--s3);justify-content:center;margin-top:var(--s7);flex-wrap:wrap;"><a class="btn btn-red btn-lg" href="#contact">Start a pilot →</a><a class="btn btn-onred btn-lg" href="#contact">Join the waitlist</a></div></div>
   </section>
 
   <!-- PARTNERS -->
