@@ -1074,8 +1074,8 @@ Append these two lines inside the `:root` block, after the colour tokens:
 ```css
 .hero{ padding-top:70px; padding-bottom:0; }
 .kick{ display:inline-flex; align-items:center; gap:var(--s2); font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; font-weight:700; margin-bottom:var(--s5); }
-.lead{ font-size:clamp(16px,1.6vw,18.5px); line-height:1.5; color:rgba(255,255,255,.94); max-width:52ch; margin:var(--s5) auto var(--s6); }
-.proof{ font-size:12.5px; color:rgba(255,255,255,.82); margin-top:var(--s5); }
+.lead{ font-size:clamp(16px,1.6vw,18.5px); line-height:1.5; color:#fff; max-width:52ch; margin:var(--s5) auto var(--s6); }
+.proof{ font-size:12.5px; color:#fff; margin-top:var(--s5); }
 .win-bar{ display:flex; align-items:center; gap:var(--s1); padding:var(--s3) var(--s4); background:#161618; }
 .devices{ display:flex; align-items:center; justify-content:center; gap:var(--s6); margin-top:var(--s7); flex-wrap:wrap; }
 .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4); margin-top:var(--s2); }
@@ -1087,6 +1087,15 @@ Append these two lines inside the `:root` block, after the colour tokens:
 .chips{ display:flex; gap:var(--s3); justify-content:center; flex-wrap:wrap; margin-top:var(--s5); }
 .chip{ border:1px solid var(--line); background:#fff; border-radius:30px; padding:var(--s2) var(--s4); font-size:13.5px; font-weight:600; display:flex; align-items:center; gap:var(--s1); }
 ```
+
+> **These colours are opaque `#fff`, not the translucent values an earlier draft
+> carried.** Task 4 made the band text opaque because no alpha below 1.0 reaches
+> AA on a red still recognisable as this brand. Applying the old `rgba(…,.82)`
+> here would drop `.proof` to 3.74–4.26 against the three gradient stops —
+> **and `check-contrast.mjs` would not catch it**, because it tests hardcoded
+> opaque white rather than the colour the stylesheet declares. That gap is real:
+> the checker verifies the palette's arithmetic, not that the stylesheet actually
+> uses it.
 
 - [ ] **Step 6: Snap the feature grids, first look, marquee and footer**
 
