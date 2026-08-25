@@ -58,6 +58,22 @@ a{ color:inherit; }
 .btn-ghostred{ background:rgba(255,255,255,.12); color:#fff; border:1.5px solid rgba(255,255,255,.5); backdrop-filter:blur(8px); } .btn-ghostred:hover{ background:rgba(255,255,255,.2); }
 .btn-ink{ background:var(--ink); color:#fff; } .btn-lg{ font-size:15px; padding:var(--s4) var(--s6); }
 
+/* ===== focus (WCAG 2.4.7) ===== */
+/* Default ring: red-deep on light grounds. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible{
+  outline:2px solid var(--red-deep);
+  outline-offset:2px;
+  border-radius:4px;
+}
+/* On dark and red grounds a red ring disappears — invert it. */
+.band-red :where(a, button, [tabindex]):focus-visible,
+.band-ink :where(a, button, [tabindex]):focus-visible,
+.foot :where(a, button, [tabindex]):focus-visible{
+  outline-color:#fff;
+}
+/* Never remove the ring for keyboard users; mouse users don't see it anyway. */
+:where(a, button):focus:not(:focus-visible){ outline:none; }
+
 /* ===== bands / headings ===== */
 .band{ padding:var(--band-y) 0; position:relative; overflow:hidden; }
 .band-ink{ background:var(--ink); color:#fff; }
