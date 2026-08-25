@@ -73,6 +73,14 @@ github.com → Settings → Developer settings → OAuth Apps → New OAuth App.
 The callback path must be exactly `/api/auth/callback` — that's the Pages Function
 built in Plan B Task 6. A trailing slash will break it.
 
+> **When you later promote off the beta subdomain, this callback must be
+> re-registered.** GitHub returns the user to whatever is registered here. If the
+> site moves to `siteseer.education` and this still says `beta.`, GitHub sends the
+> author back to the beta domain while their sign-in cookie was set on the apex —
+> the cookie isn't sent, and the flow dies with an error that points nowhere near
+> the cause. The origin allow-list already covers both domains and needs no edit;
+> this field does.
+
 Then copy the two credentials into the Pages project → Settings → Environment
 variables → **Production**:
 
