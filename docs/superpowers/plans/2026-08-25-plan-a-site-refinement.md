@@ -50,9 +50,14 @@ Replace the `"scripts"` block in `package.json` with:
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node --test tests/"
+    "test": "node --test \"tests/**/*.test.mjs\""
   },
 ```
+
+> Node 25.8.2 does not recurse into a bare directory: `node --test tests/` treats
+> `tests` as a single test file and fails. The glob form keeps the same scoping and
+> is verified working. Every later task invokes `npm test`, so nothing downstream
+> depends on the bare-directory form.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -77,6 +82,25 @@ test('hexToRgb parses with and without a leading hash', () => {
 test('relativeLuminance hits the known endpoints', () => {
   assert.equal(relativeLuminance([0, 0, 0]), 0);
   assert.equal(relativeLuminance([255, 255, 255]), 1);
+  // Primary channels pin the coefficients exactly, since srgbToLinear(255) is 1.
+  // A neutral grey cannot do this — r === g === b factors the coefficients into
+  // their sum, so the result is invariant under any permutation of them.
+  assert.equal(relativeLuminance([255, 0, 0]), 0.2126);
+  assert.equal(relativeLuminance([0, 255, 0]), 0.7152);
+  assert.equal(relativeLuminance([0, 0, 255]), 0.0722);
+  // The s/12.92 dark branch is otherwise only reached at s = 0, where both
+  // branches agree and the divisor is unpinned.
+  assert.ok(Math.abs(relativeLuminance([5, 5, 5]) - 0.0015176) < 0.0000005);
+});
+
+test('hexToRgb rejects anything that is not a 6-digit hex', () => {
+  // Task 3 feeds raw :root token strings straight into hexToRgb. If this
+  // throw ever became a silent [0,0,0], an unparseable token would score
+  // ~19:1 against --paper — a fabricated pass on the check the whole
+  // accessibility effort is gated on.
+  assert.throws(() => hexToRgb('rgba(21,18,15,.10)'), /6-digit hex/);
+  assert.throws(() => hexToRgb('#fff'), /6-digit hex/);
+  assert.throws(() => hexToRgb(''), /6-digit hex/);
 });
 
 test('contrastRatio returns 21 for black on white', () => {
@@ -102,6 +126,10 @@ test('blend composites a translucent foreground over a background', () => {
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 0.5), [128, 128, 128]);
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 1), [255, 255, 255]);
   assert.deepEqual(blend([255, 255, 255], [0, 0, 0], 0), [0, 0, 0]);
+  // A coloured ground is the only case that tests the background term at all —
+  // over black, bg[i] * (1 - alpha) is always zero. Every real caller in Task 3
+  // composites translucent white over a coloured band.
+  assert.deepEqual(blend([255, 255, 255], [230, 51, 42], 0.5), [243, 153, 149]);
 });
 
 test('requiredRatio applies the WCAG large-text thresholds', () => {
@@ -109,6 +137,10 @@ test('requiredRatio applies the WCAG large-text thresholds', () => {
   assert.equal(requiredRatio({ px: 24 }), 3);
   assert.equal(requiredRatio({ px: 19, bold: true }), 3);
   assert.equal(requiredRatio({ px: 18, bold: true }), 4.5);
+  // Without a non-bold pair in the 18.66-24px window, dropping the `bold &&`
+  // guard goes unnoticed — and Task 3's `.post .lede` row is exactly that case.
+  assert.equal(requiredRatio({ px: 19 }), 4.5);
+  assert.equal(requiredRatio({ px: 18.66, bold: true }), 3);
 });
 ```
 
@@ -135,16 +167,16 @@ export function hexToRgb(hex) {
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
 }
 
-function channelLuminance(channel) {
+function srgbToLinear(channel) {
   const s = channel / 255;
   return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
 }
 
 export function relativeLuminance([r, g, b]) {
   return (
-    0.2126 * channelLuminance(r) +
-    0.7152 * channelLuminance(g) +
-    0.0722 * channelLuminance(b)
+    0.2126 * srgbToLinear(r) +
+    0.7152 * srgbToLinear(g) +
+    0.0722 * srgbToLinear(b)
   );
 }
 
@@ -163,10 +195,8 @@ export function blend(fg, bg, alpha) {
 
 /**
  * AA threshold for a given text size. "Large" is >=24px, or >=18.66px bold.
- * Pass { graphic: true } for non-text contrast (icons, borders) which is 3.0.
  */
-export function requiredRatio({ px, bold = false, graphic = false }) {
-  if (graphic) return 3;
+export function requiredRatio({ px, bold = false }) {
   const large = px >= 24 || (bold && px >= 18.66);
   return large ? 3 : 4.5;
 }
@@ -175,7 +205,7 @@ export function requiredRatio({ px, bold = false, graphic = false }) {
 - [ ] **Step 5: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 8 tests, 0 failures
+Expected: PASS — 9 tests, 0 failures (13 assertions groups after review hardening)
 
 - [ ] **Step 6: Commit**
 
@@ -303,7 +333,7 @@ export function parseDeclarations(css, properties) {
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 13 tests total, 0 failures
+Expected: PASS — 14 tests total, 0 failures
 
 - [ ] **Step 5: Commit**
 
@@ -1493,11 +1523,52 @@ With `npm run preview` running, confirm each of these by keyboard alone:
 - [ ] No element moves on hover anywhere on the site
 - [ ] Sections animate in as they scroll into view, not before
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Wire the checks into CI**
+
+Every check in this plan is currently manual — nothing runs them on push. This
+must be a **separate workflow** from deployment: Plan B deletes
+`.github/workflows/deploy.yml` when the site moves to Cloudflare Pages, and the
+checks have to survive that.
+
+Create `.github/workflows/checks.yml`:
+
+```yaml
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check:contrast
+      - run: npm run check:spacing
+      - run: npm run build
+```
+
+Node 22 rather than 25: the `node --test` glob in `package.json` works on both,
+and CI should track an LTS release rather than the local machine's version.
+
+- [ ] **Step 6: Verify the workflow parses**
+
+Run: `npx --yes js-yaml .github/workflows/checks.yml > /dev/null && echo "workflow parses"`
+Expected: `workflow parses`
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add package.json
-git commit -m "chore: add axe accessibility check script"
+git add package.json .github/workflows/checks.yml
+git commit -m "chore: add axe check script and run all checks in CI"
 ```
 
 ---
