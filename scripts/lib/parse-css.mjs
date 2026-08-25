@@ -4,6 +4,13 @@
  * src/styles/global.css: flat style rules, plus at-blocks (`@media`,
  * `@supports`, `@keyframes`, ...) that nest one level of rules inside them.
  * It is not a general CSS parser and should not become one.
+ *
+ * KNOWN LIMITATION: the walk tracks brace depth only — it is not string-aware.
+ * An unbalanced `{` or `}` inside a quoted string (e.g. `content:"{"`)
+ * desynchronises it and everything after that rule goes silently missing.
+ * Fixing this needs string-aware tokenisation, which is past what this file
+ * should be. No such value exists in the real stylesheet today; if one is
+ * ever added, see the 'KNOWN LIMITATION' test in tests/parse-css.test.mjs.
  */
 
 /** Strip comments so they can't produce phantom matches. */
@@ -30,7 +37,11 @@ function* eachRule(css) {
   while (i < css.length) {
     const open = css.indexOf('{', i);
     if (open === -1) return;
-    const prelude = css.slice(i, open).trim().replace(/\s+/g, ' ');
+    // A leading at-statement (`@import url(...);`) has no block of its own —
+    // it's terminated by `;`, not `{`/`}` — so it sits in the same span as
+    // the next construct's prelude. Keep only what follows the last `;`, or
+    // an @import glues onto the next rule's selector and that rule vanishes.
+    const prelude = css.slice(i, open).split(';').pop().trim().replace(/\s+/g, ' ');
 
     let depth = 1;
     let j = open + 1;
@@ -39,7 +50,9 @@ function* eachRule(css) {
       else if (css[j] === '}') depth -= 1;
       j += 1;
     }
-    const body = css.slice(open + 1, j - 1);
+    // If input ran out before depth returned to 0, there is no closing brace
+    // to trim — `j - 1` would eat a real character of an unterminated block.
+    const body = css.slice(open + 1, depth === 0 ? j - 1 : j);
 
     if (prelude.startsWith('@')) {
       if (/^@(font-face|page|property|counter-style)\b/.test(prelude)) {

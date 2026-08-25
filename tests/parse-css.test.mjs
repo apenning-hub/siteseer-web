@@ -147,6 +147,54 @@ test('parseDeclarations strips comments before reading selectors', () => {
   assert.equal(parseDeclarations(css, ['padding'])[0].selector, '.btn');
 });
 
+test('parseRootTokens is not derailed by an at-statement before :root', () => {
+  // global.css line 1 is @import url(...). The prelude spans everything since
+  // the last close brace, so the @import was being glued onto the next rule's
+  // selector and that rule silently vanished. Task 3 would have seen {} and
+  // reported a clean sweep having checked nothing.
+  assert.deepEqual(parseRootTokens("@import url('x.css');\n:root{ --red:#e6332a; }"),
+    { '--red': '#e6332a' });
+});
+
+test('an unterminated block does not fabricate a truncated value', () => {
+  // Regression guard: slicing j-1 assumed a closing brace was there to trim.
+  assert.deepEqual(parseDeclarations('.a{ padding:8px', ['padding']).map((d) => d.value), ['8px']);
+  assert.deepEqual(parseRootTokens(':root{ --red:#e6332a'), { '--red': '#e6332a' });
+});
+
+test('a later declaration of a token wins, as the cascade requires', () => {
+  // A first-wins mutant passes the whole suite. It would report a colour that
+  // is not on the site, straight into hexToRgb.
+  assert.deepEqual(parseRootTokens(':root{ --red:#ff0000; --red:#e6332a; }'), { '--red': '#e6332a' });
+});
+
+test('parseDeclarations ignores spacing declared inside :root', () => {
+  // The :root guard is currently vacuous — the fixture's :root declares nothing
+  // the property filter would match, so removing the guard is undetectable.
+  assert.deepEqual(parseDeclarations(':root{ padding:0; --red:#e6332a; }', ['padding']), []);
+});
+
+test('parseDeclarations handles a minified rule', () => {
+  // No fixture omits whitespace before the closing brace, leaving the whole
+  // off-by-one region around it unpinned.
+  const found = parseDeclarations('.a{padding:8px}.b{margin:4px}', ['padding', 'margin']);
+  assert.deepEqual(found.map((d) => [d.selector, d.value]), [['.a', '8px'], ['.b', '4px']]);
+});
+
+test('atRule is null, not undefined, for a top-level rule', () => {
+  // The JSDoc promises null. Task 5 branching on === null would mis-branch on
+  // undefined, and nothing currently asserts which it is.
+  assert.strictEqual(parseDeclarations('.a{ padding:8px; }', ['padding'])[0].atRule, null);
+});
+
+test('KNOWN LIMITATION: an unbalanced brace inside a string desynchronises the walk', () => {
+  // Documented, not endorsed. Fixing it needs string-aware tokenisation, which
+  // is more parser than this file should be. No such value exists in the real
+  // stylesheet; if one is ever added, rules after it go silently missing.
+  const css = '.x{ content:"{"; padding:8px; } .y{ margin:4px; }';
+  assert.deepEqual(parseDeclarations(css, ['padding', 'margin']).map((d) => d.selector), ['.x']);
+});
+
 test('it works on the real stylesheet, not just the fixture', () => {
   // A fixture proves the walk works. This proves it works on the file Task 3
   // will actually run against. The exact count matters: a loose `> N`
