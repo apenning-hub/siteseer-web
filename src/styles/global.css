@@ -129,6 +129,32 @@ a{ color:inherit; }
 .glass-light{ background:rgba(255,255,255,.6); -webkit-backdrop-filter:blur(18px) saturate(160%); backdrop-filter:blur(18px) saturate(160%); border:1px solid rgba(255,255,255,.75); box-shadow:0 10px 34px rgba(21,18,15,.08), inset 0 1px 0 rgba(255,255,255,.9); color:var(--ink); }
 .glass-light::after{ background:linear-gradient(135deg, rgba(255,255,255,.5), transparent 45%); }
 
+/* ===== cursor spotlight ===== */
+/* .glass and .postcard already clip with overflow:hidden. The ::before layer
+   sits at z-index 0 and children are lifted to 1 so text is never washed. */
+.postcard{ position:relative; }
+.glass::before,
+.postcard::before{
+  content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  opacity:0; transition:opacity .3s ease;
+  background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),
+             rgba(255,255,255,.22), transparent 60%);
+}
+/* On white cards a white spotlight is invisible — use a faint brand wash. */
+.postcard::before{
+  background:radial-gradient(220px circle at var(--mx,50%) var(--my,50%),
+             rgba(230,51,42,.10), transparent 60%);
+}
+.glass:hover::before,
+.postcard:hover::before{ opacity:1; }
+.glass::after{ z-index:0; }
+.glass > *,
+.postcard > *{ position:relative; z-index:1; }
+
+@media (prefers-reduced-motion:reduce){
+  .glass::before, .postcard::before{ display:none; }
+}
+
 /* ===== hero ===== */
 .hero{ padding-top:70px; padding-bottom:0; }
 .h1 span{ display:block; font-size:clamp(44px,7.8vw,80px); line-height:.9; color:#fff; letter-spacing:-.02em; }

@@ -27,3 +27,38 @@ function initMarquee() {
 }
 
 initMarquee();
+
+/* ---------- cursor spotlight ---------- */
+function initSpotlight() {
+  if (reduceMotion.matches || !finePointer.matches) return;
+
+  const cards = document.querySelectorAll('.glass, .postcard');
+  for (const card of cards) {
+    let frame = null;
+    let latest = null;
+
+    card.addEventListener('pointermove', (event) => {
+      latest = event;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        const rect = card.getBoundingClientRect();
+        const x = ((latest.clientX - rect.left) / rect.width) * 100;
+        const y = ((latest.clientY - rect.top) / rect.height) * 100;
+        card.style.setProperty('--mx', `${x.toFixed(1)}%`);
+        card.style.setProperty('--my', `${y.toFixed(1)}%`);
+      });
+    });
+
+    card.addEventListener('pointerleave', () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = null;
+      }
+      card.style.removeProperty('--mx');
+      card.style.removeProperty('--my');
+    });
+  }
+}
+
+initSpotlight();
