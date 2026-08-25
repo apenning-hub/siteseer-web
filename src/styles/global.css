@@ -1,10 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-@font-face{
-  font-family:'Druk Wide Bold';
-  src:url('../fonts/DrukWideBold.ttf') format('truetype');
-  font-weight:700; font-display:swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root{
   /* Brand red. Passes AA only at large/graphic sizes (3.0). Use for the logo,
@@ -31,7 +25,7 @@
 *{ box-sizing:border-box; margin:0; padding:0; }
 @media (prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth; } }
 body{ font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:var(--ink); background:var(--paper); font-size:15.5px; }
-.druk{ font-family:'Druk Wide Bold','Arial Black',sans-serif; text-transform:uppercase; }
+.druk{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-stretch:125%; font-weight:800; text-transform:uppercase; letter-spacing:-.01em; }
 .wrap{ max-width:1200px; margin:0 auto; padding:0 var(--s7); }
 .narrow{ max-width:800px; margin:0 auto; }
 a{ color:inherit; }
@@ -44,7 +38,7 @@ a{ color:inherit; }
 .nav{ position:sticky; top:0; z-index:30; background:rgba(251,249,245,.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
 .nav-in{ display:flex; align-items:center; justify-content:space-between; height:70px; }
 .brand{ display:flex; align-items:center; gap:var(--s3); text-decoration:none; }
-.wm .n{ font-family:'Druk Wide Bold',sans-serif; font-size:15px; line-height:1; color:var(--ink); }
+.wm .n{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-size:15px; line-height:1; color:var(--ink);  font-stretch:125%; font-weight:800;}
 .wm .t{ font-size:8px; letter-spacing:.30em; color:var(--muted); margin-top:var(--s1); font-weight:600; }
 .navlinks{ display:flex; gap:var(--s6); font-size:14px; }
 .navlinks a{ color:var(--ink); opacity:.62; text-decoration:none; position:relative; padding-bottom:var(--s1); }
@@ -179,14 +173,14 @@ a{ color:inherit; }
 /* ===== pillars ===== */
 .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4); margin-top:var(--s2); }
 .pill{ padding:var(--s6); border-radius:20px; }
-.pill .no{ font-family:'Druk Wide Bold',sans-serif; font-size:13px; color:var(--red-deep); }
+.pill .no{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-size:13px; color:var(--red-deep);  font-stretch:125%; font-weight:800;}
 .pill h3{ font-size:19px; margin:var(--s4) 0 var(--s2); font-weight:600; letter-spacing:-.01em; }
 .pill p{ font-size:14.5px; color:var(--muted); line-height:1.55; }
 
 /* ===== stats ===== */
 .statstrip{ display:grid; grid-template-columns:1fr 1fr; gap:var(--s4); }
 .statc{ padding:var(--s6); border-radius:18px; }
-.statc .num{ font-family:'Druk Wide Bold',sans-serif; font-size:clamp(32px,4vw,48px); line-height:.9; }
+.statc .num{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-size:clamp(32px,4vw,48px); line-height:.9;  font-stretch:125%; font-weight:800;}
 .statc .cap{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.65); margin-top:var(--s2); }
 
 /* ===== chips ===== */
@@ -281,7 +275,7 @@ a{ color:inherit; }
 
 .post{ max-width:760px; margin:0 auto; padding:var(--s8) 0 var(--s9); }
 .post-meta{ font-size:13px; color:var(--muted); margin-bottom:var(--s4); display:flex; gap:var(--s2); align-items:center; flex-wrap:wrap; }
-.post h1{ font-family:'Druk Wide Bold',sans-serif; text-transform:uppercase; font-size:clamp(28px,4.4vw,46px); line-height:.96; letter-spacing:-.01em; margin-bottom:var(--s4); }
+.post h1{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; text-transform:uppercase; font-size:clamp(28px,4.4vw,46px); line-height:.96; letter-spacing:-.01em; margin-bottom:var(--s4);  font-stretch:125%; font-weight:800;}
 .post .lede{ font-size:19px; line-height:1.55; color:var(--muted); margin-bottom:var(--s6); }
 .prose{ font-size:16.5px; line-height:1.7; color:var(--prose-ink); }
 .prose h2{ font-size:24px; font-weight:600; letter-spacing:-.01em; margin:var(--s6) 0 var(--s3); }

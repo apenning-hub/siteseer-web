@@ -17,7 +17,6 @@ npm run preview  # preview the built site
 
 ```
 public/
-  fonts/DrukWideBold.ttf      # display font (headlines)
   images/                     # swap these — see below
 src/
   styles/global.css           # the whole design system
@@ -62,3 +61,16 @@ draft: false
 4. Add the custom domain `siteseer.education`.
 
 (Or `npx wrangler pages deploy dist` after a local `npm run build`.)
+
+## Typography
+
+Display type is **Archivo** at width 125 (expanded), weight 800, loaded from
+Google Fonts. It stands in for **Druk Wide Bold**, the brand's actual display
+face — a commercial typeface from Commercial Type that cannot ship in a public
+repository without redistributing it.
+
+To restore the real face: drop `DrukWideBold.ttf` into `src/fonts/` (so Vite
+bundles and hashes it — `public/` will not work with the `../fonts/` path a
+`@font-face` in `src/styles/` resolves), re-add the `@font-face` block, and put
+`'Druk Wide Bold'` at the front of the display stack. **Make the repository
+private first.**
