@@ -250,7 +250,17 @@ a{ color:inherit; }
 .win-bar{ display:flex; align-items:center; gap:var(--s1); padding:var(--s3) var(--s4); background:#161618; }
 .win-bar i{ width:10px; height:10px; border-radius:var(--r-dot); }
 .win-pill{ margin-left:var(--s2); font-size:var(--fs-micro); color:#8a8a8a; background:#0e0e10; padding:5px 12px; border-radius:var(--r-pill); }
+/* astro:assets <Picture> wraps every <img> in a <picture>. `display:contents`
+   removes that wrapper from the box tree entirely, so `.win-shot`,
+   `.phone .scr img` and `.framed img` keep sizing against the frame that
+   actually draws the device — otherwise `width:100%`/`height:100%` would
+   resolve against an inline <picture> with no definite size and the crop would
+   collapse. <picture> carries no role of its own, so nothing is lost. */
+picture{ display:contents; }
 .win-shot{ display:block; width:100%; height:440px; object-fit:cover; }
+/* The every-device window is shorter than the hero's. Off-scale, like the 440px
+   above it: these are the height of a drawn screen, not page rhythm. */
+.win-shot-sm{ height:330px; }
 .phone{ --r-device:32px; width:220px; aspect-ratio:9/19.3; background:#0d0d0f; border-radius:var(--r-device); padding:var(--s2); box-shadow:0 30px 60px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.06); position:relative; flex:none; }
 .phone::before{ content:''; position:absolute; top:14px; left:50%; transform:translateX(-50%); width:72px; height:18px; background:#0d0d0f; border-radius:var(--r-pill); z-index:3; }
 .phone .scr{ width:100%; height:100%; border-radius:calc(var(--r-device) - var(--s2)); overflow:hidden; background:#000; }

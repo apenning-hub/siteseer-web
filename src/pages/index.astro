@@ -1,25 +1,55 @@
 ---
 import Base from '../layouts/Base.astro';
+import { Picture } from 'astro:assets';
 import { getCollection, getEntry } from 'astro:content';
+import productHero from '../images/product-hero.png';
+import productProcess from '../images/product-process.jpg';
 
-// ── SWAP IMAGES HERE ── drop files in /public/images and point a slot at them.
+// ── SWAP IMAGES HERE ── drop a file in src/images/ and import it above.
 // landscape = window/desktop shots · portrait = phone screenshots
-// b = base path so images resolve correctly on GitHub Pages (subpath) and in prod.
-const b = import.meta.env.BASE_URL;
-// NOTE (a11y, spec §5): six of the eight slots below point at product-hero.png.
-// The three "first look" phones and the two "every device" phones are the same
-// screenshot repeated, so their alt text cannot be accurate until real distinct
-// images exist. Do not invent descriptions — replace the images.
-const img = {
-  heroProduct: `${b}images/product-hero.png`,   // hero desktop window (LANDSCAPE)
-  everyPhoneL: `${b}images/product-hero.png`,    // every-device left phone (PORTRAIT)
-  everyWindow: `${b}images/product-hero.png`,    // every-device centre window (LANDSCAPE)
-  everyPhoneR: `${b}images/product-hero.png`,    // every-device right phone (PORTRAIT)
-  groundUp:    `${b}images/product-process.jpg`, // built-from-ground-up framed (LANDSCAPE)
-  lookPhone1:  `${b}images/product-hero.png`,    // first-look phone 1 (PORTRAIT)
-  lookPhone2:  `${b}images/product-hero.png`,    // first-look phone 2 (PORTRAIT)
-  lookPhone3:  `${b}images/product-hero.png`,    // first-look phone 3 (PORTRAIT)
-};
+//
+// These are ESM imports, NOT URL strings built from BASE_URL. That is the whole
+// point: an import goes through astro:assets, which emits AVIF/WebP derivatives,
+// a srcset, and intrinsic width/height on every <img> (the thing that stops the
+// page reflowing as images load). A `${BASE_URL}images/…` string bypasses all of
+// it and ships the 2.6 MB original. Never reintroduce one.
+//
+// NOTE (a11y, spec §5): SEVEN of the eight slots below are the same file,
+// product-hero.png — the hero window, both "every device" phones and its centre
+// window, and all three "first look" phones. (An earlier version of this comment
+// said six; the built HTML shows seven.) They are one screenshot repeated, so
+// their alt text cannot be accurate until real distinct images exist. Do not
+// invent descriptions — replace the images.
+
+// ── RESPONSIVE SIZING ──
+// Every window and phone screen crops with `object-fit:cover` inside a
+// fixed-height box, so the width the browser actually paints is NOT the width of
+// the box — it is however wide the image must be for its *height* to fill.
+// product-hero.png is 1866×972 (ratio 1.92), so the painted widths are:
+//
+//   hero .win-shot        ≤884 × 440 box  → paints ~884px wide
+//   every-device .window   560 × 330 box  → paints ~634px wide
+//   .phone (220 wide)      220 × 472 box  → paints ~906px wide
+//   .phonerow centre phone 240 × 515 box  → paints ~988px wide
+//
+// One ladder spans all four, and because those six slots share one placeholder
+// file, one shared `sizes` makes every slot resolve to the SAME candidate — so
+// the browser downloads a single derivative for the whole page rather than one
+// per slot. 992 is the 1× rung (covers the widest painted width, 988); 1866 is
+// the source width and doubles as the 2× rung. `sizes:992px` slightly
+// over-states the two window slots, which costs nothing: those bytes are already
+// in cache from the phones.
+const HERO_WIDTHS = [992, 1866];
+const HERO_SIZES = '992px';
+const FORMATS: ('avif' | 'webp')[] = ['avif', 'webp'];
+// The <img> inside <picture> is only ever reached by a browser that supports
+// neither AVIF nor WebP, i.e. pre-2020 Safari. JPEG, not the source PNG: the
+// PNG is fully opaque (verified — alpha channel present but unused), so nothing
+// is lost, and it keeps a ~1 MB dead PNG out of the build output.
+const FALLBACK = 'jpeg' as const;
+
+/** Shared props for the six slots showing product-hero.png. alt is per-slot. */
+const heroShot = { src: productHero, widths: HERO_WIDTHS, sizes: HERO_SIZES, formats: FORMATS, fallbackFormat: FALLBACK };
 
 // ── COPY LIVES IN src/content/home/*.json ── so a non-technical author can edit
 // it through the CMS. Nothing below should ever be re-inlined here: the JSON is
@@ -76,7 +106,13 @@ const inlineBold = (s: string) =>
     <div class="wrap reveal d6" style="position:relative;z-index:2;max-width:980px;margin:50px auto -84px;">
       <div class="window">
         <div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — structural steel · ground floor</span></div>
-        <img class="win-shot" src={img.heroProduct} alt="A SiteSeer construction environment on desktop, showing a partially framed building with its structure exposed" />
+        <Picture
+          {...heroShot}
+          class="win-shot"
+          loading="eager"
+          fetchpriority="high"
+          alt="A SiteSeer construction environment on desktop, showing a partially framed building with its structure exposed"
+        />
       </div>
     </div>
     <div style="height:84px;"></div>
@@ -123,9 +159,9 @@ const inlineBold = (s: string) =>
     </div>
     <div class="wrap">
       <div class="devices">
-        <div class="phone"><div class="scr"><img src={img.everyPhoneL} alt="SiteSeer running on a phone" /></div></div>
-        <div class="window"><div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — desktop</span></div><img class="win-shot" src={img.everyWindow} style="height:330px" alt="SiteSeer running on a desktop" /></div>
-        <div class="phone"><div class="scr"><img src={img.everyPhoneR} alt="SiteSeer running on a phone" /></div></div>
+        <div class="phone"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
+        <div class="window"><div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — desktop</span></div><Picture {...heroShot} class="win-shot win-shot-sm" alt="SiteSeer running on a desktop" /></div>
+        <div class="phone"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
       </div>
     </div>
   </section>
@@ -156,7 +192,22 @@ const inlineBold = (s: string) =>
             <div class="glass-light glass fitem"><div class="ic" aria-hidden="true">⇆</div><h3>Tailorable depth</h3><p>Tune the experience to the cohort.</p></div>
           </div>
         </div>
-        <div class="framed"><img src={img.groundUp} alt="A residential build shown at successive construction stages, from footings through frame to lock-up" /></div>
+        <div class="framed">
+          {/* The only slot that scales with its container rather than cropping:
+              `.framed img` is width:100%/height:auto, so the painted width IS
+              the column width — ~502px in the two-column `.split` at 1200px,
+              full-bleed once `.split` collapses at 880px. Hence a real ladder
+              and a real `sizes`, unlike the cover-cropped slots above. */}
+          <Picture
+            src={productProcess}
+            width={1000}
+            widths={[400, 640, 1000, 1280, 1680]}
+            sizes="(min-width:1200px) 502px, (min-width:881px) 45vw, calc(100vw - 48px)"
+            formats={FORMATS}
+            fallbackFormat={FALLBACK}
+            alt="A residential build shown at successive construction stages, from footings through frame to lock-up"
+          />
+        </div>
       </div>
     </div>
   </section>
@@ -178,9 +229,9 @@ const inlineBold = (s: string) =>
   <section class="band band-ink tc" id="demo">
     <div class="wrap narrow"><div class="eyebrow" style="color:var(--red);opacity:1">Your first look</div><h2 class="sh druk">See it for yourself<span class="dot">.</span></h2><p class="stext">Explore a demo and start imagining how SiteSeer fits your program.</p></div>
     <div class="wrap"><div class="phonerow">
-      <div class="phone reveal d2"><div class="scr"><img src={img.lookPhone1} alt="SiteSeer running on a phone" /></div></div>
-      <div class="phone reveal d3"><div class="scr"><img src={img.lookPhone2} alt="SiteSeer running on a phone" /></div></div>
-      <div class="phone reveal d4"><div class="scr"><img src={img.lookPhone3} alt="SiteSeer running on a phone" /></div></div>
+      <div class="phone reveal d2"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
+      <div class="phone reveal d3"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
+      <div class="phone reveal d4"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
     </div></div>
     <div class="wrap narrow"><div style="display:flex;gap:12px;justify-content:center;margin-top:44px;flex-wrap:wrap;"><a class="btn btn-red btn-lg" href="#contact">Start a pilot →</a><a class="btn btn-onred btn-lg" href="#contact">Join the waitlist</a></div></div>
   </section>

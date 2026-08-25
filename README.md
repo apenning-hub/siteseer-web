@@ -16,9 +16,8 @@ npm run preview  # preview the built site
 ## Structure
 
 ```
-public/
-  images/                     # swap these — see below
 src/
+  images/                     # swap these — see below
   styles/global.css           # the whole design system
   layouts/Base.astro          # html shell + Nav + Footer + SEO meta
   components/Nav.astro         # simplified header (Platform · Evidence · Blog · Contact)
@@ -32,11 +31,18 @@ src/
 
 ## Swapping images
 
-Open `src/pages/index.astro`. The `img = { … }` object at the top of the
-frontmatter maps each slot to a file in `/public/images`. Drop a new file in
-`public/images/` and point the slot at it. Slots are labelled **landscape**
-(desktop/window) or **portrait** (phone). The hero logo is inline SVG in
-`Nav.astro` — replace with the real vector when ready.
+Drop the new file in **`src/images/`** — not `public/` — then `import` it at the
+top of `src/pages/index.astro` and pass it to the `<Picture>` for that slot.
+Slots are labelled **landscape** (desktop/window) or **portrait** (phone).
+
+`src/` is the important part. Images there go through `astro:assets`, which emits
+AVIF/WebP derivatives, a `srcset`, and intrinsic `width`/`height` on every
+`<img>`. Anything referenced by URL string out of `public/` is shipped
+byte-for-byte at full size with no dimensions — which is how the homepage came to
+weigh 5.1 MB in two files.
+
+The hero logo is inline SVG in `Nav.astro` — replace with the real vector when
+ready.
 
 ## Writing blog posts
 
