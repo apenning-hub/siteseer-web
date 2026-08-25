@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCollection, getEntry } from 'astro:content';
 
 // ── SWAP IMAGES HERE ── drop files in /public/images and point a slot at them.
 // landscape = window/desktop shots · portrait = phone screenshots
@@ -20,42 +21,56 @@ const img = {
   lookPhone3:  `${b}images/product-hero.png`,    // first-look phone 3 (PORTRAIT)
 };
 
-const pillars = [
-  { no: '01', h: '3D models', p: 'Real buildings, modelled to construction-grade detail and made explorable from any angle, at any stage of the build.' },
-  { no: '02', h: 'Game engines & gamification', p: 'Unreal-powered, interactive and rewarding — learning that feels like play, not a lecture, on hardware students already own.' },
-  { no: '03', h: 'Construction knowledge', p: 'Sequencing, structure and trade detail, encoded by the people who teach the discipline — not generic 3D.' },
-];
+// ── COPY LIVES IN src/content/home/*.json ── so a non-technical author can edit
+// it through the CMS. Nothing below should ever be re-inlined here: the JSON is
+// the single source of truth and the Zod schemas in src/content.config.ts guard
+// its shape. See src/content/home/README.md.
+//
+// getCollection() makes no ordering promise, and every one of these is an
+// ordered list, so sort by the numeric id the file() parser assigned.
+const byIndex = (a: { id: string }, b: { id: string }) => Number(a.id) - Number(b.id);
 
-const capabilities = [
-  { ic: '▦', h: 'Immersive by default', p: 'Walk an active build from any angle, and pause it at footings, frame, lock-up or fit-out.' },
-  { ic: '◷', h: 'Construction knowledge', p: 'Sequencing, structure and trade detail, encoded by the educators who teach it — not generic 3D.' },
-  { ic: '✓', h: 'Safe & repeatable', p: 'Zero site risk. No PPE or inductions — replay any stage as many times as it takes.' },
-  { ic: '◆', h: 'On any device', p: 'Runs on the Windows & macOS laptops students already own. No headset required.' },
-  { ic: '⚡', h: 'Gamified & engaging', p: 'Interactive and rewarding — learning that feels like play, not a lecture.' },
-  { ic: '⇆', h: 'Tailored depth', p: 'Tune to any skill level, from first-years to final-year cohorts.' },
-];
+const hero = (await getEntry('hero', 'hero'))!.data;
+const pillars = (await getCollection('pillars')).sort(byIndex).map((e) => e.data);
+const capabilities = (await getCollection('capabilities')).sort(byIndex).map((e) => e.data);
+const outcomes = (await getCollection('outcomes')).sort(byIndex).map((e) => e.data);
+const stats = (await getCollection('stats')).sort(byIndex).map((e) => e.data);
+const roadmap = (await getEntry('roadmap', 'roadmap'))!.data;
+const roadmapA = roadmap.rowA;
+const roadmapB = roadmap.rowB;
 
-const outcomes = [
-  { ic: '★', h: 'Engaged students', p: 'Learning that feels like play, not a lecture.' },
-  { ic: '⚙', h: 'Relevant skills', p: 'Real sites, real sequencing, from day one.' },
-  { ic: '↗', h: 'Industry-ready', p: 'Confident entry into construction.' },
-];
-
-const roadmapA = ['Augmented Reality','Learning Outcome Tracking','Customizable Analytics','Progress Monitoring','Data-Driven Insights','Curriculum Improvement','Content Library','Custom Curriculum Integration','Virtual Classrooms','Community & Forums','Interactive Building Phases'];
-const roadmapB = ['iOS & Android App','In-Environment Tutorials','Scenario-Based Modules','Assessment & Certification','Analytics Dashboard','Detailed Reporting','Feedback Tools','Modular Learning Paths','Real-Time Collaboration','Interactive Questing','Multiplayer Environments'];
+/**
+ * hero.lead is the only content field carrying markup: inline `**bold**`, so the
+ * author gets a Bold button in the CMS instead of typing a tag. It must be
+ * *converted*, not interpolated, or the asterisks print in the largest sentence
+ * on the page.
+ *
+ * Escape first. This string is written by a CMS, so it is untrusted input being
+ * handed to set:html — escaping before converting means the only tag that can
+ * ever reach the page is the <b> this function produces.
+ *
+ * Inline bold is the entire grammar the README permits; a markdown library would
+ * be several hundred kilobytes to do this one replace.
+ */
+const inlineBold = (s: string) =>
+  s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
 ---
 <Base>
   <!-- HERO -->
   <section class="band band-red grain hero tc">
     <div class="wrap" style="position:relative;z-index:2;max-width:920px;">
-      <span class="kick reveal d1"><span class="ln"></span>Construction digital learning<span class="ln"></span></span>
-      <h1 class="h1 druk"><span class="reveal d2">Building</span><span class="reveal d3">Information</span></h1>
-      <p class="lead reveal d4">We turn complex <b>building information</b> into immersive 3D worlds students can walk through, question and remember — built in real <b>game engines</b>, grounded in real construction knowledge.</p>
+      <span class="kick reveal d1"><span class="ln"></span>{hero.kick}<span class="ln"></span></span>
+      <h1 class="h1 druk">{hero.headline.map((line, i) => <span class={`reveal d${i + 2}`}>{line}</span>)}</h1>
+      <p class="lead reveal d4" set:html={inlineBold(hero.lead)}></p>
       <div class="reveal d5" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
         <a class="btn btn-onred btn-lg" href="#contact">Start a pilot →</a>
         <a class="btn btn-ghostred btn-lg" href="#contact">Join the waitlist</a>
       </div>
-      <div class="proof reveal d6">A decade in use · 1,000+ students · Built in Unreal Engine</div>
+      <div class="proof reveal d6">{hero.proof}</div>
     </div>
     <div class="wrap reveal d6" style="position:relative;z-index:2;max-width:980px;margin:50px auto -84px;">
       <div class="window">
@@ -89,10 +104,9 @@ const roadmapB = ['iOS & Android App','In-Environment Tutorials','Scenario-Based
           <p class="stext">When it's impossible to get students onto a construction site to connect theory to practice, SiteSeer is the solution — safe, repeatable, and on the devices they already carry.</p>
         </div>
         <div class="statstrip">
-          <div class="statc glass"><div class="num">1,000+</div><div class="cap">Students taught</div></div>
-          <div class="statc glass"><div class="num">10 yrs</div><div class="cap">In real classrooms</div></div>
-          <div class="statc glass"><div class="num">2</div><div class="cap">Platforms today</div></div>
-          <div class="statc glass"><div class="num">0</div><div class="cap">Site-safety risk</div></div>
+          {stats.map((s) => (
+            <div class="statc glass"><div class="num">{s.num}</div><div class="cap">{s.cap}</div></div>
+          ))}
         </div>
       </div>
     </div>
