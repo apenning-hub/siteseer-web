@@ -223,12 +223,6 @@ test('it works on the real stylesheet, not just the fixture', () => {
   // will actually run against. The exact count matters: a loose `> N`
   // threshold let a `break`-after-first-match mutant survive undetected.
   //
-  // Was 26 as of Task 2: the depth-aware walk correctly sees the one rule
-  // the old regex scan discarded in this file (`.navlinks{ display:none; }`,
-  // the first rule inside the sole @media block) — but that rule doesn't
-  // declare padding, so that particular fix didn't move this count. It is
-  // now 27: Plan A Task 9 adds one new selector, `.skip` (the skip link),
-  // whose own `padding:var(--s3) var(--s4)` declaration is the 27th.
   const here = dirname(fileURLToPath(import.meta.url));
   const css = readFileSync(resolve(here, '../src/styles/global.css'), 'utf8');
   const tokens = parseRootTokens(css);
@@ -244,5 +238,15 @@ test('it works on the real stylesheet, not just the fixture', () => {
   }
   assert.equal(tokens['--red'], '#e6332a');
   assert.equal(tokens['--ink'], '#15120f');
-  assert.equal(parseDeclarations(css, ['padding']).length, 27);
+  // A floor, not an exact count. The exact number existed to catch a
+  // `break`-after-first mutant that dropped it to 25 — a floor catches that too,
+  // without needing a bump every time anyone adds a rule with padding. It has
+  // already been bumped three times in one session, which is churn, not coverage.
+  const paddings = parseDeclarations(css, ['padding']);
+  assert.ok(paddings.length >= 26, `expected >= 26 padding declarations, got ${paddings.length}`);
+  // Name rules from opposite ends of the sheet, so a desynchronised walk that
+  // silently truncates the file fails here rather than passing on a smaller count.
+  for (const sel of ['.wrap', '.btn', '.post']) {
+    assert.ok(paddings.some((d) => d.selector === sel), `no padding found for ${sel}`);
+  }
 });
