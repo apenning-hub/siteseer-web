@@ -268,9 +268,22 @@ const inlineBold = (s: string) =>
   <!-- ROADMAP -->
   <section class="band tc" id="roadmap">
     <div class="wrap"><div class="eyebrow">On the roadmap</div><h2 class="sh druk">Upcoming features<span class="dot">.</span></h2></div>
+    {/* Each row is its content twice over, because `scrollx` translates by -50%
+        and the second copy is what slides in behind the first — remove it and
+        the loop jumps. It is a duplicate for the eye only: without
+        aria-hidden a screen reader announces all 44 spans as 44 separate
+        roadmap items when there are 22. The copies must stay in the same
+        element and the same order for the animation to be seamless, so the
+        marker goes on the spans rather than on a wrapper. */}
     <div class="marquee">
-      <div class="mrow">{[...roadmapA, ...roadmapA].map((f) => <span>{f}</span>)}</div>
-      <div class="mrow rev">{[...roadmapB, ...roadmapB].map((f) => <span>{f}</span>)}</div>
+      <div class="mrow">
+        {roadmapA.map((f) => <span>{f}</span>)}
+        {roadmapA.map((f) => <span aria-hidden="true">{f}</span>)}
+      </div>
+      <div class="mrow rev">
+        {roadmapB.map((f) => <span>{f}</span>)}
+        {roadmapB.map((f) => <span aria-hidden="true">{f}</span>)}
+      </div>
     </div>
     <button class="marquee-toggle" type="button" aria-pressed="false" data-marquee-toggle>
       Pause scrolling
