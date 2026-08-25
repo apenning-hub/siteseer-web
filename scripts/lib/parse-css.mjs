@@ -41,6 +41,8 @@ function* eachRule(css) {
     // it's terminated by `;`, not `{`/`}` — so it sits in the same span as
     // the next construct's prelude. Keep only what follows the last `;`, or
     // an @import glues onto the next rule's selector and that rule vanishes.
+    // Trade: a selector containing a literal `;` (e.g. `a[title="x;y"]`) gets
+    // truncated instead — visible in a report, unlike a rule disappearing.
     const prelude = css.slice(i, open).split(';').pop().trim().replace(/\s+/g, ' ');
 
     let depth = 1;
@@ -56,6 +58,9 @@ function* eachRule(css) {
 
     if (prelude.startsWith('@')) {
       if (/^@(font-face|page|property|counter-style)\b/.test(prelude)) {
+        // Belt-and-braces. Both paths give the same answer for a brace-free body,
+        // so no test can tell whether this branch exists. It matters only if an
+        // at-rule body ever contains a brace (e.g. a `content` value).
         yield { selector: prelude, body, atRule: null };
       } else {
         for (const rule of eachRule(body)) {
@@ -72,8 +77,18 @@ function* eachRule(css) {
 /** Returns { '--token': 'value' } for every custom property declared in :root. */
 export function parseRootTokens(css) {
   const tokens = {};
-  for (const { selector, body } of eachRule(stripComments(css))) {
+  for (const { selector, body, atRule } of eachRule(stripComments(css))) {
     if (!selector.split(',').some((s) => s.trim() === ':root')) continue;
+    if (atRule) {
+      // A :root inside an at-block means more than one palette. Silently taking
+      // either would make the checker measure a pairing that never renders —
+      // a dark-mode colour against a light-mode ground, or vice versa. There is
+      // no correct guess, so refuse rather than return a confident wrong answer.
+      throw new Error(
+        `:root declared inside "${atRule}". This file reads a single palette. ` +
+        `Teach the contrast checker to handle one palette per at-block before adding this.`
+      );
+    }
     for (const chunk of body.split(';')) {
       const m = chunk.match(/^\s*(--[\w-]+)\s*:\s*([\s\S]+?)\s*$/);
       if (m) tokens[m[1]] = m[2];

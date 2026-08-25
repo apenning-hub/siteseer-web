@@ -195,6 +195,29 @@ test('KNOWN LIMITATION: an unbalanced brace inside a string desynchronises the w
   assert.deepEqual(parseDeclarations(css, ['padding', 'margin']).map((d) => d.selector), ['.x']);
 });
 
+test('parseRootTokens refuses a second palette rather than guessing', () => {
+  // Taking the top-level :root leaves a dark palette unchecked; taking the last
+  // one measures a pairing that never renders. Both are confident wrong answers.
+  const css = ':root{ --red:#e6332a; }\n@media (prefers-color-scheme:dark){ :root{ --red:#ff8a80; } }';
+  assert.throws(() => parseRootTokens(css), /declared inside "@media/);
+});
+
+test('parseRootTokens reads a minified :root', () => {
+  // Asymmetric coverage: the minified test added last round only exercised
+  // parseDeclarations, so the equivalent path here was unpinned.
+  assert.deepEqual(parseRootTokens(':root{--red:#e6332a}'), { '--red': '#e6332a' });
+});
+
+test('parseDeclarations reports a selector containing a semicolon, mangled but present', () => {
+  // Known trade: splitting the prelude on ';' truncates an attribute-selector
+  // string. The declaration is still found with the right property and value —
+  // only the selector text is wrong, which is visible in a report. The
+  // alternative was a rule vanishing entirely, which is not.
+  const found = parseDeclarations('a[title="x;y"]{ padding:8px; }', ['padding']);
+  assert.equal(found.length, 1);
+  assert.equal(found[0].value, '8px');
+});
+
 test('it works on the real stylesheet, not just the fixture', () => {
   // A fixture proves the walk works. This proves it works on the file Task 3
   // will actually run against. The exact count matters: a loose `> N`
