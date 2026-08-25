@@ -8,6 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "check:contrast": "node scripts/check-contrast.mjs",
     "test": "node --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {
