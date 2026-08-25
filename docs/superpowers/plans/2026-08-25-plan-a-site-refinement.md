@@ -219,6 +219,26 @@ export function requiredRatio({ px, bold = false }) {
 > `parseDeclarations` returns a fourth field, **`atRule`**. Task 5 must carry it
 > into violation reports: without it the base `.wrap` and the `@media` `.wrap`
 > arrive as two identical bare selectors and the report cannot say which to fix.
+>
+> **A third round found one more, and it was the worst of them.** Routing
+> `parseRootTokens` through the depth walk meant a top-level at-*statement*
+> before `:root` erased the entire token map — and `global.css` line 1 is
+> `@import url('…fonts.googleapis.com…');`. It survived only because the next
+> construct, `@font-face`, also has a brace-free body. Move or delete either and
+> the first rule of the sheet disappears; if that rule is `:root`, the contrast
+> checker sees zero colours and reports a clean sweep having checked nothing.
+> Fixed by taking the prelude's last `;`-separated token.
+>
+> An unterminated block was also fabricating a truncated value (`padding: 8p`)
+> where the old regex returned nothing — a step backwards, now fixed by only
+> trimming the closing brace when the walk actually found one.
+>
+> **One limitation is documented rather than fixed:** an unbalanced brace inside a
+> quoted string desynchronises the walk and silently drops every following rule.
+> The old regex resynchronised at the next `}`; a depth counter cannot. Fixing it
+> needs string-aware tokenisation, which is more parser than this file should be.
+> No such value exists in the stylesheet today. There is a test that pins the
+> behaviour so the cause is written down rather than rediscovered.
 
 - [ ] **Step 5: Run the test to verify it passes**
 
@@ -423,6 +443,54 @@ test('parseDeclarations strips comments before reading selectors', () => {
   assert.equal(parseDeclarations(css, ['padding'])[0].selector, '.btn');
 });
 
+test('parseRootTokens is not derailed by an at-statement before :root', () => {
+  // global.css line 1 is @import url(...). The prelude spans everything since
+  // the last close brace, so the @import was being glued onto the next rule's
+  // selector and that rule silently vanished. Task 3 would have seen {} and
+  // reported a clean sweep having checked nothing.
+  assert.deepEqual(parseRootTokens("@import url('x.css');\n:root{ --red:#e6332a; }"),
+    { '--red': '#e6332a' });
+});
+
+test('an unterminated block does not fabricate a truncated value', () => {
+  // Regression guard: slicing j-1 assumed a closing brace was there to trim.
+  assert.deepEqual(parseDeclarations('.a{ padding:8px', ['padding']).map((d) => d.value), ['8px']);
+  assert.deepEqual(parseRootTokens(':root{ --red:#e6332a'), { '--red': '#e6332a' });
+});
+
+test('a later declaration of a token wins, as the cascade requires', () => {
+  // A first-wins mutant passes the whole suite. It would report a colour that
+  // is not on the site, straight into hexToRgb.
+  assert.deepEqual(parseRootTokens(':root{ --red:#ff0000; --red:#e6332a; }'), { '--red': '#e6332a' });
+});
+
+test('parseDeclarations ignores spacing declared inside :root', () => {
+  // The :root guard is currently vacuous — the fixture's :root declares nothing
+  // the property filter would match, so removing the guard is undetectable.
+  assert.deepEqual(parseDeclarations(':root{ padding:0; --red:#e6332a; }', ['padding']), []);
+});
+
+test('parseDeclarations handles a minified rule', () => {
+  // No fixture omits whitespace before the closing brace, leaving the whole
+  // off-by-one region around it unpinned.
+  const found = parseDeclarations('.a{padding:8px}.b{margin:4px}', ['padding', 'margin']);
+  assert.deepEqual(found.map((d) => [d.selector, d.value]), [['.a', '8px'], ['.b', '4px']]);
+});
+
+test('atRule is null, not undefined, for a top-level rule', () => {
+  // The JSDoc promises null. Task 5 branching on === null would mis-branch on
+  // undefined, and nothing currently asserts which it is.
+  assert.strictEqual(parseDeclarations('.a{ padding:8px; }', ['padding'])[0].atRule, null);
+});
+
+test('KNOWN LIMITATION: an unbalanced brace inside a string desynchronises the walk', () => {
+  // Documented, not endorsed. Fixing it needs string-aware tokenisation, which
+  // is more parser than this file should be. No such value exists in the real
+  // stylesheet; if one is ever added, rules after it go silently missing.
+  const css = '.x{ content:"{"; padding:8px; } .y{ margin:4px; }';
+  assert.deepEqual(parseDeclarations(css, ['padding', 'margin']).map((d) => d.selector), ['.x']);
+});
+
 test('it works on the real stylesheet, not just the fixture', () => {
   // A fixture proves the walk works. This proves it works on the file Task 3
   // will actually run against. The exact count matters: a loose `> N`
@@ -461,6 +529,13 @@ Create `scripts/lib/parse-css.mjs`:
  * src/styles/global.css: flat style rules, plus at-blocks (`@media`,
  * `@supports`, `@keyframes`, ...) that nest one level of rules inside them.
  * It is not a general CSS parser and should not become one.
+ *
+ * KNOWN LIMITATION: the walk tracks brace depth only — it is not string-aware.
+ * An unbalanced `{` or `}` inside a quoted string (e.g. `content:"{"`)
+ * desynchronises it and everything after that rule goes silently missing.
+ * Fixing this needs string-aware tokenisation, which is past what this file
+ * should be. No such value exists in the real stylesheet today; if one is
+ * ever added, see the 'KNOWN LIMITATION' test in tests/parse-css.test.mjs.
  */
 
 /** Strip comments so they can't produce phantom matches. */
@@ -487,7 +562,11 @@ function* eachRule(css) {
   while (i < css.length) {
     const open = css.indexOf('{', i);
     if (open === -1) return;
-    const prelude = css.slice(i, open).trim().replace(/\s+/g, ' ');
+    // A leading at-statement (`@import url(...);`) has no block of its own —
+    // it's terminated by `;`, not `{`/`}` — so it sits in the same span as
+    // the next construct's prelude. Keep only what follows the last `;`, or
+    // an @import glues onto the next rule's selector and that rule vanishes.
+    const prelude = css.slice(i, open).split(';').pop().trim().replace(/\s+/g, ' ');
 
     let depth = 1;
     let j = open + 1;
@@ -496,7 +575,9 @@ function* eachRule(css) {
       else if (css[j] === '}') depth -= 1;
       j += 1;
     }
-    const body = css.slice(open + 1, j - 1);
+    // If input ran out before depth returned to 0, there is no closing brace
+    // to trim — `j - 1` would eat a real character of an unterminated block.
+    const body = css.slice(open + 1, depth === 0 ? j - 1 : j);
 
     if (prelude.startsWith('@')) {
       if (/^@(font-face|page|property|counter-style)\b/.test(prelude)) {
@@ -563,7 +644,7 @@ export function parseDeclarations(css, properties) {
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 30 test blocks total, 0 failures
+Expected: PASS — 37 test blocks total, 0 failures
 
 - [ ] **Step 5: Commit**
 
