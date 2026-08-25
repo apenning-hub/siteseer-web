@@ -20,9 +20,21 @@ const links = [
       </svg>
       <span class="wm"><span class="n" style="display:block">SITESEER</span><span class="t" style="display:block">BUILDING INFORMATION</span></span>
     </a>
-    <nav class="navlinks">
+    <button
+      class="navtoggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="navmenu"
+    >
+      <span class="navtoggle-box" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      Menu
+    </button>
+    <nav class="navlinks" id="navmenu">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a class="btn btn-red navlinks-cta" href={`${base}#contact`}>Start a pilot</a>
     </nav>
-    <a class="btn btn-red" href={`${base}#contact`}>Start a pilot</a>
+    <a class="btn btn-red nav-cta" href={`${base}#contact`}>Start a pilot</a>
   </div>
 </header>
