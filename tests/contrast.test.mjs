@@ -16,6 +16,13 @@ test('hexToRgb parses with and without a leading hash', () => {
 test('relativeLuminance hits the known endpoints', () => {
   assert.equal(relativeLuminance([0, 0, 0]), 0);
   assert.equal(relativeLuminance([255, 255, 255]), 1);
+  assert.ok(Math.abs(relativeLuminance([128, 128, 128]) - 0.2159) < 0.0005);
+});
+
+test('hexToRgb rejects anything that is not a 6-digit hex', () => {
+  assert.throws(() => hexToRgb('rgba(21,18,15,.10)'), /6-digit hex/);
+  assert.throws(() => hexToRgb('#fff'), /6-digit hex/);
+  assert.throws(() => hexToRgb(''), /6-digit hex/);
 });
 
 test('contrastRatio returns 21 for black on white', () => {

@@ -11,16 +11,16 @@ export function hexToRgb(hex) {
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
 }
 
-function channelLuminance(channel) {
+function srgbToLinear(channel) {
   const s = channel / 255;
   return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
 }
 
 export function relativeLuminance([r, g, b]) {
   return (
-    0.2126 * channelLuminance(r) +
-    0.7152 * channelLuminance(g) +
-    0.0722 * channelLuminance(b)
+    0.2126 * srgbToLinear(r) +
+    0.7152 * srgbToLinear(g) +
+    0.0722 * srgbToLinear(b)
   );
 }
 
@@ -39,10 +39,8 @@ export function blend(fg, bg, alpha) {
 
 /**
  * AA threshold for a given text size. "Large" is >=24px, or >=18.66px bold.
- * Pass { graphic: true } for non-text contrast (icons, borders) which is 3.0.
  */
-export function requiredRatio({ px, bold = false, graphic = false }) {
-  if (graphic) return 3;
+export function requiredRatio({ px, bold = false }) {
   const large = px >= 24 || (bold && px >= 18.66);
   return large ? 3 : 4.5;
 }
