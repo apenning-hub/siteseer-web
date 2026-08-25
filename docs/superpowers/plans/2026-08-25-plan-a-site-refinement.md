@@ -222,20 +222,60 @@ git commit -m "test: add WCAG contrast maths library"
 - Create: `scripts/lib/parse-css.mjs`
 - Test: `tests/parse-css.test.mjs`
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Harden `tests/contrast.test.mjs` first**
+
+Task 1's mutation sweep found five behaviours in `hexToRgb` that are implemented
+correctly but pinned by nothing — and they only become load-bearing now, because
+this parser is what feeds it raw `:root` substrings. Two are dangerous: without
+the `$` anchor `'e6332aZZ'` silently parses and discards the garbage; without `^`,
+`'ZZe6332a'` returns `[NaN,NaN,NaN]` which propagates a `NaN` ratio.
+
+Add one assertion to the existing "parses with and without a leading hash" test:
+
+```js
+  // Real CSS has leading spaces (`--red: #e6332a`) and may be uppercased by a
+  // formatter. Task 4 rewrites the whole :root block, so neither is hypothetical.
+  assert.deepEqual(hexToRgb('  #E6332A  '), [230, 51, 42]);
+```
+
+And three to the existing "rejects anything that is not a 6-digit hex" test:
+
+```js
+  assert.throws(() => hexToRgb('e6332aZZ'), /6-digit hex/);   // pins the $ anchor
+  assert.throws(() => hexToRgb('ZZe6332a'), /6-digit hex/);   // pins the ^ anchor
+  assert.throws(() => hexToRgb(null), /6-digit hex/);         // pins String() coercion
+```
+
+Run: `npm test` — still 11 blocks, now 29 assertions, all green.
+
+- [ ] **Step 2: Write the failing parser test**
+
+The failure mode to design against is **a silent wrong answer, not a crash**. Ask of
+every test: if the parser quietly returned the wrong string, would anything fail?
 
 Create `tests/parse-css.test.mjs`:
 
 ```js
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import { parseRootTokens, parseDeclarations } from '../scripts/lib/parse-css.mjs';
 
+// Deliberately hostile: a @font-face above :root, a comment containing the word
+// "red", two declarations on one line, a non-hex token, and a data: URL carrying
+// braces, quotes and a # character. Every one of these is in the real stylesheet.
 const SAMPLE = `
+@font-face{ font-family:'Druk Wide Bold'; src:url('../fonts/DrukWideBold.ttf'); }
 :root{
+  /* Brand red. Passes AA only at large sizes — never use --red for body text. */
   --red:#e6332a; --red-deep:#c5271f;
+  --ink:#15120f; --paper:#fbf9f5;
+  --line:rgba(21,18,15,.10);
   --s1:4px; --s2:8px;
 }
+.grain::before{ background-image:url("data:image/svg+xml,%3Csvg%3E%3Cfilter id='n'%3E%3C/filter%3E%3C/svg%3E"); }
 .band{ padding:96px 0; }
 .wrap{ max-width:1200px; margin:0 auto; padding:0 48px; }
 .pill{ padding:var(--s5); }
@@ -249,17 +289,36 @@ test('parseRootTokens extracts every custom property in :root', () => {
   assert.equal(tokens['--s2'], '8px');
 });
 
+test('parseRootTokens returns non-hex tokens intact rather than dropping them', () => {
+  // --line is the canary. It is NOT a hex colour and lives in the same block.
+  // A parser that silently skipped it would turn hexToRgb's loud throw into a
+  // missing check — the same false-pass shape the Task 1 sweep was built to catch.
+  assert.equal(parseRootTokens(SAMPLE)['--line'], 'rgba(21,18,15,.10)');
+});
+
+test('parseRootTokens is not fooled by a comment mentioning a token', () => {
+  const tokens = parseRootTokens(SAMPLE);
+  assert.equal(Object.keys(tokens).length, 7);
+  assert.ok(!Object.keys(tokens).some((k) => k.includes(' ')));
+});
+
 test('parseRootTokens ignores properties declared outside :root', () => {
-  const tokens = parseRootTokens('.x{ --nope:#fff; }');
-  assert.deepEqual(tokens, {});
+  assert.deepEqual(parseRootTokens('.x{ --nope:#fff; }'), {});
 });
 
 test('parseDeclarations finds spacing declarations with their selector', () => {
-  const decls = parseDeclarations(SAMPLE, ['padding', 'margin']);
-  const values = decls.map((d) => d.value);
+  const values = parseDeclarations(SAMPLE, ['padding', 'margin']).map((d) => d.value);
   assert.ok(values.includes('96px 0'));
   assert.ok(values.includes('0 auto'));
   assert.ok(values.includes('var(--s5)'));
+});
+
+test('parseDeclarations survives a data: URL containing braces and a hash', () => {
+  // The .grain rule sits between :root and .band. If the brace matcher trips on
+  // the encoded SVG, everything after it is silently invisible to the checker.
+  const selectors = parseDeclarations(SAMPLE, ['padding']).map((d) => d.selector);
+  assert.ok(selectors.includes('.band'), 'rules after the data: URL were skipped');
+  assert.ok(selectors.includes('.wrap'));
 });
 
 test('parseDeclarations skips the :root block', () => {
@@ -268,8 +327,18 @@ test('parseDeclarations skips the :root block', () => {
 });
 
 test('parseDeclarations does not match longhand as shorthand', () => {
-  const decls = parseDeclarations('.a{ max-width:100px; }', ['width']);
-  assert.equal(decls.length, 0);
+  assert.equal(parseDeclarations('.a{ max-width:100px; }', ['width']).length, 0);
+});
+
+test('it works on the real stylesheet, not just the fixture', () => {
+  // A fixture proves the regex works. This proves it works on the file Task 3
+  // will actually run against.
+  const here = dirname(fileURLToPath(import.meta.url));
+  const css = readFileSync(resolve(here, '../src/styles/global.css'), 'utf8');
+  const tokens = parseRootTokens(css);
+  assert.equal(tokens['--red'], '#e6332a');
+  assert.equal(tokens['--ink'], '#15120f');
+  assert.ok(parseDeclarations(css, ['padding']).length > 20);
 });
 ```
 
@@ -333,7 +402,7 @@ export function parseDeclarations(css, properties) {
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `npm test`
-Expected: PASS — 14 tests total, 0 failures
+Expected: PASS — 20 test blocks total, 0 failures
 
 - [ ] **Step 5: Commit**
 
