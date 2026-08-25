@@ -11,6 +11,9 @@ import {
 test('hexToRgb parses with and without a leading hash', () => {
   assert.deepEqual(hexToRgb('#e6332a'), [230, 51, 42]);
   assert.deepEqual(hexToRgb('e6332a'), [230, 51, 42]);
+  // Real CSS has leading spaces (`--red: #e6332a`) and may be uppercased by a
+  // formatter. Task 4 rewrites the whole :root block, so neither is hypothetical.
+  assert.deepEqual(hexToRgb('  #E6332A  '), [230, 51, 42]);
 });
 
 test('relativeLuminance hits the known endpoints', () => {
@@ -32,6 +35,9 @@ test('hexToRgb rejects anything that is not a 6-digit hex', () => {
   assert.throws(() => hexToRgb('rgba(21,18,15,.10)'), /6-digit hex/);
   assert.throws(() => hexToRgb('#fff'), /6-digit hex/);
   assert.throws(() => hexToRgb(''), /6-digit hex/);
+  assert.throws(() => hexToRgb('e6332aZZ'), /6-digit hex/);   // pins the $ anchor
+  assert.throws(() => hexToRgb('ZZe6332a'), /6-digit hex/);   // pins the ^ anchor
+  assert.throws(() => hexToRgb(null), /6-digit hex/);         // pins String() coercion
 });
 
 test('contrastRatio returns 21 for black on white', () => {
