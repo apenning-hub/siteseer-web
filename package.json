@@ -10,6 +10,8 @@
     "check": "astro check",
     "check:cms": "node scripts/check-cms-schema.mjs",
     "check:contrast": "node scripts/check-contrast.mjs",
+    "check:spacing": "node scripts/check-spacing.mjs",
+    "check:a11y": "npx --yes @axe-core/cli http://localhost:4321/ http://localhost:4321/blog/ http://localhost:4321/blog/the-site-access-bottleneck/ --exit",
     "test": "node --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {
