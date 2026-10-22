@@ -1,0 +1,239 @@
+backend:
+  name: github
+  repo: apenning-hub/siteseer-web
+  branch: main
+  base_url: https://beta.siteseer.education
+  auth_endpoint: api/auth
+
+# Direct commits to main. Editorial workflow is deliberately OFF — the owner
+# asked to be out of the publishing loop.
+publish_mode: simple
+
+media_folder: public/images/blog
+public_folder: /images/blog
+
+collections:
+  # ---------------------------------------------------------------------
+  # Blog posts — src/content/blog/*.md, validated by the `blog` schema in
+  # src/content.config.ts.
+  # ---------------------------------------------------------------------
+  - name: blog
+    label: Blog posts
+    label_singular: Blog post
+    folder: src/content/blog
+    create: true
+    extension: md
+    format: frontmatter
+    fields:
+      - name: title
+        label: Title
+        widget: string
+        hint: The headline shown at the top of the post and in the blog list.
+
+      - name: description
+        label: Summary
+        widget: text
+        hint: >-
+          A one or two sentence summary. Shown on the blog listing page and
+          wherever the post is shared as a link.
+
+      - name: pubDate
+        label: Publish date
+        widget: datetime
+        hint: The date shown on the post. Newer posts appear first in the list.
+
+      - name: updatedDate
+        label: Last updated
+        widget: datetime
+        required: false
+        hint: >-
+          Optional. Only fill this in if you're revising an already-published
+          post and want to show it was updated.
+
+      - name: tags
+        label: Tags
+        widget: list
+        required: false
+        hint: >-
+          Optional. One tag per line, for example "construction" or "unreal
+          engine". Leave empty if you don't want to add any.
+
+      - name: author
+        label: Author
+        widget: string
+        default: SiteSeer
+        hint: Who wrote this post.
+
+      - name: draft
+        label: Draft
+        widget: boolean
+        default: true
+        hint: >-
+          Drafts are never published. Untick when the post is ready to go
+          live.
+
+      - name: body
+        label: Post content
+        widget: markdown
+        hint: The main text of the post. Use the toolbar for headings, links, lists and images.
+
+  # ---------------------------------------------------------------------
+  # Homepage sections — each file below is one src/content/home/*.json,
+  # validated by the matching schema in src/content.config.ts.
+  # ---------------------------------------------------------------------
+  - name: home
+    label: Homepage
+    files:
+      - name: hero
+        label: Hero section
+        file: src/content/home/hero.json
+        fields:
+          - name: kick
+            label: Kicker
+            widget: string
+            hint: The small line of text that sits above the big heading.
+
+          - name: headline
+            label: Heading lines
+            widget: list
+            hint: >-
+              The big heading, one line at a time. Each line you add here
+              stacks on its own row — for example "Building" then
+              "Information".
+
+          # Non-negotiable per spec: restricted to bold only, so the author
+          # can never type raw markdown/HTML that the hero renderer would
+          # print literally (see src/content/home/README.md).
+          - name: lead
+            label: Lead paragraph
+            widget: markdown
+            buttons: [bold]
+            editor_components: []
+            minimal: true
+            hint: >-
+              The paragraph under the heading. Select some text and click
+              Bold to emphasise it — that's the only formatting available
+              here, on purpose.
+
+          - name: proof
+            label: Proof line
+            widget: string
+            hint: >-
+              A short line of credibility under the paragraph, for example a
+              stat or track record.
+
+      - name: pillars
+        label: Pillars section
+        file: src/content/home/pillars.json
+        fields:
+          - name: items
+            label: Pillars
+            widget: list
+            hint: The numbered pillars shown on the homepage.
+            fields:
+              - name: no
+                label: Number
+                widget: string
+                hint: 'The number shown next to this pillar, for example "01".'
+              - name: h
+                label: Heading
+                widget: string
+              - name: p
+                label: Description
+                widget: text
+
+      - name: capabilities
+        label: Capabilities section
+        file: src/content/home/capabilities.json
+        fields:
+          - name: items
+            label: Capabilities
+            widget: list
+            fields:
+              - name: ic
+                label: Icon
+                widget: string
+                hint: 'A single symbol shown next to the heading, for example ▦'
+              - name: h
+                label: Heading
+                widget: string
+              - name: p
+                label: Description
+                widget: text
+
+      - name: outcomes
+        label: Outcomes section
+        file: src/content/home/outcomes.json
+        fields:
+          - name: items
+            label: Outcomes
+            widget: list
+            fields:
+              - name: ic
+                label: Icon
+                widget: string
+                hint: 'A single symbol shown next to the heading, for example ★'
+              - name: h
+                label: Heading
+                widget: string
+              - name: p
+                label: Description
+                widget: text
+
+      - name: stats
+        label: Stats section
+        file: src/content/home/stats.json
+        fields:
+          - name: items
+            label: Stats
+            widget: list
+            fields:
+              - name: num
+                label: Number
+                widget: string
+                hint: 'The big figure, for example "1,000+".'
+              - name: cap
+                label: Caption
+                widget: string
+                hint: 'The short label underneath the number, for example "Students taught".'
+
+      - name: roadmap
+        label: Roadmap section
+        file: src/content/home/roadmap.json
+        fields:
+          - name: rowA
+            label: Row A
+            widget: list
+            hint: >-
+              One item per line. Scrolls across the homepage as a moving row
+              of words.
+          - name: rowB
+            label: Row B
+            widget: list
+            hint: >-
+              One item per line. Scrolls the opposite way to Row A.
+
+      - name: partners
+        label: Partners section
+        file: src/content/home/partners.json
+        fields:
+          - name: items
+            label: Partners
+            widget: list
+            fields:
+              - name: group
+                label: Group
+                widget: select
+                options: ['Partner', 'Supported by']
+                hint: Which heading this entry is listed under on the homepage.
+              - name: name
+                label: Name
+                widget: string
+              - name: role
+                label: Role
+                widget: string
+                hint: 'A short role label, for example "Teaching partner".'
+              - name: blurb
+                label: Blurb
+                widget: text
+                hint: One sentence describing the partnership.

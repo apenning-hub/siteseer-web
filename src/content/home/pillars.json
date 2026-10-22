@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "no": "01",
+      "h": "3D models",
+      "p": "Real buildings, modelled to construction-grade detail. Every stage is there, from footings to fit-out."
+    },
+    {
+      "no": "02",
+      "h": "Game engines & gamification",
+      "p": "Built in Unreal Engine. The site runs in real time, and moving through it works the way a game does."
+    },
+    {
+      "no": "03",
+      "h": "Construction knowledge",
+      "p": "Sequencing, structure and trade detail, put there by the people who teach construction. It is a building, not a visualisation."
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 import { defineConfig } from 'astro/config';
 
-// TESTING on GitHub Pages → served from a subpath: apenning-hub.github.io/siteseer-web/
-// For the production siteseer.education deploy: set `site` to that and delete `base`.
+// Beta deploy on Cloudflare Pages. When promoting to the main domain, change
+// `site` to https://siteseer.education and follow the checklist in
+// docs/superpowers/specs/2026-08-25-siteseer-web-refinement-design.md §9.
 export default defineConfig({
-  site: 'https://apenning-hub.github.io',
-  base: '/siteseer-web/',
+  site: 'https://beta.siteseer.education',
   build: { format: 'directory' },
 });

@@ -1,0 +1,3 @@
+# BETA ONLY — remove this file when promoting to siteseer.education (spec §9).
+User-agent: *
+Disallow: /

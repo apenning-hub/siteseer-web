@@ -1,20 +1,119 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-@font-face{
-  font-family:'Druk Wide Bold';
-  src:url('../fonts/DrukWideBold.ttf') format('truetype');
-  font-weight:700; font-display:swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root{
-  --red:#e6332a; --red-deep:#c5271f; --ink:#15120f; --paper:#fbf9f5;
+  /* Brand red. Passes AA only at large/graphic sizes (3.0). Use for the logo,
+     the hero h1, icon fills, card top bars and bullets — never for body text. */
+  --red:#e6332a;
+  /* Accessible red. Passes AA at body size on paper and as a button ground. */
+  --red-deep:#c5271f;
+  /* Red on --ink. --red is 4.33:1 there; this is the nearest lift that clears
+     4.5 for small bold text (4.71:1). Reads as the same red on a dark band. */
+  --red-on-ink:#e8433b;
+
+  /* Red band gradient. Every stop is dark enough for opaque white body text to
+     pass AA (≤ 0.1833 luminance), and the stops darken monotonically, so
+     --band-red-light really is the lightest and therefore the worst case. */
+  --band-red-light:#d92418; --band-red-mid:#cf2419; --band-red-deep:#c5271f;
+
+  --ink:#15120f; --paper:#fbf9f5;
   --soft:#f3efe8; --muted:#6f6a61; --line:rgba(21,18,15,.10);
+  --prose-ink:#262019;
+
+  /* Spacing scale — spec §3. Every padding/margin/gap uses one of these. */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px;
+  --s6:32px; --s7:48px; --s8:72px; --s9:96px;
+  /* Band rhythm: a clamp, not a breakpoint, so it scales smoothly. */
+  --band-y:clamp(48px, 8vw, 96px);
+
+  /* Interactive target floors — WCAG 2.2 AA 2.5.8. --tap-min is the 24px
+     criterion floor, for the one place the layout genuinely cannot give more:
+     the 70px header bar, where a taller link drags its hover underline away
+     from the text it belongs to. --tap is the 44px platform convention (iOS
+     44pt / Android 48dp), used everywhere there is room — the mobile nav
+     panel, the back link, the marquee toggle.
+
+     Deliberately NOT folded into the spacing scale. --tap-min happens to equal
+     --s5 and --tap sits between --s7 and --s8, but that is arithmetic, not
+     meaning: these are floors on a hit area and they move only if WCAG or the
+     platform conventions move, whereas the spacing scale is page rhythm and is
+     free to be retuned. Writing var(--s5) here would hide a conformance
+     requirement inside a design decision. */
+  --tap-min:24px; --tap:44px;
+
+  /* Type scale. One ramp, integers only — the half-pixel sizes this replaced
+     were nudges, not steps. Seven text steps at roughly 1.12–1.2:
+       micro  uppercase labels (eyebrow, tag pill, stat caption, role)
+       meta   bylines, credits, dates, the proof line
+       ui     nav, buttons, compact card copy
+       body   body copy, section paragraphs, card headings
+       lead   lead paragraphs and long-form prose
+       sub    sub-headings and the article lede
+       head   prose h2
+     micro sits only 1px under meta because it is *always* uppercase and
+     tracked: 11px caps have a taller cap-height than 12px lowercase has
+     x-height, so the two read a clear step apart. */
+  --fs-micro:11px; --fs-meta:12px; --fs-ui:14px; --fs-body:16px;
+  --fs-lead:18px;  --fs-sub:20px;  --fs-head:24px;
+  /* Display steps. These only ever appear as the floor or ceiling of a
+     clamp() — nothing is set at a fixed display size. The gap from 48 to 80
+     is deliberate: the hero is the one thing on the site allowed to be twice
+     the size of everything else. */
+  --fs-d1:28px; --fs-d2:32px; --fs-d3:40px; --fs-d4:48px; --fs-d5:80px;
+
+  /* Line-height. Four values, and two of them land on the spacing grid:
+     body 16 x 1.5 = 24px = --s5, heading 20 x 1.2 = 24px = --s5. */
+  --lh-display:.9;    /* Archivo caps — locks up tight, no descenders */
+  --lh-heading:1.2;   /* sentence-case sub-headings */
+  --lh-body:1.5;      /* UI and body copy */
+  --lh-prose:1.7;     /* long-form reading measure */
+
+  /* Tracking. Negative for display, neutral-tight for headings, wide for
+     uppercase labels — optical, not one number applied everywhere. */
+  --tr-tight:-.02em;  /* >=28px display */
+  --tr-snug:-.01em;   /* headings and the display face at text sizes */
+  --tr-wide:.18em;    /* uppercase micro labels */
+
+  /* Radii. Five steps on the same 4px grid as the spacing scale, plus a pill
+     and a dot. The step is chosen by how big the thing is, not by taste:
+     r1 sits on inline chrome, r3 on controls, r5 on every card on the site
+     (they used to sit at 18, 20 and 22 and read as three different curves).
+     Anything whose radius is meant to exceed half its height — chips, tag
+     pills, the browser-chrome pill — takes --r-pill so it stays a stadium at
+     any content length instead of guessing a number. */
+  --r1:4px; --r2:8px; --r3:12px; --r4:16px; --r5:20px;
+  --r-pill:999px; --r-dot:50%;
+  /* The focus ring follows the corner of the thing it outlines. Each
+     focusable component sets --r-focus to its own radius; anything that
+     doesn't get one falls back to the smallest step. */
+  --r-focus:var(--r1);
+
+  /* Elevation. Three heights, and the shadow colour follows the ground it
+     falls on: the same lift needs far more opacity over a saturated red band
+     than over paper, which is most of why this sheet used to carry eight
+     unrelated shadows. The dark-ground rule below re-points the same three
+     names, so a component asks for a height and gets the right ink for
+     wherever it has been placed. */
+  --sh-1:0 2px 8px rgba(21,18,15,.06);
+  --sh-2:0 12px 32px rgba(21,18,15,.10);
+  --sh-3:0 24px 56px rgba(21,18,15,.16);
+  /* The brand glow on primary buttons, and its pressed state — lower and
+     tighter, as though the button moved toward the page. */
+  --sh-red:0 6px 18px rgba(230,51,42,.28);
+  --sh-red-press:0 3px 10px rgba(230,51,42,.34);
+
+  /* Motion. Two interaction durations, one entrance, one interaction curve.
+     --ease-enter is the entrance curve that was already here. */
+  --dur-1:.2s;   /* a control changing state: colour, shadow, opacity */
+  --dur-2:.3s;   /* a surface changing: the cursor spotlight, the underline */
+  --dur-3:.7s;   /* entrance */
+  --ease:cubic-bezier(.4,0,.2,1);
+  --ease-enter:cubic-bezier(.2,.7,.2,1);
 }
 *{ box-sizing:border-box; margin:0; padding:0; }
-html{ scroll-behavior:smooth; }
-body{ font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:var(--ink); background:var(--paper); font-size:15.5px; }
-.druk{ font-family:'Druk Wide Bold','Arial Black',sans-serif; text-transform:uppercase; }
-.wrap{ max-width:1200px; margin:0 auto; padding:0 44px; }
+@media (prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth; } }
+body{ font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:var(--ink); background:var(--paper); font-size:var(--fs-body); }
+.druk{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-stretch:125%; font-weight:800; text-transform:uppercase; letter-spacing:var(--tr-snug); }
+.wrap{ max-width:1200px; margin:0 auto; padding:0 var(--s7); }
 .narrow{ max-width:800px; margin:0 auto; }
 a{ color:inherit; }
 
@@ -25,142 +124,338 @@ a{ color:inherit; }
 /* ===== nav (simplified) ===== */
 .nav{ position:sticky; top:0; z-index:30; background:rgba(251,249,245,.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
 .nav-in{ display:flex; align-items:center; justify-content:space-between; height:70px; }
-.brand{ display:flex; align-items:center; gap:11px; text-decoration:none; }
-.wm .n{ font-family:'Druk Wide Bold',sans-serif; font-size:15px; line-height:1; color:var(--ink); }
-.wm .t{ font-size:8px; letter-spacing:.30em; color:var(--muted); margin-top:4px; font-weight:600; }
-.navlinks{ display:flex; gap:30px; font-size:14px; }
-.navlinks a{ color:var(--ink); opacity:.62; text-decoration:none; position:relative; padding-bottom:3px; }
-.navlinks a::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--red); transition:width .25s ease; }
-.navlinks a:hover{ opacity:1; } .navlinks a:hover::after{ width:100%; }
+.brand{ display:flex; align-items:center; gap:var(--s3); text-decoration:none; }
+.wm .n{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-size:var(--fs-body); line-height:var(--lh-display); color:var(--ink);  font-stretch:125%; font-weight:800;}
+/* OFF-SCALE, deliberately. The tagline is part of a wordmark, not text: at
+   8px/.30em it reads as a ruled band under SITESEER. On the type scale (11px)
+   with normal label tracking it would be wider than the wordmark it sits under
+   and would read as a sentence. Kept as drawn. */
+.wm .t{ font-size:8px; letter-spacing:.30em; color:var(--muted); margin-top:var(--s1); font-weight:600; }
+.navlinks{ display:flex; gap:var(--s6); font-size:var(--fs-ui); }
+/* Scoped off the CTA on purpose. `.navlinks a` is (0,1,1) and out-specifies
+   both `.btn` and `.btn-red` at (0,1,0), so the unscoped rule was quietly
+   overriding the pilot button inside the mobile panel: its white label became
+   --ink, and `padding-bottom:var(--s1)` collapsed the button's 12px bottom
+   padding to 4px. Excluding it restores the button's own styling. */
+.navlinks a:not(.navlinks-cta){
+  color:var(--ink); opacity:.62; text-decoration:none; position:relative;
+  /* WCAG 2.2 AA 2.5.8. The bar is fixed at 70px and cannot grow, and a 44px
+     link here would drag the hover underline (::after, bottom:0) well clear of
+     its text — so the header takes the 24px floor. Padding is symmetric where
+     it used to be bottom-only, which keeps the underline exactly 2px under the
+     text AND centres the links in the bar; they previously sat 2px high. */
+  padding-block:var(--s1); min-height:var(--tap-min);
+  transition:opacity var(--dur-1) var(--ease);
+}
+.navlinks a:not(.navlinks-cta)::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:2px; background:var(--red); transition:width var(--dur-2) var(--ease); }
+.navlinks a:not(.navlinks-cta):hover{ opacity:1; } .navlinks a:not(.navlinks-cta):hover::after{ width:100%; }
+
+/* ===== mobile nav disclosure ===== */
+.navtoggle{
+  display:none; align-items:center; gap:var(--s2);
+  background:none; border:none; cursor:pointer;
+  font-family:inherit; font-size:var(--fs-ui); font-weight:600; color:var(--ink);
+  padding:var(--s2); --r-focus:var(--r2);
+}
+.navtoggle-box{ display:flex; flex-direction:column; gap:var(--s1); width:18px; }
+.navtoggle-box span{ display:block; height:2px; background:var(--ink); border-radius:var(--r-pill); }
+.navlinks-cta{ display:none; }
+
+@media (max-width:880px){
+  .navtoggle{ display:flex; }
+  .nav-cta{ display:none; }
+  .navlinks{
+    display:none; position:absolute; left:0; right:0; top:70px;
+    flex-direction:column; align-items:flex-start; gap:var(--s4);
+    background:var(--paper); border-bottom:1px solid var(--line);
+    padding:var(--s5) var(--s5) var(--s6);
+  }
+  .nav[data-open='true'] .navlinks{ display:flex; }
+  /* The panel has room the 70px bar does not, so these get the full 44px
+     convention rather than the 24px floor — and `align-self:stretch` makes the
+     whole row tappable instead of just the word. The 16px `gap` above keeps
+     adjacent targets clearly apart. */
+  .navlinks a:not(.navlinks-cta){
+    opacity:1; font-size:var(--fs-lead);
+    display:flex; align-items:center; align-self:stretch;
+    min-height:var(--tap); padding-block:var(--s2);
+  }
+  /* The sliding underline is a hover affordance and there is no hover here.
+     Left in, it would draw a 2px rule the full width of the panel. */
+  .navlinks a:not(.navlinks-cta)::after{ display:none; }
+  .navlinks-cta{ display:inline-block; margin-top:var(--s2); }
+}
 
 /* ===== buttons ===== */
-.btn{ font-family:inherit; font-weight:600; font-size:14px; padding:13px 22px; border-radius:11px; border:none; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease; text-decoration:none; display:inline-block; }
-.btn-red{ background:var(--red); color:#fff; box-shadow:0 6px 18px rgba(230,51,42,.28); } .btn-red:hover{ transform:translateY(-2px); }
-.btn-onred{ background:#fff; color:var(--red); } .btn-onred:hover{ transform:translateY(-2px); }
+.btn{ font-family:inherit; font-weight:600; font-size:var(--fs-ui); padding:var(--s3) var(--s5); border-radius:var(--r3); --r-focus:var(--r3); border:none; cursor:pointer; transition:background var(--dur-1) var(--ease), box-shadow var(--dur-1) var(--ease); text-decoration:none; display:inline-block; }
+.btn-red{ background:var(--red-deep); color:#fff; box-shadow:var(--sh-red); }
+.btn-red:hover{ background:#b52119; box-shadow:var(--sh-red-press); }
+.btn-onred{ background:#fff; color:var(--red-deep); }
+.btn-onred:hover{ background:var(--soft); }
 .btn-ghostred{ background:rgba(255,255,255,.12); color:#fff; border:1.5px solid rgba(255,255,255,.5); backdrop-filter:blur(8px); } .btn-ghostred:hover{ background:rgba(255,255,255,.2); }
-.btn-ink{ background:var(--ink); color:#fff; } .btn-lg{ font-size:15px; padding:16px 30px; }
+.btn-ink{ background:var(--ink); color:#fff; } .btn-lg{ font-size:var(--fs-body); padding:var(--s4) var(--s6); }
+
+/* ===== focus (WCAG 2.4.7) ===== */
+/* Default ring: red-deep on light grounds. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible{
+  outline:2px solid var(--red-deep);
+  outline-offset:2px;
+  border-radius:var(--r-focus);
+}
+/* On dark and red grounds a red ring disappears — invert it. */
+.band-red :where(a, button, [tabindex]):focus-visible,
+.band-ink :where(a, button, [tabindex]):focus-visible,
+.foot :where(a, button, [tabindex]):focus-visible{
+  outline-color:#fff;
+}
+/* Never remove the ring for keyboard users; mouse users don't see it anyway. */
+:where(a, button):focus:not(:focus-visible){ outline:none; }
+
+/* ===== skip link (WCAG 2.4.1) ===== */
+.skip{
+  position:absolute; left:var(--s2); top:var(--s2); z-index:100;
+  background:var(--ink); color:#fff; font-size:var(--fs-ui); font-weight:600;
+  padding:var(--s3) var(--s4); border-radius:var(--r2); --r-focus:var(--r2); text-decoration:none;
+  transform:translateY(-200%);
+}
+.skip:focus{ transform:translateY(0); }
 
 /* ===== bands / headings ===== */
-.band{ padding:92px 0; position:relative; overflow:hidden; }
+.band{ padding:var(--band-y) 0; position:relative; overflow:hidden; }
 .band-ink{ background:var(--ink); color:#fff; }
-.band-red{ background:linear-gradient(160deg,#ef3b30,var(--red) 55%,var(--red-deep)); color:#fff; }
-.eyebrow{ font-size:11.5px; letter-spacing:.20em; text-transform:uppercase; font-weight:700; color:var(--red); margin-bottom:16px; }
+.band-red{ background:linear-gradient(160deg,var(--band-red-light),var(--band-red-mid) 55%,var(--band-red-deep)); color:#fff; }
+/* Same three elevations, re-inked for a dark ground. */
+.band-ink, .band-red, .foot{
+  --sh-1:0 2px 8px rgba(0,0,0,.20);
+  --sh-2:0 12px 32px rgba(0,0,0,.26);
+  --sh-3:0 24px 56px rgba(0,0,0,.34);
+}
+.eyebrow{ font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase; font-weight:700; color:var(--red-deep); margin-bottom:var(--s4); }
 .tc{ text-align:center; }
 .band-ink .eyebrow,.band-red .eyebrow{ color:#fff; opacity:.85; }
-.sh{ font-size:clamp(26px,3.6vw,40px); line-height:1; letter-spacing:-.01em; }
+.sh{ font-size:clamp(var(--fs-d1),3.6vw,var(--fs-d3)); line-height:var(--lh-display); letter-spacing:var(--tr-snug); }
 .sh .dot{ color:var(--red); } .band-red .sh .dot,.band-ink .sh .dot{ color:#fff; }
-.stext{ font-size:16px; line-height:1.6; color:var(--muted); margin-top:16px; } .tc .stext{ margin-left:auto; margin-right:auto; }
-.band-ink .stext,.band-red .stext{ color:rgba(255,255,255,.9); }
+.stext{ font-size:var(--fs-body); line-height:var(--lh-body); color:var(--muted); margin-top:var(--s4); } .tc .stext{ margin-left:auto; margin-right:auto; }
+.band-ink .stext,.band-red .stext{ color:#fff; }
 
 /* ===== glass card system ===== */
-.glass{ background:rgba(255,255,255,.08); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); border:1px solid rgba(255,255,255,.18); border-radius:22px; box-shadow:0 10px 40px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.35); position:relative; overflow:hidden; color:#fff; transition:transform .22s ease, background .22s ease; }
+.glass{ background:rgba(255,255,255,.08); -webkit-backdrop-filter:blur(20px) saturate(170%); backdrop-filter:blur(20px) saturate(170%); border:1px solid rgba(255,255,255,.18); border-radius:var(--r5); box-shadow:var(--sh-2), inset 0 1px 0 rgba(255,255,255,.35); position:relative; overflow:hidden; color:#fff; transition:background var(--dur-1) var(--ease); }
 .glass::after{ content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,0) 42%); }
-.glass:hover{ transform:translateY(-4px); background:rgba(255,255,255,.13); }
-.glass-light{ background:rgba(255,255,255,.6); -webkit-backdrop-filter:blur(18px) saturate(160%); backdrop-filter:blur(18px) saturate(160%); border:1px solid rgba(255,255,255,.75); box-shadow:0 10px 34px rgba(21,18,15,.08), inset 0 1px 0 rgba(255,255,255,.9); color:var(--ink); }
+.glass:hover{ background:rgba(255,255,255,.13); }
+.glass-light{ background:rgba(255,255,255,.6); -webkit-backdrop-filter:blur(18px) saturate(160%); backdrop-filter:blur(18px) saturate(160%); border:1px solid rgba(255,255,255,.75); box-shadow:var(--sh-2), inset 0 1px 0 rgba(255,255,255,.9); color:var(--ink); }
 .glass-light::after{ background:linear-gradient(135deg, rgba(255,255,255,.5), transparent 45%); }
 
+/* ===== cursor spotlight ===== */
+/* .glass and .postcard already clip with overflow:hidden. The ::before layer
+   sits at z-index 0 and children are lifted to 1 so text is never washed. */
+.postcard{ position:relative; }
+.glass::before,
+.postcard::before{
+  content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  opacity:0; transition:opacity var(--dur-2) var(--ease);
+  background:radial-gradient(140px circle at var(--mx,50%) var(--my,50%),
+             rgba(255,255,255,.22), transparent 60%);
+}
+/* On white cards a white spotlight is invisible — use a faint brand wash. */
+.postcard::before{
+  background:radial-gradient(140px circle at var(--mx,50%) var(--my,50%),
+             rgba(230,51,42,.10), transparent 60%);
+}
+.glass:hover::before,
+.postcard:hover::before{ opacity:1; }
+.glass::after{ z-index:0; }
+.glass > *,
+.postcard > *{ position:relative; z-index:1; }
+
+@media (prefers-reduced-motion:reduce){
+  .glass::before, .postcard::before{ display:none; }
+}
+
 /* ===== hero ===== */
-.hero{ padding-top:70px; padding-bottom:0; }
-.h1 span{ display:block; font-size:clamp(44px,7.8vw,80px); line-height:.9; color:#fff; letter-spacing:-.02em; }
-.kick{ display:inline-flex; align-items:center; gap:10px; font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; font-weight:700; margin-bottom:22px; }
+.hero{ padding-top:var(--s8); padding-bottom:0; }
+/* Two stacked words, so .9 is a lockup, not a leading value — keep it.
+   The floor is 40px, not the old 44px: at 44px the longest headline word
+   ("INFORMATION", 11 expanded-black caps) is wider than a 375px phone inside
+   the 24px gutters. 40px is the largest step that fits. */
+.h1 span{ display:block; font-size:clamp(var(--fs-d3),7.8vw,var(--fs-d5)); line-height:var(--lh-display); color:#fff; letter-spacing:var(--tr-tight); }
+.kick{ display:inline-flex; align-items:center; gap:var(--s2); font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase; font-weight:700; margin-bottom:var(--s5); }
 .kick .ln{ width:24px; height:2px; background:#fff; }
-.lead{ font-size:clamp(16px,1.6vw,18.5px); line-height:1.5; color:rgba(255,255,255,.94); max-width:52ch; margin:22px auto 30px; } .lead b{ color:#fff; }
-.proof{ font-size:12.5px; color:rgba(255,255,255,.82); margin-top:22px; }
+.lead{ font-size:clamp(var(--fs-body),1.6vw,var(--fs-lead)); line-height:var(--lh-body); color:#fff; max-width:52ch; margin:var(--s5) auto var(--s6); } .lead b{ color:#fff; }
+.proof{ font-size:var(--fs-meta); color:#fff; margin-top:var(--s5); }
 
 /* ===== device frames ===== */
-.window{ background:#0e0e10; border-radius:15px; overflow:hidden; box-shadow:0 40px 90px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08); }
-.win-bar{ display:flex; align-items:center; gap:7px; padding:12px 15px; background:#161618; }
-.win-bar i{ width:10px; height:10px; border-radius:50%; }
-.win-pill{ margin-left:10px; font-size:11px; color:#8a8a8a; background:#0e0e10; padding:5px 12px; border-radius:20px; }
+/* DEVICE FRAMES — the radii below (and the shadows) are exempt from the
+   scale on purpose: they draw physical hardware, where the corner is a fact
+   about the object, not a design token. The one rule they do follow is
+   concentricity: the screen's radius is the body's radius minus the bezel,
+   so the two curves stay parallel. */
+.window{ background:#0e0e10; border-radius:var(--r4); overflow:hidden; box-shadow:0 40px 90px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08); }
+.win-bar{ display:flex; align-items:center; gap:var(--s1); padding:var(--s3) var(--s4); background:#161618; }
+.win-bar i{ width:10px; height:10px; border-radius:var(--r-dot); }
+.win-pill{ margin-left:var(--s2); font-size:var(--fs-micro); color:#8a8a8a; background:#0e0e10; padding:5px 12px; border-radius:var(--r-pill); }
+/* astro:assets <Picture> wraps every <img> in a <picture>. `display:contents`
+   removes that wrapper from the box tree entirely, so `.win-shot`,
+   `.phone .scr img` and `.framed img` keep sizing against the frame that
+   actually draws the device — otherwise `width:100%`/`height:100%` would
+   resolve against an inline <picture> with no definite size and the crop would
+   collapse. <picture> carries no role of its own, so nothing is lost. */
+picture{ display:contents; }
 .win-shot{ display:block; width:100%; height:440px; object-fit:cover; }
-.phone{ width:220px; aspect-ratio:9/19.3; background:#0d0d0f; border-radius:32px; padding:8px; box-shadow:0 30px 60px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.06); position:relative; flex:none; }
-.phone::before{ content:''; position:absolute; top:14px; left:50%; transform:translateX(-50%); width:72px; height:18px; background:#0d0d0f; border-radius:13px; z-index:3; }
-.phone .scr{ width:100%; height:100%; border-radius:25px; overflow:hidden; background:#000; }
+/* The every-device window is shorter than the hero's. Off-scale, like the 440px
+   above it: these are the height of a drawn screen, not page rhythm. */
+.win-shot-sm{ height:330px; }
+.phone{ --r-device:32px; width:220px; aspect-ratio:9/19.3; background:#0d0d0f; border-radius:var(--r-device); padding:var(--s2); box-shadow:0 30px 60px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.06); position:relative; flex:none; }
+.phone::before{ content:''; position:absolute; top:14px; left:50%; transform:translateX(-50%); width:72px; height:18px; background:#0d0d0f; border-radius:var(--r-pill); z-index:3; }
+.phone .scr{ width:100%; height:100%; border-radius:calc(var(--r-device) - var(--s2)); overflow:hidden; background:#000; }
 .phone .scr img{ width:100%; height:100%; object-fit:cover; display:block; }
-.devices{ display:flex; align-items:center; justify-content:center; gap:30px; margin-top:48px; flex-wrap:wrap; }
+.devices{ display:flex; align-items:center; justify-content:center; gap:var(--s6); margin-top:var(--s7); flex-wrap:wrap; }
 .devices .window{ flex:1 1 460px; max-width:560px; } .devices .phone{ transform:translateY(12px); }
 
 /* ===== pillars ===== */
-.pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:10px; }
-.pill{ padding:34px; border-radius:20px; }
-.pill .no{ font-family:'Druk Wide Bold',sans-serif; font-size:13px; color:var(--red); }
-.pill h4{ font-size:19px; margin:14px 0 9px; font-weight:600; letter-spacing:-.01em; }
-.pill p{ font-size:14.5px; color:var(--muted); line-height:1.55; }
+.pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4); margin-top:var(--s2); }
+.pill{ padding:var(--s6); border-radius:var(--r5); }
+.pill .no{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-size:var(--fs-meta); color:var(--red-deep);  font-stretch:125%; font-weight:800;}
+.pill h3{ font-size:var(--fs-sub); line-height:var(--lh-heading); margin:var(--s4) 0 var(--s2); font-weight:600; letter-spacing:var(--tr-snug); }
+.pill p{ font-size:var(--fs-ui); color:var(--muted); line-height:var(--lh-body); }
 
 /* ===== stats ===== */
-.statstrip{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-.statc{ padding:26px 28px; border-radius:18px; }
-.statc .num{ font-family:'Druk Wide Bold',sans-serif; font-size:clamp(32px,4vw,48px); line-height:.9; }
-.statc .cap{ font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.65); margin-top:10px; }
+.statstrip{ display:grid; grid-template-columns:1fr 1fr; gap:var(--s4); }
+.statc{ padding:var(--s6); border-radius:var(--r5); }
+.statc .num{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; font-size:clamp(var(--fs-d2),4vw,var(--fs-d4)); line-height:var(--lh-display);  font-stretch:125%; font-weight:800;}
+.statc .cap{ font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase; color:rgba(255,255,255,.65); margin-top:var(--s2); }
 
 /* ===== chips ===== */
-.chips{ display:flex; gap:11px; justify-content:center; flex-wrap:wrap; margin-top:28px; }
-.chip{ border:1px solid var(--line); background:#fff; border-radius:30px; padding:10px 18px; font-size:13.5px; font-weight:600; display:flex; align-items:center; gap:7px; }
-.chip.soon{ opacity:.6; } .chip .tag{ font-size:10px; color:var(--red); font-weight:700; }
+.chips{ display:flex; gap:var(--s3); justify-content:center; flex-wrap:wrap; margin-top:var(--s5); }
+.chip{ border:1px solid var(--line); background:#fff; border-radius:var(--r-pill); padding:var(--s2) var(--s4); font-size:var(--fs-ui); font-weight:600; display:flex; align-items:center; gap:var(--s1); }
+.chip.soon{ color:var(--muted); } .chip .tag{ font-size:var(--fs-micro); color:var(--red-deep); font-weight:700; }
 
 /* ===== feature grids ===== */
-.framed{ border-radius:16px; overflow:hidden; border:1px solid var(--line); box-shadow:0 24px 56px rgba(21,18,15,.12); } .framed img{ display:block; width:100%; height:auto; }
-.split{ display:grid; grid-template-columns:1.05fr .95fr; gap:54px; align-items:center; }
-.fgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:34px; text-align:left; }
-.fitem{ padding:26px; border-radius:18px; }
-.fitem .ic{ width:38px; height:38px; border-radius:11px; background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:15px; }
-.fitem h5{ font-size:16px; font-weight:600; margin-bottom:6px; } .fitem p{ font-size:13.5px; line-height:1.5; opacity:.85; }
+.framed{ border-radius:var(--r4); overflow:hidden; border:1px solid var(--line); box-shadow:var(--sh-3); } .framed img{ display:block; width:100%; height:auto; }
+.split{ display:grid; grid-template-columns:1.05fr .95fr; gap:var(--s7); align-items:center; }
+.fgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4); margin-top:var(--s6); text-align:left; }
+.fitem{ padding:var(--s6); border-radius:var(--r5); }
+.fitem .ic{ width:38px; height:38px; border-radius:var(--r3); background:var(--red); color:#fff; display:flex; align-items:center; justify-content:center; font-size:var(--fs-body); margin-bottom:var(--s4); }
+.fitem h3{ font-size:var(--fs-body); line-height:var(--lh-heading); font-weight:600; margin-bottom:var(--s1); } .fitem p{ font-size:var(--fs-ui); line-height:var(--lh-body); opacity:.85; }
+
+/* ===== partners ===== */
+/* The two groups hold four and three cards, so the shared 3-column .fgrid would
+   strand the fourth partner alone on a second row. auto-fit lets each group fill
+   its own row at any width, and collapses on its own below ~530px — which it has
+   to, because `.pgroup .fgrid` out-specifies the 880px collapse rule further down
+   this sheet and would otherwise stay multi-column on a phone. */
+.pgroup{ margin-top:var(--s6); }
+.pgroup .fgrid{ grid-template-columns:repeat(3,1fr); }
+.pgroup-label{
+  font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase;
+  font-weight:700; color:var(--muted); margin-bottom:var(--s4);
+}
+.prole{
+  font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase;
+  font-weight:700; color:var(--red-deep);
+}
+.fitem h4{ font-size:var(--fs-body); line-height:var(--lh-heading); font-weight:600; margin:var(--s2) 0 var(--s1); letter-spacing:var(--tr-snug); }
 
 /* ===== first look ===== */
-.phonerow{ display:flex; gap:34px; justify-content:center; align-items:flex-end; margin-top:44px; flex-wrap:wrap; }
+.phonerow{ display:flex; gap:var(--s6); justify-content:center; align-items:flex-end; margin-top:var(--s7); flex-wrap:wrap; }
 .phonerow .phone:nth-child(2){ transform:translateY(-22px); width:240px; }
 
 /* ===== roadmap marquee ===== */
-.marquee{ position:relative; margin-top:36px; -webkit-mask-image:linear-gradient(90deg,transparent,#000 11%,#000 89%,transparent); mask-image:linear-gradient(90deg,transparent,#000 11%,#000 89%,transparent); }
+.marquee{ position:relative; margin-top:var(--s6); -webkit-mask-image:linear-gradient(90deg,transparent,#000 11%,#000 89%,transparent); mask-image:linear-gradient(90deg,transparent,#000 11%,#000 89%,transparent); }
 .mrow{ display:flex; width:max-content; white-space:nowrap; animation:scrollx 60s linear infinite; }
-.mrow.rev{ animation-direction:reverse; animation-duration:72s; margin-top:6px; }
-.mrow span{ font-size:clamp(17px,2.1vw,25px); font-weight:500; color:var(--muted); padding:8px 28px; display:inline-flex; align-items:center; gap:18px; }
+.mrow.rev{ animation-direction:reverse; animation-duration:72s; margin-top:var(--s1); }
+.mrow span{ font-size:clamp(var(--fs-lead),2.1vw,var(--fs-head)); font-weight:500; color:var(--muted); padding:var(--s2) var(--s5); display:inline-flex; align-items:center; gap:var(--s4); }
+/* OFF-SCALE: a decorative glyph, sized to sit as a bullet against 18-24px
+   text, not a type step. */
 .mrow span::before{ content:'◆'; color:var(--red); font-size:8px; }
 @keyframes scrollx{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
 .marquee:hover .mrow{ animation-play-state:paused; }
 
+.marquee-toggle{
+  /* 35px cleared the 24px AA floor but sat under the platform convention, and
+     this is a standalone centred control with nothing constraining it — so it
+     takes the full 44px. `width:fit-content` keeps `margin:auto` centring it as
+     a block; a flex container without it would stretch across the band. */
+  display:flex; align-items:center; justify-content:center;
+  min-height:var(--tap); width:fit-content; margin:var(--s4) auto 0;
+  background:none; border:1px solid var(--line); border-radius:var(--r-pill); --r-focus:var(--r-pill);
+  font-family:inherit; font-size:var(--fs-ui); font-weight:600; color:var(--muted);
+  padding:var(--s2) var(--s4); cursor:pointer;
+  transition:color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+.marquee-toggle:hover{ color:var(--ink); border-color:var(--muted); }
+/* motion.js sets `toggle.hidden = true` under prefers-reduced-motion, where the
+   animation never runs and the control is meaningless. An author `display`
+   declaration beats the UA sheet's `[hidden]{display:none}` whatever their
+   specificity, so without this the button stayed visible. Pre-existing — the
+   rule above already declared `display` — but surfaced by touching it. */
+.marquee-toggle[hidden]{ display:none; }
+.marquee.is-paused .mrow{ animation-play-state:paused; }
+
 /* ===== footer ===== */
-.foot{ background:var(--ink); color:#fff; padding:74px 0 40px; text-align:center; }
+.foot{ background:var(--ink); color:#fff; padding:var(--s8) 0 var(--s7); text-align:center; }
 .foot .sh{ color:#fff; } .foot .stext{ color:rgba(255,255,255,.78); }
-.credits{ margin-top:42px; padding-top:28px; border-top:1px solid rgba(255,255,255,.12); font-size:13px; color:rgba(255,255,255,.6); } .credits b{ color:#fff; font-weight:600; }
-.fpartners{ display:flex; gap:18px; justify-content:center; align-items:center; flex-wrap:wrap; margin:14px 0; font-size:13px; color:rgba(255,255,255,.8); } .fpartners .d{ width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,.35); }
+.credits{ margin-top:var(--s7); padding-top:var(--s5); border-top:1px solid rgba(255,255,255,.12); font-size:var(--fs-meta); color:rgba(255,255,255,.6); } .credits b{ color:#fff; font-weight:600; }
+.fpartners{ display:flex; gap:var(--s4); justify-content:center; align-items:center; flex-wrap:wrap; margin:var(--s4) 0; font-size:var(--fs-meta); color:rgba(255,255,255,.8); } .fpartners .d{ width:4px; height:4px; border-radius:var(--r-dot); background:rgba(255,255,255,.35); }
 
 /* ===== entrance animation ===== */
-@keyframes rise{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
-.reveal{ opacity:0; animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
-.d1{animation-delay:.05s}.d2{animation-delay:.14s}.d3{animation-delay:.24s}.d4{animation-delay:.34s}.d5{animation-delay:.46s}.d6{animation-delay:.58s}
-@media (prefers-reduced-motion:reduce){ .reveal{ animation:none; opacity:1; } .mrow{ animation:none; } }
+/* Content is visible by default. The opacity:0 starting state only applies
+   when JS is present, so a failed script can never hide the page. */
+.reveal{ opacity:1; transform:none; }
+.js .reveal{
+  opacity:0; transform:translateY(18px);
+  transition:opacity var(--dur-3) var(--ease-enter),
+             transform var(--dur-3) var(--ease-enter);
+}
+.js .reveal.in{ opacity:1; transform:none; }
+.d1{transition-delay:.05s}.d2{transition-delay:.14s}.d3{transition-delay:.24s}
+.d4{transition-delay:.34s}.d5{transition-delay:.46s}.d6{transition-delay:.58s}
+
+@media (prefers-reduced-motion:reduce){
+  .js .reveal{ opacity:1; transform:none; transition:none; }
+  .mrow{ animation:none; }
+}
 
 /* ===== blog ===== */
-.page-head{ padding:64px 0 8px; text-align:center; }
-.bloglist{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:40px 0 96px; }
-.postcard{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:20px; overflow:hidden; background:#fff; text-decoration:none; color:inherit; transition:transform .2s ease, box-shadow .2s ease; }
-.postcard:hover{ transform:translateY(-4px); box-shadow:0 18px 40px rgba(21,18,15,.1); }
+.page-head{ padding:var(--s8) 0 var(--s2); text-align:center; }
+.bloglist{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s5); padding:var(--s7) 0 var(--s9); }
+.postcard{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:var(--r5); --r-focus:var(--r5); overflow:hidden; background:#fff; text-decoration:none; color:inherit; box-shadow:var(--sh-1); transition:box-shadow var(--dur-1) var(--ease); }
+.postcard:hover{ box-shadow:var(--sh-2); }
 .postcard .pc-top{ height:8px; background:linear-gradient(90deg,var(--red),var(--red-deep)); }
-.postcard .pc-body{ padding:26px; display:flex; flex-direction:column; gap:10px; flex:1; }
-.postcard .pc-tags{ display:flex; gap:8px; flex-wrap:wrap; }
-.tagpill{ font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; font-weight:700; color:var(--red); background:rgba(230,51,42,.08); border-radius:20px; padding:5px 11px; }
-.postcard h3{ font-size:20px; font-weight:600; letter-spacing:-.01em; line-height:1.15; }
-.postcard .pc-desc{ font-size:14px; color:var(--muted); line-height:1.55; flex:1; }
-.postcard .pc-meta{ font-size:12.5px; color:var(--muted); margin-top:6px; }
+.postcard .pc-body{ padding:var(--s6); display:flex; flex-direction:column; gap:var(--s2); flex:1; }
+.postcard .pc-tags{ display:flex; gap:var(--s2); flex-wrap:wrap; }
+.tagpill{ font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase; font-weight:700; color:var(--red-deep); background:rgba(230,51,42,.08); border-radius:var(--r-pill); padding:5px 11px; }
+.postcard h2{ font-size:var(--fs-sub); font-weight:600; letter-spacing:var(--tr-snug); line-height:var(--lh-heading); }
+.postcard .pc-desc{ font-size:var(--fs-ui); color:var(--muted); line-height:var(--lh-body); flex:1; }
+.postcard .pc-meta{ font-size:var(--fs-meta); color:var(--muted); margin-top:var(--s1); }
 
-.post{ max-width:760px; margin:0 auto; padding:60px 44px 96px; }
-.post-meta{ font-size:13px; color:var(--muted); margin-bottom:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-.post h1{ font-family:'Druk Wide Bold',sans-serif; text-transform:uppercase; font-size:clamp(28px,4.4vw,46px); line-height:.96; letter-spacing:-.01em; margin-bottom:18px; }
-.post .lede{ font-size:19px; line-height:1.55; color:var(--muted); margin-bottom:30px; }
-.prose{ font-size:16.5px; line-height:1.7; color:#262019; }
-.prose h2{ font-size:24px; font-weight:600; letter-spacing:-.01em; margin:36px 0 12px; }
-.prose h3{ font-size:19px; font-weight:600; margin:28px 0 10px; }
-.prose p{ margin:0 0 18px; }
-.prose ul,.prose ol{ margin:0 0 18px 22px; } .prose li{ margin-bottom:7px; }
-.prose a{ color:var(--red); text-decoration:underline; text-underline-offset:2px; }
-.prose blockquote{ border-left:3px solid var(--red); padding-left:18px; margin:0 0 18px; color:var(--muted); font-style:italic; }
-.prose code{ background:var(--soft); padding:2px 6px; border-radius:5px; font-size:.9em; }
-.back-link{ display:inline-block; margin-bottom:26px; font-size:13.5px; font-weight:600; color:var(--red); text-decoration:none; }
+.post{ max-width:760px; margin:0 auto; padding:var(--s8) 0 var(--s9); }
+.post-meta{ font-size:var(--fs-meta); color:var(--muted); margin-bottom:var(--s4); display:flex; gap:var(--s2); align-items:center; flex-wrap:wrap; }
+.post h1{ font-family:'Archivo','Arial Black','Helvetica Neue',sans-serif; text-transform:uppercase; font-size:clamp(var(--fs-d1),4.4vw,var(--fs-d4)); line-height:var(--lh-display); letter-spacing:var(--tr-tight); margin-bottom:var(--s4);  font-stretch:125%; font-weight:800;}
+.post .lede{ font-size:var(--fs-sub); line-height:var(--lh-body); color:var(--muted); margin-bottom:var(--s6); }
+/* 18px, not the 16.5px it replaced: .post is 760px wide, which is ~76
+   characters at 16px and ~68 at 18px — the second is inside the comfortable
+   measure, so the size bump is a line-length fix as much as a scale snap. */
+.prose{ font-size:var(--fs-lead); line-height:var(--lh-prose); color:var(--prose-ink); }
+.prose h2{ font-size:var(--fs-head); line-height:var(--lh-heading); font-weight:600; letter-spacing:var(--tr-snug); margin:var(--s6) 0 var(--s3); }
+.prose h3{ font-size:var(--fs-sub); line-height:var(--lh-heading); font-weight:600; letter-spacing:var(--tr-snug); margin:var(--s5) 0 var(--s2); }
+.prose p{ margin:0 0 var(--s4); }
+.prose ul,.prose ol{ margin:0 0 var(--s4) var(--s5); } .prose li{ margin-bottom:var(--s1); }
+.prose a{ color:var(--red-deep); text-decoration:underline; text-underline-offset:2px; }
+.prose blockquote{ border-left:3px solid var(--red-deep); padding-left:var(--s4); margin:0 0 var(--s4); color:var(--muted); font-style:italic; }
+/* .9em is kept on purpose: it is a *relative* optical correction (monospace
+   runs large next to Inter), so it tracks the prose size instead of pinning
+   another absolute size into the sheet. */
+.prose code{ background:var(--soft); padding:2px 6px; border-radius:var(--r1); font-size:.9em; }
+/* WCAG 2.2 AA 2.5.8. "← All posts" was a ~19px-tall lone link — not a link in
+   a sentence, so the inline exception does not apply. It stands alone above the
+   article with nothing beside it, so it takes the full 44px rather than the
+   floor. The bottom margin drops a step to compensate: the flex centring
+   already contributes ~13px of clear space below the text, so --s3 + that ≈ the
+   24px gap the old --s5 gave. */
+.back-link{ display:inline-flex; align-items:center; min-height:var(--tap); margin-bottom:var(--s3); font-size:var(--fs-ui); font-weight:600; color:var(--red-deep); text-decoration:none; }
 
 /* ===== responsive ===== */
 @media (max-width:880px){
-  .navlinks{ display:none; }
   .pillars,.fgrid,.statstrip,.split,.bloglist{ grid-template-columns:1fr; }
-  .wrap{ padding:0 24px; }
+  .wrap{ padding:0 var(--s5); }
 }

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>SiteSeer — content</title>
+  </head>
+  <body>
+    <!--
+      Verified against sveltia-cms's own docs (sveltiacms.app/en/docs/start) on
+      2026-08-25: a plain (non-module) script tag from unpkg, unpinned, is
+      still upstream's own recommended snippet — no CSS link needed, and
+      `type="module"` is explicitly discouraged there because it can break
+      the CMS's JS API.
+
+      The URL is intentionally unpinned ("latest"), matching upstream's own
+      example. That is a tradeoff, not an oversight: it means the author
+      always gets the newest release with no separate upgrade step, but it
+      also means the CMS's UI/behaviour can change under them without
+      warning, outside this repo's control. Pin to a specific version
+      (e.g. .../@sveltia/cms@<version>/dist/sveltia-cms.js) if that
+      unannounced-change risk ever becomes a problem in practice.
+    -->
+    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+  </body>
+</html>
