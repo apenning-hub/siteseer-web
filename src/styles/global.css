@@ -6,6 +6,9 @@
   --red:#e6332a;
   /* Accessible red. Passes AA at body size on paper and as a button ground. */
   --red-deep:#c5271f;
+  /* Red on --ink. --red is 4.33:1 there; this is the nearest lift that clears
+     4.5 for small bold text (4.71:1). Reads as the same red on a dark band. */
+  --red-on-ink:#e8433b;
 
   /* Red band gradient. Every stop is dark enough for opaque white body text to
      pass AA (≤ 0.1833 luminance), and the stops darken monotonically, so
@@ -324,7 +327,7 @@ picture{ display:contents; }
 /* ===== chips ===== */
 .chips{ display:flex; gap:var(--s3); justify-content:center; flex-wrap:wrap; margin-top:var(--s5); }
 .chip{ border:1px solid var(--line); background:#fff; border-radius:var(--r-pill); padding:var(--s2) var(--s4); font-size:var(--fs-ui); font-weight:600; display:flex; align-items:center; gap:var(--s1); }
-.chip.soon{ opacity:.6; } .chip .tag{ font-size:var(--fs-micro); color:var(--red-deep); font-weight:700; }
+.chip.soon{ color:var(--muted); } .chip .tag{ font-size:var(--fs-micro); color:var(--red-deep); font-weight:700; }
 
 /* ===== feature grids ===== */
 .framed{ border-radius:var(--r4); overflow:hidden; border:1px solid var(--line); box-shadow:var(--sh-3); } .framed img{ display:block; width:100%; height:auto; }
@@ -421,7 +424,7 @@ picture{ display:contents; }
 .postcard .pc-body{ padding:var(--s6); display:flex; flex-direction:column; gap:var(--s2); flex:1; }
 .postcard .pc-tags{ display:flex; gap:var(--s2); flex-wrap:wrap; }
 .tagpill{ font-size:var(--fs-micro); letter-spacing:var(--tr-wide); text-transform:uppercase; font-weight:700; color:var(--red-deep); background:rgba(230,51,42,.08); border-radius:var(--r-pill); padding:5px 11px; }
-.postcard h3{ font-size:var(--fs-sub); font-weight:600; letter-spacing:var(--tr-snug); line-height:var(--lh-heading); }
+.postcard h2{ font-size:var(--fs-sub); font-weight:600; letter-spacing:var(--tr-snug); line-height:var(--lh-heading); }
 .postcard .pc-desc{ font-size:var(--fs-ui); color:var(--muted); line-height:var(--lh-body); flex:1; }
 .postcard .pc-meta{ font-size:var(--fs-meta); color:var(--muted); margin-top:var(--s1); }
 

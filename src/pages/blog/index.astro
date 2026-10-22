@@ -25,7 +25,7 @@ const base = import.meta.env.BASE_URL;
             <div class="pc-top"></div>
             <div class="pc-body">
               <div class="pc-tags">{post.data.tags.slice(0, 2).map((t) => <span class="tagpill">{t}</span>)}</div>
-              <h3>{post.data.title}</h3>
+              <h2>{post.data.title}</h2>
               <p class="pc-desc">{post.data.description}</p>
               <div class="pc-meta">{fmt(post.data.pubDate)} · {post.data.author}</div>
             </div>

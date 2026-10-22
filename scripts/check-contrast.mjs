@@ -132,14 +132,14 @@ function countRules(css) {
  *     which is `rgba(230,51,42,.08)` — i.e. `--red` at 8% composited over
  *     the white `.postcard` behind it, not over `--paper` directly. FAILS at
  *     3.85:1 — the tint is so faint it barely helps.
- *   - `.chip.soon`    — asked for by the coordinator. `opacity:.6` on the
- *     whole element composites BOTH the chip's own white background and its
- *     ink text independently over whatever is behind the whole component
- *     (assumed `--paper`: `.chips` isn't nested in any band section in this
- *     file). This is a different shape from every alpha row above, where
- *     only the foreground is translucent — here the local "background" the
- *     text sits on is itself a blend, not a flat colour, so it needs its own
- *     two-step composite (see `compute()` below).
+ *   - `.chip.soon`    — asked for by the coordinator. It used `opacity:.6`
+ *     on the whole element, which this file modelled for the ink text but
+ *     not for the nested `.tag`, faded to 2.90:1 — axe caught it, this table
+ *     didn't. The chip now sets `color:var(--muted)` instead, so the label and
+ *     the `.tag` inside it are both plain pairs on the chip's white ground.
+ *   - `#demo .eyebrow` — overridden inline in index.astro to `--red-on-ink`
+ *     on the `--ink` band. Inline styles are invisible to the stylesheet
+ *     parser, so this row is the only thing that checks it.
  *   - `.eyebrow (on band-ink)` — `.band-ink .eyebrow,.band-red .eyebrow`
  *     sets white/.85 (not `--red-deep`) when `.eyebrow` sits on a band. Only
  *     the `--ink` variant is computable today (`--band-red-light` doesn't
@@ -214,18 +214,9 @@ const PAIRS = [
       return { fg: redDeep, bg: blend(red, white, 0.08) };
     },
   },
-  {
-    // `opacity:.6` on the whole `.chip.soon` element composites both its own
-    // white background AND its ink text independently over whatever's truly
-    // behind the component (assumed --paper — see comment block above).
-    label: '.chip.soon', px: 14, bold: true,
-    compute(tokens) {
-      const ink = resolveSimple('--ink', tokens);
-      const white = resolveSimple('#ffffff', tokens);
-      const paper = resolveSimple('--paper', tokens);
-      return { fg: blend(ink, paper, 0.6), bg: blend(white, paper, 0.6) };
-    },
-  },
+  { label: '.chip.soon',              fg: '--muted',       bg: '#ffffff',  px: 14, bold: true },
+  { label: '.chip.soon .tag',         fg: '--red-deep',    bg: '#ffffff',  px: 11, bold: true },
+  { label: '#demo .eyebrow',          fg: '--red-on-ink',  bg: '--ink',    px: 11, bold: true },
 ];
 
 /** Resolve a pair's colour spec (a `--token` name or a literal `#hex`) to RGB. */
