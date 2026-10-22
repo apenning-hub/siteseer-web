@@ -20,6 +20,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <!-- BETA ONLY. A beta subdomain serving near-identical copy would compete
+         with siteseer.education in search. Remove this line and public/robots.txt
+         when promoting to the main domain — spec §9. -->
+    <meta name="robots" content="noindex, nofollow" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Crect width='34' height='34' rx='9' fill='%23e6332a'/%3E%3Cpath d='M8 16.5 L17 9 L26 16.5' stroke='%23fff' stroke-width='2.4' fill='none' stroke-linejoin='round'/%3E%3Cline x1='10.5' y1='21.2' x2='23.5' y2='21.2' stroke='%23fff' stroke-width='2.4'/%3E%3Cline x1='10.5' y1='25.6' x2='23.5' y2='25.6' stroke='%23fff' stroke-width='2.4'/%3E%3C/svg%3E" />
     <meta property="og:type" content="website" />
