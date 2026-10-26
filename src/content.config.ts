@@ -72,7 +72,9 @@ const sites = defineCollection({
     }),
     team: z.object({
       heading: z.string(), lede: z.string(),
-      members: z.array(z.object({ name: z.string(), role: z.string(), text: z.string() })),
+      // The mix of fields the team brings, shown above the people.
+      expertise: z.array(point),
+      groups: z.array(z.object({ title: z.string(), members: z.array(z.object({ name: z.string(), role: z.string(), text: z.string() })) })),
     }).optional(),
     partners: z.object({ heading: z.string(), order: z.array(z.string()).min(1) }),
     contact: z.object({

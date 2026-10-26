@@ -320,9 +320,14 @@ html:not(.js) .rv{ opacity:1; transform:none; }
 .partner p{ font-size:var(--fs-ui); line-height:1.5; color:var(--card-ink); }
 
 /* Research team */
-.people{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:var(--s4); margin-top:var(--s7); }
+/* The three fields the team spans: the point of the section, so they lead. */
+.expertise{ list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:var(--s4); margin-top:var(--s7); }
+.expertise li{ border-top:3px solid var(--red); padding-top:var(--s4); }
+.expertise b{ display:block; font:800 var(--fs-sub)/1.15 var(--font-display); text-transform:uppercase; margin-bottom:var(--s2); }
+.expertise span{ font-size:var(--fs-body); line-height:1.55; color:var(--card-ink); }
+.people{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:var(--s4); }
 .person{ background:#fff; border-radius:var(--r6); padding:var(--s5) var(--s6); box-shadow:var(--sh-1); }
-.person h3{ font:700 var(--fs-sub)/1.25 Inter, sans-serif; }
+.person h4{ font:700 var(--fs-sub)/1.25 Inter, sans-serif; }
 .person .role{ font:600 var(--fs-ui) Inter, sans-serif; color:var(--muted); margin:var(--s1) 0 var(--s3); }
 .person p:last-child{ font-size:var(--fs-body); line-height:1.55; color:var(--card-ink); }
 

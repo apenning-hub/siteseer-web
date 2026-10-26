@@ -467,21 +467,34 @@ collections:
                 collapsed: true
                 fields: *a1
           - name: team
-            label: Research team
+            label: Team
             widget: object
             collapsed: true
             required: false
             fields:
               - { name: heading, label: Heading, widget: string }
               - { name: lede, label: Intro, widget: text }
-              - name: members
-                label: People
+              - name: expertise
+                label: Areas of expertise
                 widget: list
                 collapsed: true
                 fields:
-                  - { name: name, label: Name, widget: string }
-                  - { name: role, label: Role, widget: string }
-                  - { name: text, label: What they do, widget: text }
+                  - { name: title, label: Title, widget: string }
+                  - { name: text, label: Text, widget: text }
+              - name: groups
+                label: Groups
+                widget: list
+                collapsed: true
+                fields:
+                  - { name: title, label: Group title, widget: string }
+                  - name: members
+                    label: People
+                    widget: list
+                    collapsed: true
+                    fields:
+                      - { name: name, label: Name, widget: string }
+                      - { name: role, label: Role, widget: string }
+                      - { name: text, label: What they do, widget: text }
           - name: partners
             label: Partners
             widget: object

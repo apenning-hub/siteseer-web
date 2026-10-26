@@ -308,18 +308,52 @@
     ]
   },
   "team": {
-    "heading": "The people behind it.",
-    "lede": "SiteSeer comes out of construction and architecture teaching research.",
-    "members": [
+    "heading": "Construction, education and game technology, in one team.",
+    "lede": "SiteSeer grew out of construction-learning research at Adelaide University. It brings together people who know how buildings go together, how people learn, and how to build real-time 3D worlds. That mix is rare, and it's what SiteSeer is made of.",
+    "expertise": [
       {
-        "name": "Associate Professor Damian Madigan",
-        "role": "Initial modelling and learning material",
-        "text": "Built the first SiteSeer models and wrote the learning material they teach with, and uses SiteSeer in his own classes and lectures."
+        "title": "Construction",
+        "text": "Architecture and construction expertise: how a building is detailed, sequenced and built."
       },
       {
-        "name": "Andrew Lymn-Penning",
-        "role": "Lecturer in Architecture, Adelaide University",
-        "text": "Researches how construction is learned, and leads SiteSeer's research and development."
+        "title": "Education",
+        "text": "Years of teaching construction, and research into how it is learned best."
+      },
+      {
+        "title": "Digital technology and gamification",
+        "text": "Real-time 3D in Unreal Engine, and learning designed to work the way a game does."
+      }
+    ],
+    "groups": [
+      {
+        "title": "Founders",
+        "members": [
+          {
+            "name": "Sean Pickersgill",
+            "role": "Founder",
+            "text": "Founded SiteSeer and leads the company."
+          },
+          {
+            "name": "Darcy Holmes",
+            "role": "Co-founder and Technical Artist",
+            "text": "Builds the SiteSeer environments in Unreal Engine."
+          }
+        ]
+      },
+      {
+        "title": "Research team, Adelaide University",
+        "members": [
+          {
+            "name": "Associate Professor Damian Madigan",
+            "role": "Adelaide University",
+            "text": "Built the first SiteSeer models and wrote the learning material they teach with, and uses SiteSeer in his own classes and lectures."
+          },
+          {
+            "name": "Andrew Lymn-Penning",
+            "role": "Lecturer in Architecture, Adelaide University",
+            "text": "Researches how construction is learned, and leads SiteSeer's research and development."
+          }
+        ]
       }
     ]
   },
