@@ -31,6 +31,7 @@ const ALLOWED_RAW = new Map([
  */
 const ALLOWED_TOKENS = new Map([
   ['--band-y', 'fluid band rhythm — clamp() between --s7 (48px) and --s9 (96px)'],
+  ['--gut', 'fluid page gutter — clamp() from 16px on phones (the 16px gutter floor) to 72px'],
 ]);
 
 const SPACING_PROPS =['padding', 'margin', 'gap', 'row-gap', 'column-gap'];
