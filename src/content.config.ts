@@ -35,7 +35,9 @@ const heroStep = z.object({
   kind: z.enum(['build', 'focus', 'inspect', 'pull', 'finale']),
   cam: z.object({ t: vec3, az: z.number(), polar: z.number(), r: z.number() }),
   hold: z.number().optional(),
-  focus: z.number().int().min(1).max(12).optional(),
+  // How the model looks during the step, changing at t ms: the white model,
+  // building-system colours, or an x-ray with `focus` layers held solid.
+  looks: z.array(z.object({ t: z.number(), look: z.enum(['white', 'systems', 'xray']), focus: z.array(z.number().int()).optional() })).optional(),
   inspect: z.array(z.object({ at: vec3, kicker: z.string(), title: z.string(), text: z.string() })).optional(),
   pulls: z.array(z.object({
     t: z.number(), dur: z.number(), layers: z.array(z.number().int()), dv: z.tuple([z.number(), z.number()]),
@@ -68,6 +70,10 @@ const sites = defineCollection({
       stats: z.array(z.object({ num: z.string(), suffix: z.string().optional(), cap: z.string() })),
       outcomes: z.array(point),
     }),
+    team: z.object({
+      eyebrow: z.string(), heading: z.string(), lede: z.string(),
+      members: z.array(z.object({ name: z.string(), role: z.string(), text: z.string() })),
+    }).optional(),
     partners: z.object({ eyebrow: z.string(), heading: z.string(), order: z.array(z.string()).min(1) }),
     contact: z.object({
       eyebrow: z.string(), heading: z.string(), lede: z.string(), email: z.string().email(),

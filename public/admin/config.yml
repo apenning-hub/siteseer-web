@@ -218,11 +218,20 @@ collections:
                     widget: number
                     value_type: int
                     required: false
-                  - name: focus
-                    label: Highlight layer (1–12)
-                    widget: number
-                    value_type: int
+                  - name: looks
+                    label: How the model looks
+                    widget: list
+                    collapsed: true
                     required: false
+                    hint: Changes during the step, at a time in ms. White model, building-system colours, or x-ray with some layers held solid.
+                    fields:
+                      - { name: t, label: From (ms), widget: number, value_type: int }
+                      - { name: look, label: Look, widget: select, options: [white, systems, xray] }
+                      - name: focus
+                        label: Layers held solid in x-ray (1–12)
+                        widget: list
+                        required: false
+                        field: { name: n, label: Layer, widget: number, value_type: int }
                   - name: inspect
                     label: Inspection points
                     widget: list
@@ -472,6 +481,23 @@ collections:
                 widget: list
                 collapsed: true
                 fields: *a1
+          - name: team
+            label: Research team
+            widget: object
+            collapsed: true
+            required: false
+            fields:
+              - { name: eyebrow, label: Eyebrow, widget: string }
+              - { name: heading, label: Heading, widget: string }
+              - { name: lede, label: Intro, widget: text }
+              - name: members
+                label: People
+                widget: list
+                collapsed: true
+                fields:
+                  - { name: name, label: Name, widget: string }
+                  - { name: role, label: Role, widget: string }
+                  - { name: text, label: What they do, widget: text }
           - name: partners
             label: Partners
             widget: object

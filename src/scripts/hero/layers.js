@@ -9,8 +9,8 @@ import { systemOf } from './systems.js';
 // wherever the exporter nests it. See tools/models/README.md.
 const LAYER = /^L(\d\d)_(?!pin$)/;
 const METAL = new Set([2, 3, 4, 7, 12]);
-// When one layer is picked out, everything else steps back to Apple's systemGray5.
-const RECEDE = new THREE.Color(0xe5e5ea);
+// The layers held solid in the x-ray look: the logo red.
+const HELD = new THREE.Color(0xff0000);
 // Construction order for the build-up (layer numbers).
 export const ORDER = [2, 6, 3, 1, 4, 5, 7, 11, 12, 8, 10, 9];
 
@@ -48,47 +48,80 @@ export function createLayers(root) {
       const work = real.clone();
       o.userData = {
         real, glass, mix: withTextureMix(work), baseOpacity: real.opacity,
-        // The "systems" look: each layer in its building system's colour.
-        // The finale blends from this to the real, textured material.
-        clay: {
-          color: new THREE.Color(systemOf(n)?.color ?? '#c7c7cc'),
-          roughness: glass ? 0.1 : metal ? 0.4 : 0.6,
-          metalness: metal ? 0.15 : 0,
-        },
+        // Three looks the model moves between (see setLook):
+        //   white   - the plain presentation model
+        //   systems - each layer in its building system's colour
+        //   xray    - everything ghosted except the layers being shown
+        white: new THREE.Color(glass ? 0xdfe8ea : metal ? 0xc4bfb8 : 0xebe5dd),
+        system: new THREE.Color(systemOf(n)?.color ?? '#c7c7cc'),
+        roughness: glass ? 0.1 : metal ? 0.4 : 0.7,
+        metalness: metal ? 0.15 : 0,
+        target: new THREE.Color(),
       };
+      o.userData.target.copy(o.userData.white);
+      work.color.copy(o.userData.white);
+      work.roughness = o.userData.roughness;
+      work.metalness = o.userData.metalness;
+      work.normalScale.setScalar(0);
+      o.userData.mix.value = 0;
       o.material = work;
       L.meshes.push(o);
     });
+    L.xr = 0; L.xrTo = 0; L.k = 1;
   }
   const each = (fn) => { for (const [n, L] of layers.entries()) if (L) fn(L, n); };
 
-  // System colours everywhere; with a focus layer, the rest recede to grey.
-  function paint(focus) {
+  // The look eases in over a moment rather than snapping.
+  function setLook(look, focus = [], instant = false) {
     each((L, n) => {
+      const held = focus.includes(n);
+      L.xrTo = look === 'xray' && !held ? 1 : 0;
       for (const m of L.meshes) {
-        const { clay, mix } = m.userData;
-        const recede = focus && n !== focus;
-        m.material.color.copy(recede ? RECEDE : clay.color);
-        m.material.roughness = clay.roughness;
-        m.material.metalness = clay.metalness;
-        m.material.normalScale.setScalar(0);
-        mix.value = 0;
+        const u = m.userData;
+        u.target.copy(look === 'systems' ? u.system : look === 'xray' && held ? HELD : u.white);
+        if (instant) m.material.color.copy(u.target);
+      }
+      if (instant) L.xr = L.xrTo;
+      apply(L);
+    });
+  }
+  function stepLook(dt) {
+    const k = Math.min(1, dt * 0.005);
+    each((L) => {
+      for (const m of L.meshes) m.material.color.lerp(m.userData.target, k);
+      if (L.xr !== L.xrTo) {
+        L.xr += (L.xrTo - L.xr) * k;
+        if (Math.abs(L.xrTo - L.xr) < 0.002) L.xr = L.xrTo;
+        apply(L);
       }
     });
   }
 
-  // 0 = clay, 1 = the real textured material.
+  // 0 = the white model, 1 = the real textured material (the finale).
   function lerpReal(k) {
     each((L) => {
       for (const m of L.meshes) {
-        const { clay, real, mix } = m.userData;
-        m.material.color.copy(clay.color).lerp(real.color, k);
-        m.material.roughness = THREE.MathUtils.lerp(clay.roughness, real.roughness, k);
-        m.material.metalness = THREE.MathUtils.lerp(clay.metalness, real.metalness, k);
+        const u = m.userData;
+        m.material.color.copy(u.white).lerp(u.real.color, k);
+        u.target.copy(m.material.color);
+        m.material.roughness = THREE.MathUtils.lerp(u.roughness, u.real.roughness, k);
+        m.material.metalness = THREE.MathUtils.lerp(u.metalness, u.real.metalness, k);
         m.material.normalScale.setScalar(k);
-        mix.value = k;
+        u.mix.value = k;
       }
     });
+  }
+
+  // Opacity is the build-up (k) times the x-ray ghosting (xr).
+  function apply(L) {
+    const ghost = 1 - 0.9 * L.xr;
+    for (const m of L.meshes) {
+      const op = m.userData.baseOpacity * L.k * ghost;
+      m.material.transparent = m.userData.glass || op < 0.999;
+      m.material.opacity = op;
+      m.material.depthWrite = L.xr < 0.05;
+      m.castShadow = L.k > 0.5 && L.xr < 0.5;
+    }
   }
 
   // k = 0 hidden above its place, 1 landed.
@@ -98,11 +131,7 @@ export function createLayers(root) {
     L.node.position.y = L.baseY + (1 - k) * 0.7;
     L.node.visible = k > 0.001;
     L.k = k;
-    for (const m of L.meshes) {
-      m.material.transparent = m.userData.glass || k < 1;
-      m.material.opacity = m.userData.baseOpacity * k;
-      m.castShadow = k > 0.5;
-    }
+    apply(L);
   }
   const setAll = (k) => ORDER.forEach((n) => setLayer(n, k));
 
@@ -143,5 +172,5 @@ export function createLayers(root) {
   // Has this layer landed (mostly) during a build-up?
   const landed = (n) => (layers[n]?.k ?? 1) > 0.5;
 
-  return { paint, lerpReal, startBuild, stepBuild, finishBuild, stepPulls, isOut, landed };
+  return { setLook, stepLook, lerpReal, startBuild, stepBuild, finishBuild, stepPulls, isOut, landed };
 }

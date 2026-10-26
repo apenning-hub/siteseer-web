@@ -27,23 +27,56 @@
           "az": -30,
           "polar": 76,
           "r": 6.4
-        }
+        },
+        "hold": 7200,
+        "looks": [
+          {
+            "t": 0,
+            "look": "white"
+          },
+          {
+            "t": 3600,
+            "look": "systems"
+          }
+        ]
       },
       {
         "word": "Accurate",
         "line": "Matched 1-to-1 with what gets built.",
-        "kind": "focus",
+        "kind": "inspect",
         "cam": {
           "t": [
-            0.4,
-            1.35,
+            0.2,
+            1.1,
             0.2
           ],
-          "az": -40,
-          "polar": 70,
-          "r": 5.4
+          "az": -34,
+          "polar": 74,
+          "r": 5.2
         },
-        "focus": 4
+        "hold": 6000,
+        "looks": [
+          {
+            "t": 0,
+            "look": "xray",
+            "focus": [
+              4,
+              12
+            ]
+          }
+        ],
+        "inspect": [
+          {
+            "at": [
+              0.3,
+              0.69,
+              0.27
+            ],
+            "kicker": "Hidden in the wall",
+            "title": "Cavity tray flashing",
+            "text": "Under the sill and over the lintel, flashings catch water in the cavity and send it out through the weep holes. Once the brick is laid, you never see them."
+          }
+        ]
       },
       {
         "word": "Clear",
@@ -60,7 +93,6 @@
           "r": 4.0
         },
         "hold": 6000,
-        "focus": 4,
         "inspect": [
           {
             "at": [
@@ -291,6 +323,23 @@
       {
         "title": "One place to look.",
         "text": "The question, the element and the stage, together."
+      }
+    ]
+  },
+  "team": {
+    "eyebrow": "Research team",
+    "heading": "The people behind it.",
+    "lede": "SiteSeer comes out of construction and architecture teaching research.",
+    "members": [
+      {
+        "name": "Associate Professor Damian Madigan",
+        "role": "Initial modelling and learning material",
+        "text": "Built the first SiteSeer models and wrote the learning material they teach with, and uses SiteSeer in his own classes and lectures."
+      },
+      {
+        "name": "Andrew Lymn-Penning",
+        "role": "Lecturer in Architecture, Adelaide University",
+        "text": "Researches how construction is learned, and leads SiteSeer's research and development."
       }
     ]
   },

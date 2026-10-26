@@ -9,6 +9,7 @@ import UseCases from '../components/UseCases.astro';
 import WhereItRuns from '../components/WhereItRuns.astro';
 import Results from '../components/Results.astro';
 import Partners from '../components/Partners.astro';
+import Team from '../components/Team.astro';
 import Contact from '../components/Contact.astro';
 import Upcoming from '../components/Upcoming.astro';
 import { getEntry } from 'astro:content';
@@ -30,6 +31,7 @@ const alt = () => n++ % 2 === 0;
   {site.uses && <UseCases uses={site.uses} alt={alt()} />}
   <WhereItRuns access={site.access} alt={alt()} />
   <Results results={site.results} alt={alt()} />
+  {site.team && <Team team={site.team} alt={alt()} />}
   <Partners partners={site.partners} alt={alt()} />
   <Contact contact={site.contact} alt={alt()} />
   <Upcoming upcoming={site.upcoming} alt={alt()} />

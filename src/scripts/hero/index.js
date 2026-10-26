@@ -28,11 +28,14 @@ export async function mountHero(hero) {
   S.scene.add(gltf.scene);
   sharpenTextures(gltf.scene, S.renderer);
   const L = createLayers(gltf.scene);
-  L.paint();
+  L.setLook('white', [], true);
   const site = createSite(loader, hero.dataset.site, S);
   const overlay = createOverlay({ hero, toScreen: S.toScreen, layers: L });
 
   let step = -1, stepStart = 0, elapsed = 0, playing = false, dragging = false;
+  let look = null;
+  // A step's look can change part-way through: `looks` is [{ t, look, focus }].
+  const lookAt = (s, t) => (s.looks ?? []).findLast((l) => t >= l.t) ?? { look: 'white' };
   let idle = null, toReal = null;
 
   function go(i) {
@@ -45,7 +48,7 @@ export async function mountHero(hero) {
       p.setAttribute('aria-current', String(k === i));
       p.querySelector('b').style.width = k < i ? '100%' : '0';
     });
-    L.paint(s.focus);
+    look = null; // re-evaluated on the next frame
     toReal = null;
     const finale = s.kind === 'finale';
     // The finale keeps the wall where it is: it turns real and the site appears beneath it.
@@ -123,6 +126,12 @@ export async function mountHero(hero) {
       pills[step].querySelector('b').style.width = `${(at.t / seq.holdOf(step)) * 100}%`;
       if (at.done) setPlaying(false);
     }
+    const want = lookAt(steps[step], reduce ? Infinity : now - stepStart);
+    if (want !== look && steps[step].kind !== 'finale') {
+      look = want;
+      L.setLook(want.look, want.focus ?? [], reduce);
+    }
+    L.stepLook(dt);
     L.stepBuild(now);
     site.step(now);
     if (toReal) {
@@ -131,7 +140,7 @@ export async function mountHero(hero) {
       if (k === 1) toReal = null;
     }
     if (!dragging) S.tickCamera(now, dt, playing);
-    overlay.update(steps[step], now - stepStart, !S.tweening() && !dragging && !reduce, dt);
+    overlay.update(steps[step], now - stepStart, !S.tweening() && !dragging && !reduce, dt, look?.look);
     S.controls.update();
     S.render();
     if (++frames === 3) {
