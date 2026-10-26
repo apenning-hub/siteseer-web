@@ -1,21 +1,21 @@
 {
   "draft": true,
   "meta": {
-    "title": "SiteSeer for industry: the building, at every stage",
-    "description": "One 3D model of the building at every stage, for RFIs, defects, limitations and inductions."
+    "title": "SiteSeer for industry: train your team on the building first",
+    "description": "RFIs and defects cost the industry time and money. SiteSeer trains your team on the actual building in 3D, at every stage, before they build it."
   },
   "nav": {
     "cta": "Book a walkthrough"
   },
   "hero": {
     "kicker": "SiteSeer Building Information",
-    "statement": "RFIs and defects, pinned to the 3D model at the stage they happen. SiteSeer shows the building at every stage, from footings to fit-out, so everyone looks at the same element.",
+    "statement": "Train your team on the building before they build it. RFIs and defects cost time and money; SiteSeer shows every stage in 3D, matched 1-to-1 with what gets built.",
     "primary": "Book a walkthrough",
     "secondary": "See how it works",
     "steps": [
       {
         "word": "Fast",
-        "line": "Find the detail in seconds, at the stage it matters.",
+        "line": "Every stage of the build, in a click.",
         "kind": "build",
         "cam": {
           "t": [
@@ -30,7 +30,7 @@
       },
       {
         "word": "Accurate",
-        "line": "Modelled to the last flashing.",
+        "line": "Matched 1-to-1 with what gets built.",
         "kind": "focus",
         "cam": {
           "t": [
@@ -46,7 +46,7 @@
       },
       {
         "word": "Clear",
-        "line": "Raise an RFI against the exact element.",
+        "line": "Understand the detail before it becomes an RFI.",
         "kind": "inspect",
         "cam": {
           "t": [
@@ -67,9 +67,9 @@
               1.745,
               0.27
             ],
-            "kicker": "RFI 014 · Open",
+            "kicker": "Common RFI",
             "title": "Lintel bearing",
-            "text": "Confirm the minimum bearing each side of the opening for the paired angle lintel."
+            "text": "How far does the lintel bear each side of the opening? Answered on the model, before anyone has to ask."
           },
           {
             "at": [
@@ -77,15 +77,15 @@
               1.84,
               0.27
             ],
-            "kicker": "RFI 015 · Answered",
+            "kicker": "Common RFI",
             "title": "Weep holes over the head",
-            "text": "Weep holes in the course above the lintel, at the same spacing as the base course."
+            "text": "Where do the weep holes go above a window? Shown in place, in the course above the lintel."
           }
         ]
       },
       {
         "word": "Traceable",
-        "line": "Walk a defect back to where it started.",
+        "line": "See where a defect starts, and how to avoid it.",
         "kind": "pull",
         "cam": {
           "t": [
@@ -110,9 +110,9 @@
               -0.95,
               0.35
             ],
-            "kicker": "Defect · Damp at the sill",
+            "kicker": "Common defect · Damp at the sill",
             "title": "Cavity tray lap",
-            "text": "With the veneer pulled back, check the tray flashing laps and drains to the weep holes.",
+            "text": "With the veneer pulled back, see how the tray flashing should lap and drain to the weep holes.",
             "refs": "AS 4773 · AS/NZS 2904"
           },
           {
@@ -136,7 +136,7 @@
       },
       {
         "word": "Immersive",
-        "line": "The whole site, before anyone sets foot on it.",
+        "line": "Walk the site before day one.",
         "kind": "finale",
         "cam": {
           "t": [
@@ -153,20 +153,20 @@
   },
   "problem": {
     "eyebrow": "The problem",
-    "heading": "Drawings don't show the sequence.",
-    "lede": "Questions about a detail usually arrive as a marked-up PDF and an email thread, after the moment they mattered. SiteSeer puts the building, at every stage, in front of everyone who needs to see it.",
+    "heading": "RFIs and defects are expensive.",
+    "lede": "Most start with someone on site not understanding how a detail goes together, because drawings don't show the sequence. SiteSeer trains your team on the actual building, at every stage, before they build it.",
     "points": [
       {
-        "title": "RFIs without the back-and-forth.",
-        "text": "Point at the element itself, at the stage it is built, instead of describing it."
+        "title": "Fewer RFIs.",
+        "text": "Staff see the detail in 3D, at the stage it is built, before they need to ask."
       },
       {
-        "title": "Defects traced to their cause.",
-        "text": "Step back through the build to see what was covered up, and when."
+        "title": "Fewer defects.",
+        "text": "They see what gets covered up, and what it relies on, before it is covered."
       },
       {
-        "title": "Design constraints written down.",
-        "text": "Record what a detail can't do against the model, where the next person will find it."
+        "title": "Confidence on site.",
+        "text": "The model matches 1-to-1 with what gets built, so what they learned is what they will find."
       }
     ],
     "image": "render-63.jpg",
@@ -179,16 +179,16 @@
     "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
     "points": [
       {
-        "title": "Pick a stage.",
-        "text": "Footings, frame, lock-up or fit-out. The building waits at that point while you look around it."
+        "title": "We build the staged model.",
+        "text": "From your architectural or shop-drawing models, or as a custom build by our team."
       },
       {
-        "title": "Peel back the layers.",
-        "text": "Turn layers on and off to see the frame, the cavity and the flashings behind the finish."
+        "title": "Your team walks it.",
+        "text": "Every stage, in real time, on the machines they already use."
       },
       {
-        "title": "Pin it to the element.",
-        "text": "Questions, defects and notes sit on the model, at the stage they belong to."
+        "title": "Inspection points explain it.",
+        "text": "What each detail is, what it relies on, and where it tends to go wrong."
       }
     ],
     "strip": [
@@ -210,29 +210,29 @@
     ]
   },
   "uses": {
-    "eyebrow": "Use cases",
-    "heading": "One model for the questions a site raises.",
-    "lede": "Everyone looks at the same element, at the same stage.",
+    "eyebrow": "What your team gets",
+    "heading": "Training on the building they're about to build.",
+    "lede": "Not a generic course: your project, at every stage.",
     "items": [
-      {
-        "tag": "RFIs",
-        "title": "Ask about the exact element.",
-        "text": "Pin a question to the element at the stage it is built, so everyone answers the same thing."
-      },
-      {
-        "tag": "Defects",
-        "title": "Trace it back.",
-        "text": "Walk a defect back through the stages to where it started, and what covered it up."
-      },
-      {
-        "tag": "Design constraints",
-        "title": "Write down what it relies on.",
-        "text": "Record a detail's constraints against the model, where the next trade will see them."
-      },
       {
         "tag": "Inductions",
         "title": "Walk the site before day one.",
-        "text": "Take new crews through the site and its hazards before they arrive."
+        "text": "New crews see the site, the sequence and the hazards before they arrive."
+      },
+      {
+        "tag": "Detail walkthroughs",
+        "title": "Layer by layer.",
+        "text": "Each tricky detail taken apart and put back together, in the order it is built."
+      },
+      {
+        "tag": "Defect prevention",
+        "title": "Where it goes wrong.",
+        "text": "Common defects shown where they happen, with what prevents them."
+      },
+      {
+        "tag": "Design constraints",
+        "title": "What a detail relies on.",
+        "text": "Recorded against the model, where the next trade will see it."
       }
     ]
   },
@@ -308,7 +308,7 @@
   "contact": {
     "eyebrow": "Your project",
     "heading": "See it on your build.",
-    "lede": "Book a walkthrough, or talk to us about piloting SiteSeer on a live project.",
+    "lede": "Book a walkthrough, or talk to us about training your team on a live project.",
     "email": "sean.pickersgill@adelaide.edu.au",
     "primary": {
       "label": "Book a walkthrough",
@@ -324,36 +324,32 @@
     "intro": "SiteSeer is continuously evolving. These are the features we're building for project teams.",
     "groups": [
       {
+        "title": "Bringing models in",
+        "items": [
+          {
+            "title": "IFC and Revit import",
+            "text": "Bring a model straight in from your BIM software."
+          },
+          {
+            "title": "Shop-drawing models",
+            "text": "Staged models from fabricators' shop drawings."
+          }
+        ]
+      },
+      {
         "title": "For project teams",
         "items": [
+          {
+            "title": "Drawing markup",
+            "text": "Mark up drawings and shop drawings against the 3D model."
+          },
           {
             "title": "Real-time collaboration",
             "text": "Walk the model together, from different places."
           },
           {
             "title": "Detailed reporting",
-            "text": "Export RFIs, defects and notes as a report."
-          },
-          {
-            "title": "Analytics dashboard",
-            "text": "Open items across the project, at a glance."
-          }
-        ]
-      },
-      {
-        "title": "On site",
-        "items": [
-          {
-            "title": "Augmented reality",
-            "text": "The model over the real site, on a tablet."
-          },
-          {
-            "title": "Feedback tools",
-            "text": "Raise an issue from where you are standing."
-          },
-          {
-            "title": "Shared walkthroughs",
-            "text": "Several people on the same site at once."
+            "text": "Export notes and walkthrough records as a report."
           }
         ]
       },
@@ -362,15 +358,15 @@
         "items": [
           {
             "title": "Scenario-based modules",
-            "text": "Induction scenarios for new crews."
+            "text": "Induction and defect scenarios for new crews."
           },
           {
             "title": "Assessment and certification",
-            "text": "Check what an inductee has understood."
+            "text": "Check what a trainee has understood."
           },
           {
-            "title": "Content library",
-            "text": "More buildings and details to choose from."
+            "title": "Shared walkthroughs",
+            "text": "Several people on the same site at once."
           }
         ]
       }
