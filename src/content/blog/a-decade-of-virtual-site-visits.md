@@ -4,6 +4,7 @@ description: Over ten years and a thousand-plus students, we learned that a game
 pubDate: 2026-03-10
 author: Andrew Lymn-Penning
 tags: ['Research', 'Game engines']
+audience: ['education']
 ---
 
 When we started building virtual construction environments, the sceptical question was reasonable: isn't this just a video game? A decade and more than a thousand students later, the answer is clearer than we expected — and it's the opposite of what the question implies.

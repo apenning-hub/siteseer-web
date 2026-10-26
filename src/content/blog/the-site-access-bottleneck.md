@@ -4,6 +4,7 @@ description: Construction is learned on site — yet getting students onto a liv
 pubDate: 2026-05-20
 author: Andrew Lymn-Penning
 tags: ['Construction education', 'Pedagogy']
+audience: ['education']
 ---
 
 Ask any construction educator what students learn best from, and you'll hear the same answer: being on site. Standing under a half-built roof, watching a slab cure, tracing a service run through a wall cavity before it's closed up — these are the moments where theory snaps into place.
