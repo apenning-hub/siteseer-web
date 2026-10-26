@@ -152,7 +152,7 @@ section[id]{ scroll-margin-top:var(--s9); }
 .nav{ position:fixed; inset:0 0 auto 0; z-index:20; height:64px; display:flex; align-items:center; gap:var(--s6); padding:0 var(--gut); color:var(--ink); background:rgba(251,249,245,.94); transition:box-shadow var(--dur-2) var(--ease); }
 .nav.solid{ box-shadow:0 1px 0 var(--line); }
 .brand{ display:flex; align-items:center; gap:var(--s2); color:inherit; text-decoration:none; margin-right:auto; font:800 17px Archivo, Inter, sans-serif; font-stretch:125%; letter-spacing:.02em; }
-.brand svg{ flex:none; }
+.brand img{ display:block; height:30px; width:auto; }
 .navlinks{ display:flex; gap:var(--s5); list-style:none; }
 .navlinks a{ color:inherit; text-decoration:none; font:500 var(--fs-ui) Inter, sans-serif; display:inline-flex; align-items:center; min-height:var(--tap-min); }
 .navlinks a:hover{ text-decoration:underline; text-underline-offset:4px; }

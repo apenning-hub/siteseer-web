@@ -16,7 +16,9 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
 <section class="hero" id="hero" aria-labelledby="hero-h" data-detail="/models/detail.glb" data-site="/models/site.glb">
   <Image class="hero-still" src={still} alt="" loading="eager" widths={[600, 1000, 1400]} sizes="(min-width: 901px) 56vw, 100vw" />
   <div class="copy">
-    <h1 id="hero-h">{hero.kicker}</h1>
+    <!-- The page heading is kept for screen readers and search; visually the
+         rotating word leads. -->
+    <h1 class="sr" id="hero-h">{hero.kicker}</h1>
     <p class="word" id="word" aria-hidden="true">
       {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.word}<i>.</i></span>)}
     </p>
