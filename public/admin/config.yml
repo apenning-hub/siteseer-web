@@ -76,6 +76,20 @@ collections:
         default: [education, industry]
         hint: Which site lists this post. Pick one or both.
 
+      - name: image
+        label: Image
+        widget: string
+        required: false
+        hint: >-
+          A render file from src/images/renders, e.g. render-20.jpg. Shown on
+          the blog card and above the post.
+
+      - name: imageAlt
+        label: Image description
+        widget: string
+        required: false
+        hint: What the image shows, for people who cannot see it.
+
       - name: draft
         label: Draft
         widget: boolean

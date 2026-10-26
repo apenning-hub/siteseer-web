@@ -1,43 +1,48 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { getCollection } from 'astro:content';
+import PostCard from '../../components/PostCard.astro';
+import Stop from '../../components/Stop.astro';
+import { getCollection, getEntry } from 'astro:content';
 import { AUDIENCE } from '../../lib/audience';
 import { postsFor } from '../../lib/posts-core.mjs';
 
 const posts = postsFor(await getCollection('blog'), AUDIENCE, { prod: import.meta.env.PROD });
-const fmt = (d: Date) => d.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
+const site = (await getEntry('sites', AUDIENCE))!.data;
 
 const HEAD = {
   education: {
+    eyebrow: 'The SiteSeer blog',
     heading: 'Construction education, in focus.',
     lede: 'Research-led, plain-English writing on the skills shortage, digital learning, and the tertiary, TAFE and school landscape.',
   },
   industry: {
+    eyebrow: 'The SiteSeer blog',
     heading: 'Building, in focus.',
-    lede: 'Writing on how buildings are documented, sequenced, questioned and fixed.',
+    lede: 'Writing on how buildings are understood, sequenced and built right the first time.',
   },
 }[AUDIENCE];
+// The industry blog is just starting: say so, rather than leave a thin page.
+const comingSoon = AUDIENCE === 'industry' && posts.length < 3;
 ---
 <Base title="Blog: SiteSeer" description={HEAD.lede}>
-  <section class="band">
+  <section class="band page-top">
     <div class="wrap">
-      <p class="eyebrow">The SiteSeer blog</p>
-      <h1 class="h2">{HEAD.heading}</h1>
+      <p class="eyebrow">{HEAD.eyebrow}</p>
+      <h1 class="h2"><Stop text={HEAD.heading} /></h1>
       <p class="lede">{HEAD.lede}</p>
-      {posts.length ? (
-        <div class="bloglist">
-          {posts.map((post) => (
-            <a class="postcard" href={`/blog/${post.id}/`}>
-              <div class="pc-tags">{post.data.tags.slice(0, 2).map((t) => <span class="tagpill">{t}</span>)}</div>
-              <h2>{post.data.title}</h2>
-              <p class="pc-desc">{post.data.description}</p>
-              <div class="pc-meta">{fmt(post.data.pubDate)} · {post.data.author}</div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p class="empty">New posts are on the way.</p>
-      )}
+      <div class="bloglist">
+        {posts.map((post) => <PostCard post={post} />)}
+        {comingSoon && (
+          <article class="postcard soon">
+            <div class="pc-body">
+              <span class="pc-cat">Coming next</span>
+              <h2>First industry posts</h2>
+              <p class="pc-desc">RFIs that start with a misread detail, getting cavity trays right, and building in the right order.</p>
+              <a class="btn r" href={`mailto:${site.contact.email}?subject=${encodeURIComponent(site.contact.primary.subject)}`}>{site.contact.primary.label}</a>
+            </div>
+          </article>
+        )}
+      </div>
     </div>
   </section>
 </Base>

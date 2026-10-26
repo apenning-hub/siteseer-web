@@ -5,6 +5,8 @@ pubDate: 2026-05-20
 author: Andrew Lymn-Penning
 tags: ['Construction education', 'Pedagogy']
 audience: ['education']
+image: render-20.jpg
+imageAlt: "A two-storey house part way through construction on a suburban site, its frame and cladding open to view"
 ---
 
 Ask any construction educator what students learn best from, and you'll hear the same answer: being on site. Standing under a half-built roof, watching a slab cure, tracing a service run through a wall cavity before it's closed up — these are the moments where theory snaps into place.
@@ -29,4 +31,4 @@ The answer isn't to abandon real site visits — it's to stop depending on them 
 
 That's the gap SiteSeer was built to close: not a replacement for the site, but a way to make the site visitable, repeatably, by everyone.
 
-*This is the first in a series on the realities of construction education. Next: how the skills shortage starts long before the job site.*
+*This is the first in a series on the realities of construction education. Next: [how the skills shortage starts long before the job site](/blog/skills-shortage-starts-in-the-classroom/).*

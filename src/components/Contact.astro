@@ -1,4 +1,5 @@
 ---
+import Stop from './Stop.astro';
 interface Btn { label: string; subject: string }
 interface Props {
   contact: { eyebrow: string; heading: string; lede: string; email: string; primary: Btn; secondary: Btn };
@@ -10,7 +11,7 @@ const mailto = (b: Btn) => `mailto:${contact.email}?subject=${encodeURIComponent
 <section class:list={['band center', { alt }]} id="contact" aria-labelledby="contact-h">
   <div class="wrap">
     <p class="eyebrow rv">{contact.eyebrow}</p>
-    <h2 class="h2 rv" id="contact-h">{contact.heading}</h2>
+    <h2 class="h2 rv" id="contact-h"><Stop text={contact.heading} /></h2>
     <p class="lede rv">{contact.lede}</p>
     <div class="cta-row rv">
       <a class="btn r" href={mailto(contact.primary)}>{contact.primary.label}</a>

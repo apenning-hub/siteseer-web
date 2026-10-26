@@ -8,7 +8,7 @@ import { ease, easeOut } from './scene.js';
 // wherever the exporter nests it. See tools/models/README.md.
 const LAYER = /^L(\d\d)_(?!pin$)/;
 const METAL = new Set([2, 3, 4, 7, 12]);
-const BRAND_RED = new THREE.Color(0xe6332a);
+const BRAND_RED = new THREE.Color(0xff0000); // the logo red
 // Construction order for the build-up (layer numbers).
 export const ORDER = [2, 6, 3, 1, 4, 5, 7, 11, 12, 8, 10, 9];
 

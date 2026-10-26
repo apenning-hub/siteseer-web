@@ -2,9 +2,9 @@
 // it never delays the first frame. In the finale the ground and slab fade up
 // under the wall, then each S_ prop group settles into place.
 import * as THREE from 'three';
-import { easeOut } from './scene.js';
+import { easeOut, sharpenTextures } from './scene.js';
 
-export function createSite(loader, url, { scene, sun, ground }) {
+export function createSite(loader, url, { scene, sun, ground, renderer }) {
   let root = null;
   const parts = [];
   let wanted = null; // a show() that arrived before the file did
@@ -19,6 +19,7 @@ export function createSite(loader, url, { scene, sun, ground }) {
         P.meshes.push(o);
       });
     }
+    sharpenTextures(root, renderer);
     root.visible = false;
     scene.add(root);
     if (wanted) show(...wanted);

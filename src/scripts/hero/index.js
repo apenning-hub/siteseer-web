@@ -3,7 +3,7 @@
 // the sequence: each step once, in order, then rest on the last one.
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import { createScene, ease } from './scene.js';
+import { createScene, ease, sharpenTextures } from './scene.js';
 import { createLayers } from './layers.js';
 import { createSite } from './site.js';
 import { createOverlay } from './overlay.js';
@@ -26,6 +26,7 @@ export async function mountHero(hero) {
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
   const gltf = await loader.loadAsync(hero.dataset.detail);
   S.scene.add(gltf.scene);
+  sharpenTextures(gltf.scene, S.renderer);
   const L = createLayers(gltf.scene);
   L.paint();
   const site = createSite(loader, hero.dataset.site, S);
@@ -132,7 +133,7 @@ export async function mountHero(hero) {
     if (!dragging) S.tickCamera(now, dt, playing);
     overlay.update(steps[step], now - stepStart, !S.tweening() && !dragging && !reduce, dt);
     S.controls.update();
-    S.renderer.render(S.scene, S.camera);
+    S.render();
     if (++frames === 3) {
       hero.classList.add('live');
       window.heroReady = true;

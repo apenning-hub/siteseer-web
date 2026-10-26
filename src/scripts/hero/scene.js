@@ -4,12 +4,31 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 export const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 export const easeOut = (t) => 1 - (1 - t) ** 3;
 
 // The paper ground behind the canvas, for fog that melts the far ground into it.
 const BACKDROP = 0xf3eee6;
+
+// Desktop gets the full-fidelity path: ambient occlusion and finer shadows.
+// Phones and touch tablets skip both; they cost more than they show at that size.
+export const HIGH_QUALITY = typeof matchMedia !== 'undefined' && matchMedia('(min-width: 901px) and (pointer: fine)').matches;
+
+// Crisp textures at grazing angles (the ground, brick faces seen side-on).
+export function sharpenTextures(root, renderer) {
+  const max = renderer.capabilities.getMaxAnisotropy();
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    for (const m of [].concat(o.material)) {
+      for (const key of ['map', 'normalMap', 'roughnessMap']) if (m[key]) { m[key].anisotropy = max; m[key].needsUpdate = true; }
+    }
+  });
+}
 
 export function createScene(hero) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -30,7 +49,7 @@ export function createScene(hero) {
   const sun = new THREE.DirectionalLight(0xffffff, 1.7);
   sun.position.set(-3.5, 5, 2.5);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.setScalar(HIGH_QUALITY ? 4096 : 2048);
   Object.assign(sun.shadow.camera, { left: -2.5, right: 2.5, top: 3, bottom: -1.5, near: 0.5, far: 14 });
   sun.shadow.bias = -0.0004;
   scene.add(sun);
@@ -51,12 +70,32 @@ export function createScene(hero) {
   });
 
   // The canvas is sized by CSS: the right of the hero on desktop, the lower part on phones.
+  // Ambient occlusion (GTAO): soft contact shading in brick joints, under the
+  // sill and where layers meet. The canvas stays transparent so the page's own
+  // ground shows behind the model.
+  let composer = null, gtao = null;
+  if (HIGH_QUALITY) {
+    composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }));
+    composer.addPass(new RenderPass(scene, camera));
+    gtao = new GTAOPass(scene, camera, 1, 1);
+    gtao.updateGtaoMaterial({ radius: 0.18, distanceExponent: 1.5, thickness: 1, scale: 1.1, samples: 16 });
+    gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
+    gtao.blendIntensity = 0.9;
+    composer.addPass(gtao);
+    composer.addPass(new OutputPass());
+  }
+  const render = () => (composer ? composer.render() : renderer.render(scene, camera));
+
   const resize = () => {
     const w = renderer.domElement.clientWidth, h = renderer.domElement.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    if (composer) {
+      composer.setPixelRatio(renderer.getPixelRatio());
+      composer.setSize(w, h);
+    }
   };
   new ResizeObserver(resize).observe(renderer.domElement);
   resize();
@@ -110,7 +149,7 @@ export function createScene(hero) {
   }
 
   return {
-    renderer, scene, camera, controls, sun, ground,
+    renderer, scene, camera, controls, sun, ground, render,
     camTo, tickCamera, applyCam, adoptControls, toScreen,
     stopTween: () => { tween = null; },
     tweening: () => !!tween,

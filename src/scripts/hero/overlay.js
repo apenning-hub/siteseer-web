@@ -26,6 +26,7 @@ export function createOverlay({ hero, toScreen, layers }) {
       }
     }
     card.classList.toggle('on', !!info);
+    card.classList.toggle('docked', !!info && dock);
     if (!info) return;
     const w = card.offsetWidth, h = card.offsetHeight;
     if (dock) {

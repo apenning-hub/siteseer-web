@@ -4,7 +4,9 @@ description: We treat the construction skills shortage as a recruitment problem.
 pubDate: 2026-04-15
 author: SiteSeer
 tags: ['Skills shortage', 'Policy', 'VET']
-audience: ['education']
+audience: ['education', 'industry']
+image: render-58.jpg
+imageAlt: "Inside SiteSeer: a timber wall frame standing on a slab beside a site workbench"
 ---
 
 Construction trades have sat near the top of Australia's skills-priority lists for years, and successive workforce plans keep arriving at the same conclusion: we are not training enough people, fast enough, to the right standard. The usual policy levers — funding, apprenticeship incentives, migration — all target the *pipeline*. Fewer ask about the *teaching*.

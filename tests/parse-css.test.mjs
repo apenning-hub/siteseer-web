@@ -234,11 +234,13 @@ test('it works on the real stylesheet, not just the fixture', () => {
   // exist under the names it uses.
   assert.ok(Object.keys(tokens).length >= 11,
     `expected at least 11 root tokens, got ${Object.keys(tokens).length}`);
-  for (const t of ['--red', '--red-deep', '--band-red-light', '--band-red-mid',
-                   '--band-red-deep', '--ink', '--paper', '--muted', '--prose-ink']) {
+  // The band reds went with the red section grounds (Oct 2026); the contrast
+  // table now leans on --soft and --card-ink instead.
+  for (const t of ['--red', '--red-deep', '--ink', '--paper', '--soft', '--muted',
+                   '--card-ink', '--prose-ink']) {
     assert.ok(t in tokens, `missing token ${t}`);
   }
-  assert.equal(tokens['--red'], '#e6332a');
+  assert.equal(tokens['--red'], '#ff0000'); // the logo red
   assert.equal(tokens['--ink'], '#15120f');
   // A floor, not an exact count. The exact number existed to catch a
   // `break`-after-first mutant that dropped it to 25 — a floor catches that too,

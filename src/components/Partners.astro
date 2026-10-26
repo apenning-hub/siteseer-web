@@ -1,4 +1,5 @@
 ---
+import Stop from './Stop.astro';
 import { getCollection } from 'astro:content';
 
 interface Props { partners: { eyebrow: string; heading: string; order: string[] }; alt?: boolean }
@@ -21,7 +22,7 @@ const LABEL = { Partner: 'Partners', 'Supported by': 'Supported by' } as const;
 <section class:list={['band', { alt }]} id="partners" aria-labelledby="partners-h">
   <div class="wrap">
     <p class="eyebrow rv">{partners.eyebrow}</p>
-    <h2 class="h2 rv" id="partners-h">{partners.heading}</h2>
+    <h2 class="h2 rv" id="partners-h"><Stop text={partners.heading} /></h2>
     {groups.map(({ g, items }) => (
       <div class="pgroup">
         <h3>{LABEL[g]}</h3>

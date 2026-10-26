@@ -1,0 +1,24 @@
+---
+// A blog card: render, one category label, the title in display caps, the
+// summary, and the date and reading time pinned to the foot so a row lines up.
+import { Picture } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { render } from '../lib/renders';
+import { readingMinutes } from '../lib/authors';
+
+interface Props { post: CollectionEntry<'blog'> }
+const { post } = Astro.props;
+const d = post.data;
+const fmt = (date: Date) => date.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+<a class="postcard" href={`/blog/${post.id}/`}>
+  {d.image && (
+    <Picture class="pc-img" src={render(d.image)} alt={d.imageAlt ?? ''} widths={[400, 640, 800]} sizes="(min-width: 881px) 31vw, 100vw" formats={['avif', 'webp']} />
+  )}
+  <div class="pc-body">
+    {d.tags[0] && <span class="pc-cat">{d.tags[0]}</span>}
+    <h2>{d.title}</h2>
+    <p class="pc-desc">{d.description}</p>
+    <div class="pc-meta">{fmt(d.pubDate)} · {readingMinutes(post.body)} min read</div>
+  </div>
+</a>

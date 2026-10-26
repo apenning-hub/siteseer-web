@@ -16,6 +16,9 @@ const blog = defineCollection({
     author: z.string().default('SiteSeer'),
     draft: z.boolean().default(false),
     audience: z.array(z.enum(AUDIENCES)).min(1).default(['education', 'industry']),
+    // A render from src/images/renders/ shown on the card and above the post.
+    image: z.string().optional(),
+    imageAlt: z.string().optional(),
   }),
 });
 

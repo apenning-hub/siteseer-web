@@ -78,7 +78,8 @@ export function zodKeysFor(source, collectionName) {
     }
   }
 
-  const body = source.slice(objectStart + 'z.object({'.length, end);
+  // Line comments would otherwise be glued to the start of the next field.
+  const body = source.slice(objectStart + 'z.object({'.length, end).replace(/\/\/[^\n]*/g, '');
   const keys = [];
   for (const part of splitTopLevel(body)) {
     const match = part.match(/^\s*([A-Za-z_][\w]*)\s*:/);

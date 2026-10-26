@@ -86,6 +86,12 @@ export async function mountStage(host) {
     else if (/^S_/.test(o.name)) o.visible = false;
   });
   scene.add(detail.scene, site.scene);
+  // Crisp textures at grazing angles.
+  const aniso = renderer.capabilities.getMaxAnisotropy();
+  for (const root of [detail.scene, site.scene]) root.traverse((o) => {
+    if (!o.isMesh) return;
+    for (const key of ['map', 'normalMap']) if (o.material[key]) o.material[key].anisotropy = aniso;
+  });
 
   // k = 0 lifted off and invisible, 1 in place. Relative to the node's own
   // position, which carries the compressed file's per-node offset.
