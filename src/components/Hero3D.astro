@@ -4,6 +4,7 @@
 // sequence are added by src/scripts/hero/ once the page is idle.
 import { Image } from 'astro:assets';
 import still from '../images/hero-still.png';
+import { SYSTEMS } from '../scripts/hero/systems.js';
 
 interface Step { word: string; line: string }
 interface Props {
@@ -37,6 +38,14 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
   </div>
   <div id="pins3d" aria-hidden="true"></div>
   <div class="icard" id="icard" role="note"></div>
+  <div class="lpanel spanel" id="spanel" aria-label="Building systems and the trades that build them">
+    <div class="lp-h">Systems and trades</div>
+    <ul>
+      {SYSTEMS.map((s) => (
+        <li data-layers={s.layers.join(',')}><span class="sdot" style={`background:${s.color}`}></span><span><b>{s.name}</b><small>{s.trade}</small></span></li>
+      ))}
+    </ul>
+  </div>
   <div class="lpanel" id="lpanel" aria-hidden="true">
     <div class="lp-h">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z" /><path d="m3 13 9 5 9-5" /></svg>

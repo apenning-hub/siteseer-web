@@ -3,12 +3,14 @@
 // them out and back for the layer pulls.
 import * as THREE from 'three';
 import { ease, easeOut } from './scene.js';
+import { systemOf } from './systems.js';
 
 // A layer is the outermost node named Lnn_… (Lnn_pin markers excluded),
 // wherever the exporter nests it. See tools/models/README.md.
 const LAYER = /^L(\d\d)_(?!pin$)/;
 const METAL = new Set([2, 3, 4, 7, 12]);
-const BRAND_RED = new THREE.Color(0xff0000); // the logo red
+// When one layer is picked out, everything else steps back to Apple's systemGray5.
+const RECEDE = new THREE.Color(0xe5e5ea);
 // Construction order for the build-up (layer numbers).
 export const ORDER = [2, 6, 3, 1, 4, 5, 7, 11, 12, 8, 10, 9];
 
@@ -46,11 +48,12 @@ export function createLayers(root) {
       const work = real.clone();
       o.userData = {
         real, glass, mix: withTextureMix(work), baseOpacity: real.opacity,
+        // The "systems" look: each layer in its building system's colour.
+        // The finale blends from this to the real, textured material.
         clay: {
-          // A shade under paper, so the clay model still reads on the light ground.
-          color: new THREE.Color(glass ? 0xdfe8ea : metal ? 0xc4bfb8 : 0xebe5dd),
-          roughness: glass ? 0.1 : metal ? 0.45 : 0.8,
-          metalness: metal ? 0.25 : 0,
+          color: new THREE.Color(systemOf(n)?.color ?? '#c7c7cc'),
+          roughness: glass ? 0.1 : metal ? 0.4 : 0.6,
+          metalness: metal ? 0.15 : 0,
         },
       };
       o.material = work;
@@ -59,15 +62,15 @@ export function createLayers(root) {
   }
   const each = (fn) => { for (const [n, L] of layers.entries()) if (L) fn(L, n); };
 
-  // Clay everywhere, with one layer optionally picked out in brand red.
+  // System colours everywhere; with a focus layer, the rest recede to grey.
   function paint(focus) {
     each((L, n) => {
       for (const m of L.meshes) {
         const { clay, mix } = m.userData;
-        const hi = focus && n === focus;
-        m.material.color.copy(hi ? BRAND_RED : clay.color);
-        m.material.roughness = hi ? 0.5 : clay.roughness;
-        m.material.metalness = hi ? 0.2 : clay.metalness;
+        const recede = focus && n !== focus;
+        m.material.color.copy(recede ? RECEDE : clay.color);
+        m.material.roughness = clay.roughness;
+        m.material.metalness = clay.metalness;
         m.material.normalScale.setScalar(0);
         mix.value = 0;
       }
@@ -94,6 +97,7 @@ export function createLayers(root) {
     if (!L) return;
     L.node.position.y = L.baseY + (1 - k) * 0.7;
     L.node.visible = k > 0.001;
+    L.k = k;
     for (const m of L.meshes) {
       m.material.transparent = m.userData.glass || k < 1;
       m.material.opacity = m.userData.baseOpacity * k;
@@ -136,6 +140,8 @@ export function createLayers(root) {
     });
   }
   const isOut = (n) => (layers[n]?.pull ?? 0) > 0.5;
+  // Has this layer landed (mostly) during a build-up?
+  const landed = (n) => (layers[n]?.k ?? 1) > 0.5;
 
-  return { paint, lerpReal, startBuild, stepBuild, finishBuild, stepPulls, isOut };
+  return { paint, lerpReal, startBuild, stepBuild, finishBuild, stepPulls, isOut, landed };
 }

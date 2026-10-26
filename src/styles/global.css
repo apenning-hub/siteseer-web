@@ -226,6 +226,15 @@ html:not(.js) .steps{ display:none; }
 .lpanel li.off{ color:var(--muted); background:var(--soft); }
 .lpanel li.off .sw{ background:#cfc9c0; }
 .lpanel li.off .sw::after{ left:2px; }
+/* Systems legend: the colours on the model, and who builds each system. */
+.spanel{ width:236px; }
+.spanel li{ justify-content:flex-start; align-items:flex-start; gap:var(--s3); opacity:.35; transition:opacity var(--dur-2), background var(--dur-2); }
+.spanel li.lit{ opacity:1; }
+.spanel.focusing li{ opacity:.35; }
+.spanel.focusing li.active{ opacity:1; background:var(--soft); }
+.spanel .sdot{ flex:none; width:12px; height:12px; border-radius:var(--r-dot); margin-top:3px; }
+.spanel b{ display:block; font:600 var(--fs-meta)/1.3 Inter, sans-serif; color:var(--ink); }
+.spanel small{ display:block; font:400 var(--fs-micro)/1.35 Inter, sans-serif; color:var(--muted); }
 @media (max-width:900px){
   .hero-canvas,.hero-still{ top:42%; left:0; width:100%; height:58%; -webkit-mask-image:linear-gradient(180deg,transparent,#000 14%); mask-image:linear-gradient(180deg,transparent,#000 14%); }
   .copy{ top:calc(var(--nav-h) + var(--s6)); transform:none; width:auto; right:var(--gut); }

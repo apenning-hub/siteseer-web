@@ -9,6 +9,8 @@ export function createOverlay({ hero, toScreen, layers }) {
   const pinsEl = hero.querySelector('#pins3d');
   const card = hero.querySelector('#icard');
   const panel = hero.querySelector('#lpanel');
+  const legend = hero.querySelector('#spanel');
+  const sysRows = [...legend.querySelectorAll('li')].map((li) => ({ li, layers: li.dataset.layers.split(',').map(Number) }));
   const rows = [...panel.querySelectorAll('li')].map((li) => ({ li, layers: li.dataset.layers.split(',').map(Number) }));
   const pinEls = [];
   let cardInfo = null;
@@ -70,6 +72,15 @@ export function createOverlay({ hero, toScreen, layers }) {
     const pulling = pull && t < pull.t + pull.dur ? pull : null;
     layers.stepPulls(dt, pulling);
     panel.classList.toggle('on', !!step.pulls && settled);
+    // Systems legend: shown while the wall builds and while one layer is picked
+    // out. Rows light up as their system's layers land.
+    const showLegend = step.kind === 'build' || step.kind === 'focus';
+    legend.classList.toggle('on', showLegend);
+    for (const r of sysRows) {
+      r.li.classList.toggle('lit', r.layers.some(layers.landed));
+      r.li.classList.toggle('active', !!step.focus && r.layers.includes(step.focus));
+    }
+    legend.classList.toggle('focusing', !!step.focus);
     for (const r of rows) r.li.classList.toggle('off', r.layers.some(layers.isOut));
 
     if (active) setCard(active, active.at);
