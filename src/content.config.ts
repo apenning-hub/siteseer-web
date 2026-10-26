@@ -1,7 +1,10 @@
 import { defineCollection, z } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 
-// Blog posts live as Markdown in src/content/blog/*.md
+export const AUDIENCES = ['education', 'industry'] as const;
+
+// Blog posts live as Markdown in src/content/blog/*.md. Each post says which
+// of the two sites lists it; the default is both.
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
   schema: z.object({
@@ -12,88 +15,91 @@ const blog = defineCollection({
     tags: z.array(z.string()).default([]),
     author: z.string().default('SiteSeer'),
     draft: z.boolean().default(false),
+    audience: z.array(z.enum(AUDIENCES)).min(1).default(['education', 'industry']),
+  }),
+});
+
+const vec3 = z.tuple([z.number(), z.number(), z.number()]);
+const point = z.object({ title: z.string(), text: z.string() });
+const image = z.object({ image: z.string(), alt: z.string(), caption: z.string() });
+
+// One step of the hero sequence. `cam` is an orbit round the model, in metres
+// and degrees. `inspect` pins cards to points on the model; `pulls` slide
+// layers out (dv is [dx, dz] metres) and back.
+const heroStep = z.object({
+  word: z.string(),
+  line: z.string(),
+  kind: z.enum(['build', 'focus', 'inspect', 'pull', 'finale']),
+  cam: z.object({ t: vec3, az: z.number(), polar: z.number(), r: z.number() }),
+  hold: z.number().optional(),
+  focus: z.number().int().min(1).max(12).optional(),
+  inspect: z.array(z.object({ at: vec3, kicker: z.string(), title: z.string(), text: z.string() })).optional(),
+  pulls: z.array(z.object({
+    t: z.number(), dur: z.number(), layers: z.array(z.number().int()), dv: z.tuple([z.number(), z.number()]),
+    kicker: z.string(), title: z.string(), text: z.string(), refs: z.string().optional(),
+  })).optional(),
+});
+
+// Each site's homepage copy is one JSON file: src/content/sites/education.json
+// and industry.json. The file name is the entry id, and the homepage throws if
+// its entry is missing, so a malformed file can't ship a blank page.
+const sites = defineCollection({
+  loader: glob({ pattern: '*.json', base: './src/content/sites' }),
+  schema: z.object({
+    draft: z.boolean(),
+    meta: z.object({ title: z.string(), description: z.string() }),
+    nav: z.object({ cta: z.string() }),
+    hero: z.object({ kicker: z.string(), statement: z.string(), primary: z.string(), secondary: z.string(), steps: z.array(heroStep).min(1) }),
+    problem: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point) }).merge(image),
+    how: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point), strip: z.array(image) }),
+    access: z.object({
+      eyebrow: z.string(), heading: z.string(), lede: z.string(), closing: z.string(),
+      ways: z.array(z.object({
+        icon: z.enum(['lab', 'lms', 'laptop', 'phone', 'tablet', 'browser', 'office']),
+        title: z.string(), text: z.string(), platforms: z.array(z.string()).optional(),
+      })),
+    }),
+    uses: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), items: z.array(point.extend({ tag: z.string() })) }).optional(),
+    results: z.object({
+      eyebrow: z.string(), heading: z.string(), lede: z.string(),
+      stats: z.array(z.object({ num: z.string(), suffix: z.string().optional(), cap: z.string() })),
+      outcomes: z.array(point),
+    }),
+    partners: z.object({ eyebrow: z.string(), heading: z.string(), order: z.array(z.string()).min(1) }),
+    contact: z.object({
+      eyebrow: z.string(), heading: z.string(), lede: z.string(), email: z.string().email(),
+      primary: z.object({ label: z.string(), subject: z.string() }),
+      secondary: z.object({ label: z.string(), subject: z.string() }),
+    }),
+    upcoming: z.object({ heading: z.string(), intro: z.string(), groups: z.array(z.object({ title: z.string(), items: z.array(point) })) }),
   }),
 });
 
 /**
- * Homepage copy lives in src/content/home/*.json so the CMS can edit it.
- * Astro's file() loader wants a top-level array of { id, ... }; the JSON is
- * shaped as { items: [...] } because that is what the CMS list widget writes,
- * so these parsers bridge the two.
- *
- * `id` is POSITIONAL, not identity — it changes when the author reorders items
- * in the CMS. Never link to it, persist it, or use it in a URL.
+ * Partner records shared by both sites; each site's `partners.order` picks
+ * which appear and in what order. Wrapped as { items: [...] } because that is
+ * what the CMS list widget writes. `id` is the stable `slug`, not position.
  */
-const listParser = (text: string) => {
+const partnersParser = (text: string) => {
   const parsed = JSON.parse(text);
   if (!Array.isArray(parsed?.items)) {
     throw new Error('Expected { "items": [...] } — got ' + JSON.stringify(parsed).slice(0, 80));
   }
-  return parsed.items.map((item: Record<string, unknown>, index: number) => ({
-    ...item,
-    id: String(index),
-  }));
+  return parsed.items.map((item: Record<string, unknown>) => ({ ...item, id: String(item.slug) }));
 };
-
-const singletonParser = (id: string) => (text: string) => [{ ...JSON.parse(text), id }];
-
-// hero.lead carries inline bold and nothing else. The renderer converts only
-// double-asterisk emphasis, so any other construct the CMS might emit would
-// print as literal source in the most-read sentence on the site. Strip the
-// well-formed bold spans, then nothing markup-ish may remain.
-const BOLD_ONLY = /[*_`~\[\]<>#|]/;
-const boldOnlyMarkdown = (s: string) => !BOLD_ONLY.test(s.replace(/\*\*[^*\n]+\*\*/g, ''));
-
-const hero = defineCollection({
-  loader: file('src/content/home/hero.json', { parser: singletonParser('hero') }),
-  schema: z.object({
-    kick: z.string(),
-    headline: z.array(z.string()),
-    lead: z.string().refine(boldOnlyMarkdown, {
-      message:
-        'hero.lead supports inline bold (double asterisks) only. Remove italics, links, headings, code or raw HTML — the hero renderer prints them literally.',
-    }),
-    proof: z.string(),
-  }),
-});
-
-const pillars = defineCollection({
-  loader: file('src/content/home/pillars.json', { parser: listParser }),
-  schema: z.object({ no: z.string(), h: z.string(), p: z.string() }),
-});
-
-const capabilities = defineCollection({
-  loader: file('src/content/home/capabilities.json', { parser: listParser }),
-  schema: z.object({ ic: z.string(), h: z.string(), p: z.string() }),
-});
-
-const outcomes = defineCollection({
-  loader: file('src/content/home/outcomes.json', { parser: listParser }),
-  schema: z.object({ ic: z.string(), h: z.string(), p: z.string() }),
-});
-
-const stats = defineCollection({
-  loader: file('src/content/home/stats.json', { parser: listParser }),
-  schema: z.object({ num: z.string(), cap: z.string() }),
-});
-
-const roadmap = defineCollection({
-  loader: file('src/content/home/roadmap.json', { parser: singletonParser('roadmap') }),
-  schema: z.object({ rowA: z.array(z.string()), rowB: z.array(z.string()) }),
-});
 
 export const PARTNER_GROUPS = ['Partner', 'Supported by'] as const;
 
 const partners = defineCollection({
-  loader: file('src/content/home/partners.json', { parser: listParser }),
+  loader: file('src/content/partners.json', { parser: partnersParser }),
   schema: z.object({
-    group: z.enum(PARTNER_GROUPS),
+    slug: z.string(),
     name: z.string(),
     role: z.string(),
+    group: z.enum(PARTNER_GROUPS),
     blurb: z.string(),
+    logo: z.string(),
   }),
 });
 
-export const collections = {
-  blog, hero, pillars, capabilities, outcomes, stats, roadmap, partners,
-};
+export const collections = { blog, sites, partners };

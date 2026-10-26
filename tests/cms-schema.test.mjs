@@ -49,3 +49,8 @@ test('zodKeysFor extracts the keys of a named schema', () => {
 test('zodKeysFor returns null for a collection it cannot find', () => {
   assert.equal(zodKeysFor(SCHEMAS, 'nope'), null);
 });
+
+test('both site files are checked against the one sites schema', async () => {
+  const { COLLECTIONS } = await import('../scripts/check-cms-schema.mjs');
+  assert.deepEqual(COLLECTIONS.filter(([, zod]) => zod === 'sites').map(([cms]) => cms), ['education', 'industry']);
+});

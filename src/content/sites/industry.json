@@ -1,0 +1,384 @@
+{
+  "draft": true,
+  "meta": {
+    "title": "SiteSeer for industry: the building, at every stage",
+    "description": "One 3D model of the building at every stage, for RFIs, defects, limitations and inductions."
+  },
+  "nav": {
+    "cta": "Talk to us"
+  },
+  "hero": {
+    "kicker": "SiteSeer Building Information",
+    "statement": "The building in 3D at every stage, from footings to fit-out. Raise RFIs, trace defects and record limitations against the exact element, before and during construction.",
+    "primary": "Talk to us",
+    "secondary": "See how it works",
+    "steps": [
+      {
+        "word": "Fast",
+        "line": "Find the detail in seconds, at the stage it matters.",
+        "kind": "build",
+        "cam": {
+          "t": [
+            0,
+            1.1,
+            0.13
+          ],
+          "az": -30,
+          "polar": 76,
+          "r": 6.2
+        }
+      },
+      {
+        "word": "Accurate",
+        "line": "Modelled to the last flashing.",
+        "kind": "focus",
+        "cam": {
+          "t": [
+            -0.5,
+            1.4,
+            0.2
+          ],
+          "az": -42,
+          "polar": 68,
+          "r": 3.9
+        },
+        "focus": 4
+      },
+      {
+        "word": "Clear",
+        "line": "Raise an RFI against the exact element.",
+        "kind": "inspect",
+        "cam": {
+          "t": [
+            0.15,
+            1.5,
+            0.25
+          ],
+          "az": 22,
+          "polar": 74,
+          "r": 4.0
+        },
+        "hold": 6000,
+        "focus": 4,
+        "inspect": [
+          {
+            "at": [
+              -0.32,
+              1.745,
+              0.27
+            ],
+            "kicker": "RFI 014 · Open",
+            "title": "Lintel bearing",
+            "text": "Confirm the minimum bearing each side of the opening for the paired angle lintel."
+          },
+          {
+            "at": [
+              0.15,
+              1.84,
+              0.27
+            ],
+            "kicker": "RFI 015 · Answered",
+            "title": "Weep holes over the head",
+            "text": "Weep holes in the course above the lintel, at the same spacing as the base course."
+          }
+        ]
+      },
+      {
+        "word": "Traceable",
+        "line": "Walk a defect back to where it started.",
+        "kind": "pull",
+        "cam": {
+          "t": [
+            0.1,
+            1.15,
+            0.45
+          ],
+          "az": -62,
+          "polar": 72,
+          "r": 6.6
+        },
+        "hold": 6800,
+        "pulls": [
+          {
+            "t": 300,
+            "dur": 2900,
+            "layers": [
+              1,
+              5
+            ],
+            "dv": [
+              -0.95,
+              0.35
+            ],
+            "kicker": "Defect · Damp at the sill",
+            "title": "Cavity tray lap",
+            "text": "With the veneer pulled back, check the tray flashing laps and drains to the weep holes.",
+            "refs": "AS 4773 · AS/NZS 2904"
+          },
+          {
+            "t": 3500,
+            "dur": 2900,
+            "layers": [
+              7,
+              11,
+              12
+            ],
+            "dv": [
+              -0.65,
+              0.5
+            ],
+            "kicker": "Limitation · Window head",
+            "title": "Head flashing",
+            "text": "Recorded against the layer: the head detail relies on the flashing, not the sealant.",
+            "refs": "Recorded against layer 4"
+          }
+        ]
+      },
+      {
+        "word": "Immersive",
+        "line": "The whole site, before anyone sets foot on it.",
+        "kind": "finale",
+        "cam": {
+          "t": [
+            1.0,
+            0.45,
+            0.2
+          ],
+          "az": -36,
+          "polar": 64,
+          "r": 14.5
+        }
+      }
+    ]
+  },
+  "problem": {
+    "eyebrow": "The problem",
+    "heading": "Drawings don't show the sequence.",
+    "lede": "Questions about a detail usually arrive as a marked-up PDF and an email thread, after the moment they mattered. SiteSeer puts the building, at every stage, in front of everyone who needs to see it.",
+    "points": [
+      {
+        "title": "RFIs without the back-and-forth.",
+        "text": "Point at the element itself, at the stage it is built, instead of describing it."
+      },
+      {
+        "title": "Defects found while they're cheap.",
+        "text": "Step back through the build to see what was covered up, and when."
+      },
+      {
+        "title": "Limitations written down.",
+        "text": "Record what a detail can't do against the model, where the next person will find it."
+      }
+    ],
+    "image": "render-63.jpg",
+    "alt": "A bolted steel knee connection where a portal frame rafter meets its column",
+    "caption": "A portal frame connection, bolted as it is fabricated."
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "heading": "Pause the build. Walk in.",
+    "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
+    "points": [
+      {
+        "title": "Pick a stage.",
+        "text": "Footings, frame, lock-up or fit-out. The building waits at that point while you look around it."
+      },
+      {
+        "title": "Peel back the layers.",
+        "text": "Turn layers on and off to see the frame, the cavity and the flashings behind the finish."
+      },
+      {
+        "title": "Pin it to the element.",
+        "text": "Questions, defects and notes sit on the model, at the stage they belong to."
+      }
+    ],
+    "strip": [
+      {
+        "image": "render-58.jpg",
+        "alt": "A timber wall frame standing on a slab beside a site workbench",
+        "caption": "The frame, before the lining goes on."
+      },
+      {
+        "image": "render-49.jpg",
+        "alt": "A raking-ceiling room with blue sarking and insulation exposed between the framing",
+        "caption": "Sarking and insulation, before they're covered."
+      },
+      {
+        "image": "render-20.jpg",
+        "alt": "A two-storey house mid-construction on a suburban site",
+        "caption": "The whole house, part way through the build."
+      }
+    ]
+  },
+  "uses": {
+    "eyebrow": "Use cases",
+    "heading": "One model for the questions a site raises.",
+    "lede": "Everyone looks at the same element, at the same stage.",
+    "items": [
+      {
+        "tag": "RFIs",
+        "title": "Ask about the exact element.",
+        "text": "Pin a question to the element at the stage it is built, so everyone answers the same thing."
+      },
+      {
+        "tag": "Defects",
+        "title": "Trace it back.",
+        "text": "Walk a defect back through the stages to where it started, and what covered it up."
+      },
+      {
+        "tag": "Limitations",
+        "title": "Write down what it can't do.",
+        "text": "Record a detail's limits against the model, where the next trade will see them."
+      },
+      {
+        "tag": "Inductions",
+        "title": "Walk the site before day one.",
+        "text": "Take new crews through the site and its hazards before they arrive."
+      }
+    ]
+  },
+  "access": {
+    "eyebrow": "Where it runs",
+    "heading": "In the office and on site.",
+    "lede": "On the machines your team already has, at the desk and at the slab edge.",
+    "closing": "It's all possible with SiteSeer.",
+    "ways": [
+      {
+        "icon": "office",
+        "title": "In the office",
+        "text": "Runs on the Windows and macOS machines your team already uses."
+      },
+      {
+        "icon": "tablet",
+        "title": "On site",
+        "text": "Open it on a tablet or phone at the slab edge."
+      },
+      {
+        "icon": "browser",
+        "title": "In the browser",
+        "text": "Share a model with the browser viewer, with nothing to install."
+      },
+      {
+        "icon": "lab",
+        "title": "Training rooms",
+        "text": "Deploy the Unreal Engine build to training-room computers for inductions."
+      }
+    ]
+  },
+  "results": {
+    "eyebrow": "Built on teaching",
+    "heading": "A decade of explaining buildings.",
+    "lede": "SiteSeer began in construction education, where a building has to make sense to someone who has never seen it built. That's what a site team needs too.",
+    "stats": [
+      {
+        "num": "1,000+",
+        "cap": "People trained on it"
+      },
+      {
+        "num": "10",
+        "suffix": "yrs",
+        "cap": "In use"
+      },
+      {
+        "num": "0",
+        "cap": "Site-safety risk"
+      }
+    ],
+    "outcomes": [
+      {
+        "title": "Shared understanding.",
+        "text": "Everyone looks at the same element at the same stage."
+      },
+      {
+        "title": "Earlier answers.",
+        "text": "Questions are raised against the model before the trade arrives."
+      },
+      {
+        "title": "A record that stays.",
+        "text": "RFIs, defects and limitations stay with the model after handover."
+      }
+    ]
+  },
+  "partners": {
+    "eyebrow": "Partners",
+    "heading": "Who we work with.",
+    "order": [
+      "bates-smart",
+      "unreal-academic-partner",
+      "csiro-on",
+      "icc",
+      "adelaide-university",
+      "tafe-sa"
+    ]
+  },
+  "contact": {
+    "eyebrow": "Your project",
+    "heading": "See it on your build.",
+    "lede": "Book a walkthrough, or talk to us about piloting SiteSeer on a live project.",
+    "email": "sean.pickersgill@adelaide.edu.au",
+    "primary": {
+      "label": "Book a walkthrough",
+      "subject": "SiteSeer walkthrough (industry)"
+    },
+    "secondary": {
+      "label": "Talk about a pilot",
+      "subject": "SiteSeer industry pilot"
+    }
+  },
+  "upcoming": {
+    "heading": "Upcoming features.",
+    "intro": "SiteSeer is continuously evolving. These are the features we're building for project teams.",
+    "groups": [
+      {
+        "title": "For project teams",
+        "items": [
+          {
+            "title": "Real-time collaboration",
+            "text": "Walk the model together, from different places."
+          },
+          {
+            "title": "Detailed reporting",
+            "text": "Export RFIs, defects and notes as a report."
+          },
+          {
+            "title": "Analytics dashboard",
+            "text": "Open items across the project, at a glance."
+          }
+        ]
+      },
+      {
+        "title": "On site",
+        "items": [
+          {
+            "title": "Augmented reality",
+            "text": "The model over the real site, on a tablet."
+          },
+          {
+            "title": "Feedback tools",
+            "text": "Raise an issue from where you are standing."
+          },
+          {
+            "title": "Multiplayer environments",
+            "text": "Several people on the same site at once."
+          }
+        ]
+      },
+      {
+        "title": "Training",
+        "items": [
+          {
+            "title": "Scenario-based modules",
+            "text": "Induction scenarios for new crews."
+          },
+          {
+            "title": "Assessment and certification",
+            "text": "Check what an inductee has understood."
+          },
+          {
+            "title": "Content library",
+            "text": "More buildings and details to choose from."
+          }
+        ]
+      }
+    ]
+  }
+}

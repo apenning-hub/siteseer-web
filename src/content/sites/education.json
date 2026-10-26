@@ -1,0 +1,385 @@
+{
+  "draft": false,
+  "meta": {
+    "title": "SiteSeer for education: construction learning in 3D",
+    "description": "A 3D construction site your learners walk through at any stage of the build. For construction and architecture courses, from high school to degree."
+  },
+  "nav": {
+    "cta": "Start a pilot"
+  },
+  "hero": {
+    "kicker": "SiteSeer Building Information",
+    "statement": "A 3D construction site your learners walk through at any stage of the build, from footings to fit-out. For construction and architecture courses, from high school to degree.",
+    "primary": "Start a pilot",
+    "secondary": "See how it works",
+    "steps": [
+      {
+        "word": "Fast",
+        "line": "Any stage of the build, in a click.",
+        "kind": "build",
+        "cam": {
+          "t": [
+            0,
+            1.1,
+            0.13
+          ],
+          "az": -30,
+          "polar": 76,
+          "r": 6.2
+        }
+      },
+      {
+        "word": "Accurate",
+        "line": "Modelled to the last flashing.",
+        "kind": "focus",
+        "cam": {
+          "t": [
+            -0.5,
+            1.4,
+            0.2
+          ],
+          "az": -42,
+          "polar": 68,
+          "r": 3.9
+        },
+        "focus": 4
+      },
+      {
+        "word": "Safe",
+        "line": "Zero site risk. No PPE, no inductions.",
+        "kind": "inspect",
+        "cam": {
+          "t": [
+            0.15,
+            1.5,
+            0.25
+          ],
+          "az": 22,
+          "polar": 74,
+          "r": 4.0
+        },
+        "hold": 7000,
+        "inspect": [
+          {
+            "at": [
+              0.15,
+              1.84,
+              0.27
+            ],
+            "kicker": "Inspection point 16",
+            "title": "Weep holes",
+            "text": "A perpend left unfilled: a gap between two bricks with no mortar in it. You'll find them at the base of brick walls, and above windows like this one."
+          },
+          {
+            "at": [
+              -0.32,
+              1.745,
+              0.27
+            ],
+            "kicker": "Inspection point 33",
+            "title": "Lintels",
+            "text": "A beam that creates the opening, carrying the brickwork above it that would otherwise be unsupported."
+          },
+          {
+            "at": [
+              0.66,
+              1.15,
+              0.27
+            ],
+            "kicker": "Inspection point 40",
+            "title": "Brickwork",
+            "text": "Entirely non-structural. The frame it is tied to carries the load; the brick is a protective veneer."
+          }
+        ]
+      },
+      {
+        "word": "Easy",
+        "line": "Pull a layer off. See what's behind it.",
+        "kind": "pull",
+        "cam": {
+          "t": [
+            0.1,
+            1.15,
+            0.45
+          ],
+          "az": -62,
+          "polar": 72,
+          "r": 6.6
+        },
+        "hold": 6800,
+        "pulls": [
+          {
+            "t": 300,
+            "dur": 2900,
+            "layers": [
+              1,
+              5
+            ],
+            "dv": [
+              -0.95,
+              0.35
+            ],
+            "kicker": "Brick veneer off",
+            "title": "Wall ties",
+            "text": "Metal ties cross the cavity, holding the veneer to the frame against the wind.",
+            "refs": "AS/NZS 2699.1 · AS 3700"
+          },
+          {
+            "t": 3500,
+            "dur": 2900,
+            "layers": [
+              7,
+              11,
+              12
+            ],
+            "dv": [
+              -0.65,
+              0.5
+            ],
+            "kicker": "Window out",
+            "title": "Double studs",
+            "text": "Used at openings in a framed wall to support the lintel, and to stiffen the opening.",
+            "refs": "Inspection point 46"
+          }
+        ]
+      },
+      {
+        "word": "Immersive",
+        "line": "Walk in, the way you would in a game.",
+        "kind": "finale",
+        "cam": {
+          "t": [
+            1.0,
+            0.45,
+            0.2
+          ],
+          "az": -36,
+          "polar": 64,
+          "r": 14.5
+        }
+      }
+    ]
+  },
+  "problem": {
+    "eyebrow": "The problem",
+    "heading": "You can't take a cohort onto a building site.",
+    "lede": "When it's impossible to get learners onto a construction site to connect theory to practice, SiteSeer is the solution. We put a real building into a game engine, at every stage of its construction.",
+    "points": [
+      {
+        "title": "Nothing gets covered up.",
+        "text": "A real site hides its own work as it goes. Here the footing, the cavity and the connection stay open."
+      },
+      {
+        "title": "Run it again.",
+        "text": "Learners repeat a stage as many times as it takes, without leaving the classroom."
+      },
+      {
+        "title": "Learn the order of trades.",
+        "text": "Sequencing is learned on a build instead of a slide."
+      }
+    ],
+    "image": "render-20.jpg",
+    "alt": "Inside SiteSeer: a two-storey house mid-construction on a suburban site, with gum trees and site fencing",
+    "caption": "Inside SiteSeer: a two-storey house, part way through the build."
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "heading": "Pause the build. Walk in.",
+    "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
+    "points": [
+      {
+        "title": "Pick a stage.",
+        "text": "Footings, frame, lock-up or fit-out. The building waits at that point while learners look around it."
+      },
+      {
+        "title": "Move through it freely.",
+        "text": "Built in Unreal Engine, so learners walk the site in real time and go wherever they need to look."
+      },
+      {
+        "title": "Inspection points explain it.",
+        "text": "Placed by people who teach construction: what you are looking at, and why it is built that way."
+      }
+    ],
+    "strip": [
+      {
+        "image": "render-63.jpg",
+        "alt": "A bolted steel knee connection where a portal frame rafter meets its column",
+        "caption": "Steel connections, bolted as they are fabricated."
+      },
+      {
+        "image": "render-58.jpg",
+        "alt": "A timber wall frame standing on a slab beside a site workbench",
+        "caption": "The frame, before the lining goes on."
+      },
+      {
+        "image": "render-51.jpg",
+        "alt": "A finished raking-ceiling room with white walls, skylights and a kitchen bench",
+        "caption": "The same room at fit-out."
+      }
+    ]
+  },
+  "access": {
+    "eyebrow": "Where it runs",
+    "heading": "Meet learners where they are.",
+    "lede": "In the lab, inside your learning platform, on their own laptop or on their phone.",
+    "closing": "It's all possible with SiteSeer.",
+    "ways": [
+      {
+        "icon": "lab",
+        "title": "Computer labs",
+        "text": "Deploy the Unreal Engine build to your pool and lab computers."
+      },
+      {
+        "icon": "lms",
+        "title": "Your LMS",
+        "text": "Embed SiteSeer in the learning platform your cohort already uses, at university, TAFE or school.",
+        "platforms": [
+          "Canvas",
+          "Moodle",
+          "Blackboard",
+          "Daymap",
+          "SEQTA"
+        ]
+      },
+      {
+        "icon": "laptop",
+        "title": "Their laptops",
+        "text": "Runs on the Windows and macOS laptops learners already own. No headset, no lab booking."
+      },
+      {
+        "icon": "phone",
+        "title": "Phones",
+        "text": "Open it on a phone, wherever learners are."
+      }
+    ]
+  },
+  "results": {
+    "eyebrow": "Proven. Better.",
+    "heading": "A decade in real classrooms.",
+    "lede": "Over the last decade SiteSeer has been used by more than a thousand learners. Their experience shaped what it is now.",
+    "stats": [
+      {
+        "num": "1,000+",
+        "cap": "Learners taught"
+      },
+      {
+        "num": "10",
+        "suffix": "yrs",
+        "cap": "In real classrooms"
+      },
+      {
+        "num": "0",
+        "cap": "Site-safety risk"
+      }
+    ],
+    "outcomes": [
+      {
+        "title": "Engaged learners.",
+        "text": "They come to the drawing already knowing what it describes."
+      },
+      {
+        "title": "Relevant skills.",
+        "text": "Sequencing and trade order, learned on a build instead of a slide."
+      },
+      {
+        "title": "Industry-ready.",
+        "text": "They have walked a build before their first day on a real one."
+      }
+    ]
+  },
+  "partners": {
+    "eyebrow": "Partners",
+    "heading": "Who we work with.",
+    "order": [
+      "adelaide-university",
+      "tafe-sa",
+      "unreal-academic-partner",
+      "icc",
+      "bates-smart",
+      "csiro-on"
+    ]
+  },
+  "contact": {
+    "eyebrow": "Your first look",
+    "heading": "See it for yourself.",
+    "lede": "Book a guided demo, or talk to us about running a pilot with your cohort.",
+    "email": "sean.pickersgill@adelaide.edu.au",
+    "primary": {
+      "label": "Book a guided demo",
+      "subject": "SiteSeer guided demo"
+    },
+    "secondary": {
+      "label": "Start a pilot",
+      "subject": "SiteSeer pilot"
+    }
+  },
+  "upcoming": {
+    "heading": "Upcoming features.",
+    "intro": "SiteSeer is continuously evolving, with a sharp focus on features that widen access and lift learning outcomes.",
+    "groups": [
+      {
+        "title": "For learners",
+        "items": [
+          {
+            "title": "In-environment tutorials",
+            "text": "Guidance inside the building, where it's needed."
+          },
+          {
+            "title": "Interactive questing",
+            "text": "Tasks that send learners looking for the answer on site."
+          },
+          {
+            "title": "Scenario-based modules",
+            "text": "Work through a realistic problem on the build."
+          },
+          {
+            "title": "Augmented reality",
+            "text": "The model, placed in a real space."
+          }
+        ]
+      },
+      {
+        "title": "For educators",
+        "items": [
+          {
+            "title": "Learning outcome tracking",
+            "text": "See what each learner has covered."
+          },
+          {
+            "title": "Assessment and certification",
+            "text": "Check understanding inside the model."
+          },
+          {
+            "title": "Analytics and reporting",
+            "text": "Progress across your cohort, at a glance."
+          },
+          {
+            "title": "Curriculum integration",
+            "text": "Map the build to your units and outcomes."
+          }
+        ]
+      },
+      {
+        "title": "Platform",
+        "items": [
+          {
+            "title": "Content library",
+            "text": "More buildings and details to choose from."
+          },
+          {
+            "title": "Multiplayer environments",
+            "text": "A whole cohort on the same site at once."
+          },
+          {
+            "title": "Virtual classrooms",
+            "text": "Teach live, inside the model."
+          },
+          {
+            "title": "Community and forums",
+            "text": "Share approaches with other educators."
+          }
+        ]
+      }
+    ]
+  }
+}

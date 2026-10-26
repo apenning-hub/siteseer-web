@@ -2,7 +2,9 @@ backend:
   name: github
   repo: apenning-hub/siteseer-web
   branch: main
-  base_url: https://beta.siteseer.education
+  # The OAuth broker (functions/api/auth) is served from the education site;
+  # the industry site's /admin signs in through it too.
+  base_url: https://education.siteseer.education
   auth_endpoint: api/auth
 
 # Direct commits to main. Editorial workflow is deliberately OFF — the owner
@@ -64,6 +66,16 @@ collections:
         default: SiteSeer
         hint: Who wrote this post.
 
+      - name: audience
+        label: Show on
+        widget: select
+        multiple: true
+        options:
+          - { label: Education site, value: education }
+          - { label: Industry site, value: industry }
+        default: [education, industry]
+        hint: Which site lists this post. Pick one or both.
+
       - name: draft
         label: Draft
         widget: boolean
@@ -78,162 +90,483 @@ collections:
         hint: The main text of the post. Use the toolbar for headings, links, lists and images.
 
   # ---------------------------------------------------------------------
-  # Homepage sections — each file below is one src/content/home/*.json,
-  # validated by the matching schema in src/content.config.ts.
+  # Each site's homepage copy (src/content/sites/*.json) and the shared
+  # partner list, validated by the `sites` and `partners` schemas in
+  # src/content.config.ts. Both site files share one field tree.
   # ---------------------------------------------------------------------
-  - name: home
-    label: Homepage
+  - name: sites
+    label: Site pages
     files:
-      - name: hero
-        label: Hero section
-        file: src/content/home/hero.json
-        fields:
-          - name: kick
-            label: Kicker
-            widget: string
-            hint: The small line of text that sits above the big heading.
-
-          - name: headline
-            label: Heading lines
-            widget: list
-            hint: >-
-              The big heading, one line at a time. Each line you add here
-              stacks on its own row — for example "Building" then
-              "Information".
-
-          # Non-negotiable per spec: restricted to bold only, so the author
-          # can never type raw markdown/HTML that the hero renderer would
-          # print literally (see src/content/home/README.md).
-          - name: lead
-            label: Lead paragraph
-            widget: markdown
-            buttons: [bold]
-            editor_components: []
-            minimal: true
-            hint: >-
-              The paragraph under the heading. Select some text and click
-              Bold to emphasise it — that's the only formatting available
-              here, on purpose.
-
-          - name: proof
-            label: Proof line
-            widget: string
-            hint: >-
-              A short line of credibility under the paragraph, for example a
-              stat or track record.
-
-      - name: pillars
-        label: Pillars section
-        file: src/content/home/pillars.json
-        fields:
-          - name: items
-            label: Pillars
-            widget: list
-            hint: The numbered pillars shown on the homepage.
+      - name: education
+        label: Education site
+        file: src/content/sites/education.json
+        fields: &a7
+          - name: draft
+            label: Draft copy
+            widget: boolean
+            hint: Shows a "Draft copy" note in the footer while the copy is under review.
+          - name: meta
+            label: Search and sharing
+            widget: object
+            collapsed: true
             fields:
-              - name: no
-                label: Number
+              - name: title
+                label: Page title
                 widget: string
-                hint: 'The number shown next to this pillar, for example "01".'
-              - name: h
-                label: Heading
-                widget: string
-              - name: p
+              - name: description
                 label: Description
                 widget: text
-
-      - name: capabilities
-        label: Capabilities section
-        file: src/content/home/capabilities.json
-        fields:
-          - name: items
-            label: Capabilities
-            widget: list
+          - name: nav
+            label: Header
+            widget: object
+            collapsed: true
             fields:
-              - name: ic
-                label: Icon
+              - name: cta
+                label: Button label
                 widget: string
-                hint: 'A single symbol shown next to the heading, for example ▦'
-              - name: h
+          - name: hero
+            label: Hero
+            widget: object
+            collapsed: true
+            fields:
+              - name: kicker
+                label: Kicker
+                widget: string
+              - name: statement
+                label: What SiteSeer is
+                widget: text
+                hint: "One or two plain sentences: what it is and who it is for."
+              - name: primary
+                label: Main button
+                widget: string
+              - name: secondary
+                label: Second button
+                widget: string
+              - name: steps
+                label: Animated steps
+                widget: list
+                collapsed: true
+                fields:
+                  - name: word
+                    label: Word
+                    widget: string
+                    hint: The big word, e.g. "Fast". Shown with a full stop.
+                  - name: line
+                    label: Line
+                    widget: string
+                    hint: One short line under the word.
+                  - name: kind
+                    label: What the model does
+                    widget: select
+                    options:
+                      - build
+                      - focus
+                      - inspect
+                      - pull
+                      - finale
+                  - name: cam
+                    label: Camera
+                    widget: object
+                    collapsed: true
+                    fields:
+                      - name: t
+                        label: Look at
+                        widget: list
+                        collapsed: true
+                        fields: null
+                        field:
+                          name: v
+                          label: Value
+                          widget: number
+                          value_type: float
+                        min: 3
+                        max: 3
+                        hint: "Three numbers: x, y, z in metres."
+                      - name: az
+                        label: Turn (degrees)
+                        widget: number
+                        value_type: float
+                      - name: polar
+                        label: Tilt (degrees)
+                        widget: number
+                        value_type: float
+                      - name: r
+                        label: Distance (metres)
+                        widget: number
+                        value_type: float
+                    hint: Leave unless you are adjusting the shot.
+                  - name: hold
+                    label: Hold (ms)
+                    widget: number
+                    value_type: int
+                    required: false
+                  - name: focus
+                    label: Highlight layer (1–12)
+                    widget: number
+                    value_type: int
+                    required: false
+                  - name: inspect
+                    label: Inspection points
+                    widget: list
+                    collapsed: true
+                    fields:
+                      - name: at
+                        label: Position
+                        widget: list
+                        collapsed: true
+                        fields: null
+                        field:
+                          name: v
+                          label: Value
+                          widget: number
+                          value_type: float
+                        min: 3
+                        max: 3
+                        hint: "Three numbers: x, y, z in metres."
+                      - name: kicker
+                        label: Label
+                        widget: string
+                      - name: title
+                        label: Title
+                        widget: string
+                      - name: text
+                        label: Text
+                        widget: text
+                    required: false
+                  - name: pulls
+                    label: Layer pulls
+                    widget: list
+                    collapsed: true
+                    fields:
+                      - name: t
+                        label: Starts at (ms)
+                        widget: number
+                        value_type: int
+                      - name: dur
+                        label: Lasts (ms)
+                        widget: number
+                        value_type: int
+                      - name: layers
+                        label: Layers
+                        widget: list
+                        collapsed: true
+                        fields: null
+                        field:
+                          name: n
+                          label: Layer
+                          widget: number
+                          value_type: int
+                      - name: dv
+                        label: Slide (dx, dz metres)
+                        widget: list
+                        collapsed: true
+                        fields: null
+                        field:
+                          name: v
+                          label: Value
+                          widget: number
+                          value_type: float
+                        min: 2
+                        max: 2
+                      - name: kicker
+                        label: Label
+                        widget: string
+                      - name: title
+                        label: Title
+                        widget: string
+                      - name: text
+                        label: Text
+                        widget: text
+                      - name: refs
+                        label: References
+                        widget: string
+                        required: false
+                    required: false
+          - name: problem
+            label: The problem
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
                 label: Heading
                 widget: string
-              - name: p
-                label: Description
+              - name: lede
+                label: Intro
                 widget: text
-
-      - name: outcomes
-        label: Outcomes section
-        file: src/content/home/outcomes.json
-        fields:
-          - name: items
-            label: Outcomes
-            widget: list
-            fields:
-              - name: ic
-                label: Icon
+              - name: points
+                label: Points
+                widget: list
+                collapsed: true
+                fields: &a1
+                  - &a5
+                    name: title
+                    label: Title
+                    widget: string
+                  - &a6
+                    name: text
+                    label: Text
+                    widget: text
+              - &a2
+                name: image
+                label: Image file
                 widget: string
-                hint: 'A single symbol shown next to the heading, for example ★'
-              - name: h
-                label: Heading
+                hint: A file in src/images/renders, e.g. render-20.jpg.
+              - &a3
+                name: alt
+                label: Alt text
                 widget: string
-              - name: p
-                label: Description
-                widget: text
-
-      - name: stats
-        label: Stats section
-        file: src/content/home/stats.json
-        fields:
-          - name: items
-            label: Stats
-            widget: list
-            fields:
-              - name: num
-                label: Number
-                widget: string
-                hint: 'The big figure, for example "1,000+".'
-              - name: cap
+                hint: What the image shows, for people who cannot see it.
+              - &a4
+                name: caption
                 label: Caption
                 widget: string
-                hint: 'The short label underneath the number, for example "Students taught".'
-
-      - name: roadmap
-        label: Roadmap section
-        file: src/content/home/roadmap.json
-        fields:
-          - name: rowA
-            label: Row A
-            widget: list
-            hint: >-
-              One item per line. Scrolls across the homepage as a moving row
-              of words.
-          - name: rowB
-            label: Row B
-            widget: list
-            hint: >-
-              One item per line. Scrolls the opposite way to Row A.
-
+          - name: how
+            label: How it works
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
+                label: Heading
+                widget: string
+              - name: lede
+                label: Intro
+                widget: text
+              - name: points
+                label: Points
+                widget: list
+                collapsed: true
+                fields: *a1
+              - name: strip
+                label: Images
+                widget: list
+                collapsed: true
+                fields:
+                  - *a2
+                  - *a3
+                  - *a4
+          - name: access
+            label: Where it runs
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
+                label: Heading
+                widget: string
+              - name: lede
+                label: Intro
+                widget: text
+              - name: closing
+                label: Closing line
+                widget: string
+              - name: ways
+                label: Ways in
+                widget: list
+                collapsed: true
+                fields:
+                  - name: icon
+                    label: Icon
+                    widget: select
+                    options:
+                      - lab
+                      - lms
+                      - laptop
+                      - phone
+                      - tablet
+                      - browser
+                      - office
+                  - name: title
+                    label: Title
+                    widget: string
+                  - name: text
+                    label: Text
+                    widget: text
+                  - name: platforms
+                    label: Platforms
+                    widget: list
+                    required: false
+                    hint: Learning platforms to show, one per line.
+          - name: uses
+            label: Use cases
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
+                label: Heading
+                widget: string
+              - name: lede
+                label: Intro
+                widget: text
+              - name: items
+                label: Use cases
+                widget: list
+                collapsed: true
+                fields:
+                  - name: tag
+                    label: Tag
+                    widget: string
+                  - *a5
+                  - *a6
+            required: false
+          - name: results
+            label: Results
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
+                label: Heading
+                widget: string
+              - name: lede
+                label: Intro
+                widget: text
+              - name: stats
+                label: Stats
+                widget: list
+                collapsed: true
+                fields:
+                  - name: num
+                    label: Number
+                    widget: string
+                  - name: suffix
+                    label: Suffix
+                    widget: string
+                    required: false
+                  - name: cap
+                    label: Caption
+                    widget: string
+              - name: outcomes
+                label: Outcomes
+                widget: list
+                collapsed: true
+                fields: *a1
+          - name: partners
+            label: Partners
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
+                label: Heading
+                widget: string
+              - name: order
+                label: Partners shown, in order
+                widget: list
+                hint: Partner slugs from the Partners list, one per line.
+          - name: contact
+            label: Contact
+            widget: object
+            collapsed: true
+            fields:
+              - name: eyebrow
+                label: Eyebrow
+                widget: string
+              - name: heading
+                label: Heading
+                widget: string
+              - name: lede
+                label: Intro
+                widget: text
+              - name: email
+                label: Email address
+                widget: string
+              - name: primary
+                label: Main button
+                widget: object
+                collapsed: true
+                fields:
+                  - name: label
+                    label: Label
+                    widget: string
+                  - name: subject
+                    label: Email subject
+                    widget: string
+              - name: secondary
+                label: Second button
+                widget: object
+                collapsed: true
+                fields:
+                  - name: label
+                    label: Label
+                    widget: string
+                  - name: subject
+                    label: Email subject
+                    widget: string
+          - name: upcoming
+            label: Upcoming features
+            widget: object
+            collapsed: true
+            fields:
+              - name: heading
+                label: Heading
+                widget: string
+              - name: intro
+                label: Intro
+                widget: text
+              - name: groups
+                label: Groups
+                widget: list
+                collapsed: true
+                fields:
+                  - name: title
+                    label: Group title
+                    widget: string
+                  - name: items
+                    label: Features
+                    widget: list
+                    collapsed: true
+                    fields: *a1
+      - name: industry
+        label: Industry site
+        file: src/content/sites/industry.json
+        fields: *a7
+  - name: shared
+    label: Shared
+    files:
       - name: partners
-        label: Partners section
-        file: src/content/home/partners.json
+        label: Partners
+        file: src/content/partners.json
         fields:
           - name: items
             label: Partners
             widget: list
+            collapsed: true
             fields:
-              - name: group
-                label: Group
-                widget: select
-                options: ['Partner', 'Supported by']
-                hint: Which heading this entry is listed under on the homepage.
+              - name: slug
+                label: Slug
+                widget: string
+                hint: Short id used by each site's partner order, e.g. tafe-sa. Do not change once in use.
               - name: name
                 label: Name
                 widget: string
               - name: role
                 label: Role
                 widget: string
-                hint: 'A short role label, for example "Teaching partner".'
+              - name: group
+                label: Group
+                widget: select
+                options:
+                  - Partner
+                  - Supported by
               - name: blurb
                 label: Blurb
                 widget: text
-                hint: One sentence describing the partnership.
+              - name: logo
+                label: Logo file
+                widget: string
+                hint: A file in public/logos, e.g. tafe-sa.svg.
