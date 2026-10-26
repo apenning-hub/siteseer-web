@@ -19,3 +19,4 @@ npm-debug.log*
 .superpowers/
 .wrangler/
 tools/models/out/
+dist-industry/

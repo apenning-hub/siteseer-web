@@ -1,0 +1,20 @@
+---
+interface Btn { label: string; subject: string }
+interface Props {
+  contact: { eyebrow: string; heading: string; lede: string; email: string; primary: Btn; secondary: Btn };
+  alt?: boolean;
+}
+const { contact, alt = false } = Astro.props;
+const mailto = (b: Btn) => `mailto:${contact.email}?subject=${encodeURIComponent(b.subject)}`;
+---
+<section class:list={['band center', { alt }]} id="contact" aria-labelledby="contact-h">
+  <div class="wrap">
+    <p class="eyebrow rv">{contact.eyebrow}</p>
+    <h2 class="h2 rv" id="contact-h">{contact.heading}</h2>
+    <p class="lede rv">{contact.lede}</p>
+    <div class="cta-row rv">
+      <a class="btn r" href={mailto(contact.primary)}>{contact.primary.label}</a>
+      <a class="btn g" href={mailto(contact.secondary)}>{contact.secondary.label}</a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,50 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+type Icon = 'lab' | 'lms' | 'laptop' | 'phone' | 'tablet' | 'browser' | 'office';
+interface Props {
+  access: { eyebrow: string; heading: string; lede: string; closing: string; ways: { icon: Icon; title: string; text: string; platforms?: string[] }[] };
+  alt?: boolean;
+}
+const { access, alt = false } = Astro.props;
+
+// Monoline icons on a 24px grid (Lucide-style paths).
+const ICONS: Record<Icon, string> = {
+  lab: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  office: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  lms: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/>',
+  laptop: '<rect x="4" y="5" width="16" height="10" rx="1.5"/><path d="M2 19h20"/>',
+  phone: '<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  tablet: '<rect x="4" y="2" width="16" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  browser: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/>',
+};
+// A platform shows its logo when public/logos/<slug>.svg exists, else its name.
+const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const logoFor = (name: string) => (existsSync(join(process.cwd(), 'public/logos', `${slug(name)}.svg`)) ? `/logos/${slug(name)}.svg` : null);
+---
+<section class:list={['band', { alt }]} id="access" aria-labelledby="access-h">
+  <div class="wrap">
+    <p class="eyebrow rv">{access.eyebrow}</p>
+    <h2 class="h2 rv" id="access-h">{access.heading}</h2>
+    <p class="lede rv">{access.lede}</p>
+    <div class="cards">
+      {access.ways.map((w) => (
+        <article class="card rv">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[w.icon]} /></div>
+          <h3>{w.title}</h3>
+          <p>{w.text}</p>
+          {w.platforms && (
+            <ul class="lms" aria-label="Learning platforms">
+              {w.platforms.map((name) => {
+                const src = logoFor(name);
+                return <li>{src ? <img src={src} alt={name} height="20" /> : <span>{name}</span>}</li>;
+              })}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+    <p class="closing rv">{access.closing}</p>
+  </div>
+</section>

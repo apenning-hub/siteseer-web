@@ -1,0 +1,25 @@
+---
+interface Props {
+  results: { eyebrow: string; heading: string; lede: string; stats: { num: string; suffix?: string; cap: string }[]; outcomes: { title: string; text: string }[] };
+  alt?: boolean;
+}
+const { results, alt = false } = Astro.props;
+---
+<section class:list={['band', { alt }]} id="results" aria-labelledby="results-h">
+  <div class="wrap">
+    <p class="eyebrow rv">{results.eyebrow}</p>
+    <h2 class="h2 rv" id="results-h">{results.heading}</h2>
+    <p class="lede rv">{results.lede}</p>
+    <div class="stats">
+      {results.stats.map((s) => (
+        <div class="stat rv">
+          <div class="num"><span class="n">{s.num}</span>{s.suffix && <small>{s.suffix}</small>}</div>
+          <div class="cap">{s.cap}</div>
+        </div>
+      ))}
+    </div>
+    <div class="outcomes">
+      {results.outcomes.map((o) => <div class="rv"><h3>{o.title}</h3><p>{o.text}</p></div>)}
+    </div>
+  </div>
+</section>

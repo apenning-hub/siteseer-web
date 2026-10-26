@@ -1,21 +1,18 @@
 ---
-const year = 2026;
+import { OTHER } from '../lib/audience';
+
+interface Props { draft?: boolean }
+const { draft = false } = Astro.props;
 ---
-<footer class="foot grain" id="contact">
-  <div class="wrap narrow">
-    <div class="eyebrow" style="color:var(--red)">Contact us</div>
-    <h2 class="sh druk">Let's build it together<span class="dot">.</span></h2>
-    <p class="stext">We're always looking for supporters, collaborators and partners. Start a pilot at your institution, or register interest for what's coming next.</p>
-    <div style="display:flex;gap:var(--s3);justify-content:center;margin-top:var(--s6);flex-wrap:wrap;">
-      <a class="btn btn-red btn-lg" href="mailto:sean.pickersgill@unisa.edu.au?subject=SiteSeer%20%E2%80%94%20Pilot%20interest">Start a pilot →</a>
-      <a class="btn btn-ink btn-lg" href="mailto:sean.pickersgill@unisa.edu.au?subject=SiteSeer%20%E2%80%94%20Enquiry">Email us</a>
-    </div>
-    <div class="fpartners" style="margin-top:var(--s6)">
-      <b>Adelaide University</b><span class="d"></span><b>Unreal Engine Academic Partner</b><span class="d"></span><b>TAFE SA</b>
-    </div>
-    <div class="credits">
-      Built &amp; developed by <b>Sean Pickersgill</b>, <b>Damian Madigan</b>, <b>Darcy Holmes</b> + <b>Andrew Lymn-Penning</b>.<br />
-      © {year} SiteSeer. All rights reserved.
-    </div>
+<footer class="site-foot">
+  <div class="wrap">
+    <span>
+      © 2026 SiteSeer Building Information. Built by Sean Pickersgill, Damian Madigan, Darcy Holmes and Andrew Lymn-Penning.
+    </span>
+    <nav aria-label="Footer">
+      <a href="/blog/">Blog</a>
+      <a href={OTHER.href}>{OTHER.label} →</a>
+    </nav>
+    {draft && <span class="draft">Draft copy, under review</span>}
   </div>
 </footer>
