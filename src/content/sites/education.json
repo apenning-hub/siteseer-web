@@ -305,7 +305,7 @@
   },
   "team": {
     "heading": "Construction, education and game technology, in one team.",
-    "lede": "SiteSeer grew out of construction-learning research at Adelaide University. It brings together people who know how buildings go together, how people learn, and how to build real-time 3D worlds. That mix is rare, and it's what SiteSeer is made of.",
+    "lede": "SiteSeer was founded by Sean Pickersgill and Darcy Holmes. It brings together people who know how buildings go together, how people learn, and how to build real-time 3D worlds. That mix is rare, and it's what SiteSeer is made of.",
     "expertise": [
       {
         "title": "Construction",
@@ -327,27 +327,27 @@
           {
             "name": "Sean Pickersgill",
             "role": "Founder",
-            "text": "Founded SiteSeer and leads the company."
+            "text": "Founded SiteSeer to bring construction, education and game technology together, and leads the company."
           },
           {
             "name": "Darcy Holmes",
             "role": "Co-founder and Technical Artist",
-            "text": "Builds the SiteSeer environments in Unreal Engine."
+            "text": "Co-founded SiteSeer and leads its technical art: the real-time Unreal Engine environments people walk through."
           }
         ]
       },
       {
-        "title": "Research team, Adelaide University",
+        "title": "With the research team at Adelaide University",
         "members": [
           {
             "name": "Associate Professor Damian Madigan",
             "role": "Adelaide University",
-            "text": "Built the first SiteSeer models and wrote the learning material they teach with, and uses SiteSeer in his own classes and lectures."
+            "text": "Initial modelling and learning material."
           },
           {
             "name": "Andrew Lymn-Penning",
             "role": "Lecturer in Architecture, Adelaide University",
-            "text": "Researches how construction is learned, and leads SiteSeer's research and development."
+            "text": "Research and development."
           }
         ]
       }

@@ -7,26 +7,34 @@ interface Props {
   alt?: boolean;
 }
 const { team, alt = false } = Astro.props;
+// The first group (the founders) is the feature; any later groups are set
+// as a compact supporting row beneath it.
+const [lead, ...rest] = team.groups;
 ---
 <section class:list={['band', { alt }]} id="team" aria-labelledby="team-h">
   <div class="wrap">
     <h2 class="h2 rv" id="team-h"><Stop text={team.heading} /></h2>
     <p class="lede rv">{team.lede}</p>
+    {lead && (
+      <div class="founders">
+        {lead.members.map((m) => (
+          <article class="founder rv">
+            <p class="role">{m.role}</p>
+            <h3>{m.name}</h3>
+            <p>{m.text}</p>
+          </article>
+        ))}
+      </div>
+    )}
     <ul class="expertise">
       {team.expertise.map((e) => <li class="rv"><b>{e.title}</b><span>{e.text}</span></li>)}
     </ul>
-    {team.groups.map((g) => (
-      <div class="pgroup">
+    {rest.map((g) => (
+      <div class="supporting rv">
         <h3>{g.title}</h3>
-        <div class="people">
-          {g.members.map((m) => (
-            <article class="person rv">
-              <h4>{m.name}</h4>
-              <p class="role">{m.role}</p>
-              <p>{m.text}</p>
-            </article>
-          ))}
-        </div>
+        <ul>
+          {g.members.map((m) => <li><b>{m.name}</b>, {m.role}. {m.text}</li>)}
+        </ul>
       </div>
     ))}
   </div>
