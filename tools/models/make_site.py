@@ -8,8 +8,10 @@ site in piece by piece. Geometry is boxes, cylinders and heightfields only.
 Run: python3 make_site.py out.glb
 """
 import math, random, sys
+from pathlib import Path
 
-from glb import Glb
+from glb import Glb, chamfer_box
+from PIL import Image
 from make_detail import box
 
 random.seed(7)
@@ -95,8 +97,81 @@ def cylinder(r0, r1, height, n=18, caps=True):
     return tris(out)
 
 
+# ---- displacement, baked into the geometry --------------------------------------
+# The displacement maps are sampled here, offline, and moved into the vertices.
+# The browser gets the relief as ordinary geometry (meshopt-compressed) and
+# never downloads or runs a displacement map.
+_TEX = Path(__file__).parent / 'textures'
+class _Disp:
+    def __init__(self, name, tile, amp):
+        im = Image.open(_TEX / f'{name}_disp.png').convert('L')
+        self.w, self.h, self.px = im.width, im.height, im.load()
+        self.tile, self.amp = tile, amp
+    def __call__(self, x, z):
+        # Bilinear, tiling, in the same world-space frame as the texture UVs.
+        u = (x / self.tile) % 1 * self.w; v = (-z / self.tile) % 1 * self.h
+        x0, y0 = int(u) % self.w, int(v) % self.h
+        x1, y1 = (x0 + 1) % self.w, (y0 + 1) % self.h
+        fx, fy = u - int(u), v - int(v)
+        p = self.px
+        top = p[x0, y0] * (1 - fx) + p[x1, y0] * fx
+        bot = p[x0, y1] * (1 - fx) + p[x1, y1] * fx
+        return ((top * (1 - fy) + bot * fy) / 255 - 0.5) * self.amp
+
+MUD = _Disp('mud', 5.0, 0.07)
+SAND = _Disp('sand', 1.4, 0.03)
+SLAB = (-3.6, 3.0, -3.0, 0.9)   # x0, x1, z0, z1 of the slab
+
+
+def _rut(x, z):
+    """Two tyre ruts curving in from the gate past the stacks: 4 cm deep."""
+    cx = 1.2 + 0.18 * z + 0.06 * z * z           # track centre line
+    d = 0.0
+    for off in (-0.55, 0.55):
+        t = (x - (cx + off)) / 0.12
+        d -= 0.04 * math.exp(-t * t)
+    return d if 0.9 < z < 7.0 else d * max(0.0, 1 - abs(z - 3.9) / 3.1) if z <= 0.9 else d * max(0.0, (7.5 - z) / 0.5)
+
+
 def ground_y(x, z):
-    return -0.12 + 0.03 * math.sin(1.7 * x + 0.3) * math.cos(1.3 * z) + 0.015 * math.sin(5.1 * x + 2 * z)
+    base = -0.12 + 0.03 * math.sin(1.7 * x + 0.3) * math.cos(1.3 * z) + 0.015 * math.sin(5.1 * x + 2 * z)
+    # Relief fades out under the slab, so the ground never pokes through it.
+    dx = max(SLAB[0] - x, 0.0, x - SLAB[1]); dz = max(SLAB[2] - z, 0.0, z - SLAB[3])
+    near = min(1.0, math.hypot(dx, dz) / 0.6)
+    far = max(0.0, 1 - math.hypot(x, z) / 14)    # flatter towards the fogged horizon
+    return base + near * far * (MUD(x, z) + _rut(x, z))
+
+
+def smooth_radial(h, cx, cz, rad, rings, segs, power=1.0):
+    """Heightfield on a polar grid with shared vertices and smooth normals, so a
+    dense displaced surface costs one vertex per grid point, not three per triangle."""
+    ring = lambda i: rad * (i / rings) ** power
+    pos, nrm, idx = [], [], []
+    e = 0.01
+    def add(x, z):
+        y = h(x, z)
+        nx, nz = h(x - e, z) - h(x + e, z), h(x, z - e) - h(x, z + e)
+        ln = math.sqrt(nx * nx + 4 * e * e + nz * nz)
+        pos.append((x, y, z)); nrm.append((nx / ln, 2 * e / ln, nz / ln))
+    add(cx, cz)
+    for i in range(1, rings + 1):
+        r = ring(i)
+        for k in range(segs):
+            a = 2 * math.pi * k / segs
+            add(cx + r * math.sin(a), cz + r * math.cos(a))
+    vid = lambda i, k: 0 if i == 0 else 1 + (i - 1) * segs + k % segs
+    for k in range(segs):  # centre fan
+        idx += [vid(0, 0), vid(1, k), vid(1, k + 1)]
+    for i in range(1, rings):
+        for k in range(segs):
+            a, b, c, d = vid(i, k), vid(i, k + 1), vid(i + 1, k), vid(i + 1, k + 1)
+            idx += [a, c, b, b, c, d]
+    # Wind every triangle to face up.
+    for t in range(0, len(idx), 3):
+        a, b, c = (pos[j] for j in idx[t:t + 3])
+        if (b[0] - a[0]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[0] - a[0]) > 0:
+            idx[t + 1], idx[t + 2] = idx[t + 2], idx[t + 1]
+    return pos, nrm, idx
 
 
 # ---- the site -------------------------------------------------------------------
@@ -129,8 +204,8 @@ MAT = {
 # Far bigger than any camera view, so its edge is never on screen; the hero
 # fogs the distance into the background red.
 R = 60.0
-group('ground', ('dirt', [radial_field(ground_y, 0.0, 0.0, R, 36, 96, power=2.2)]))
-group('slab', ('concrete', [box(-3.6, 3.0, -0.14, 0.0, -3.0, 0.9)]))
+group('ground', ('dirt', [smooth_radial(ground_y, 0.0, 0.0, R, 90, 200, power=2.4)]))
+group('slab', ('concrete', [chamfer_box(-3.6, 3.0, -0.14, 0.0, -3.0, 0.9, 0.012)]))
 
 # The stud frame carries on past the finished detail, so the build is mid-way.
 frame = []
@@ -146,10 +221,10 @@ def pallet(cx, cz, ry=0.0, w=1.1, d=1.1):
     parts = []
     for k in range(3):
         z = -d / 2 + 0.05 + k * (d - 0.1) / 2
-        parts.append(box(-w / 2, w / 2, 0.0, 0.1, z - 0.05, z + 0.05))
+        parts.append(chamfer_box(-w / 2, w / 2, 0.0, 0.1, z - 0.05, z + 0.05, 0.006))
     for k in range(6):
         x = -w / 2 + 0.07 + k * (w - 0.14) / 5
-        parts.append(box(x - 0.07, x + 0.07, 0.1, 0.12, -d / 2, d / 2))
+        parts.append(chamfer_box(x - 0.07, x + 0.07, 0.1, 0.12, -d / 2, d / 2, 0.003))
     return [xform(p, ry=ry, t=(cx, ground_y(cx, cz), cz)) for p in parts]
 
 
@@ -160,7 +235,10 @@ def brick_stack(cx, cz, ry, courses, top_rows=None):
         for i in range(4):
             for j in range(rows):
                 x0, z0, y0 = -0.48 + i * 0.24, -0.5 + j * 0.115, 0.12 + c * 0.086
-                parts.append(box(x0, x0 + 0.23, y0, y0 + 0.076, z0, z0 + 0.11))
+                # Only bricks on the outside of the stack can be seen.
+                if 0 < i < 3 and 0 < j < rows - 1 and c < courses - 1:
+                    continue
+                parts.append(chamfer_box(x0, x0 + 0.23, y0, y0 + 0.076, z0, z0 + 0.11, 0.004))
     return [xform(p, ry=ry, t=(cx, ground_y(cx, cz), cz)) for p in parts]
 
 
@@ -173,17 +251,17 @@ for layer in range(4):
     y = 0.05 + layer * 0.1
     for k in range(8):
         z = -0.4 + k * 0.11
-        timber.append(box(-1.8, 1.8 - 0.25 * (k % 3 == 2 and layer == 3), y, y + 0.045, z, z + 0.09))
+        timber.append(chamfer_box(-1.8, 1.8 - 0.25 * (k % 3 == 2 and layer == 3), y, y + 0.045, z, z + 0.09, 0.004))
     for x in (-1.4, 0.0, 1.4):
         timber.append(box(x - 0.03, x + 0.03, y - 0.05, y, -0.45, 0.5))
 timber = [xform(p, ry=0.14, t=(-0.6, ground_y(-0.6, 2.7), 2.7)) for p in timber]
 offcuts, loose = [], []
 for _ in range(16):
     x, z, ln = random.uniform(-1.5, 4.0), random.uniform(0.9, 3.8), random.uniform(0.2, 0.7)
-    offcuts.append(xform(box(-ln / 2, ln / 2, 0, 0.045, -0.045, 0.045), ry=random.uniform(0, math.pi), t=(x, ground_y(x, z), z)))
+    offcuts.append(xform(chamfer_box(-ln / 2, ln / 2, 0, 0.045, -0.045, 0.045, 0.004), ry=random.uniform(0, math.pi), t=(x, ground_y(x, z), z)))
 for _ in range(12):
     x, z = random.uniform(-0.5, 3.6), random.uniform(0.95, 3.4)
-    loose.append(xform(box(-0.115, 0.115, 0, 0.076, -0.055, 0.055), ry=random.uniform(0, math.pi),
+    loose.append(xform(chamfer_box(-0.115, 0.115, 0, 0.076, -0.055, 0.055, 0.004), ry=random.uniform(0, math.pi),
                        rz=random.choice((0, 0, math.pi / 2)), t=(x, ground_y(x, z), z)))
 group('timber', ('pine', timber + offcuts))
 group('loose_bricks', ('brick', loose))
@@ -192,15 +270,15 @@ group('loose_bricks', ('brick', loose))
 def mound(cx, cz, rad, ht):
     def h(x, z):
         d = math.hypot(x - cx, z - cz) / rad
-        return ground_y(x, z) + ht * max(0.0, 1 - d * d) ** 1.3 + 0.02 * math.sin(9 * x) * math.cos(7 * z)
-    return radial_field(h, cx, cz, rad, 10, 40)
+        return ground_y(x, z) + ht * max(0.0, 1 - d * d) ** 1.3 + max(0.0, 1 - d) * SAND(x, z)
+    return smooth_radial(h, cx, cz, rad, 26, 96)
 
 
 group('sand', ('sand', [mound(4.3, -1.1, 1.15, 0.6)]))
 bags = []
 for layer in range(2):
     for k in range(3):
-        bags.append(box(-0.5 + k * 0.34, -0.5 + k * 0.34 + 0.32, 0.12 + layer * 0.13, 0.24 + layer * 0.13, -0.3, 0.3))
+        bags.append(chamfer_box(-0.5 + k * 0.34, -0.5 + k * 0.34 + 0.32, 0.12 + layer * 0.13, 0.24 + layer * 0.13, -0.3, 0.3, 0.035))
 group('cement', ('pallet', pallet(4.0, 2.6, -0.3, 1.1, 0.8)),
       ('bag', [xform(p, ry=-0.3 + (0.15 if i >= 3 else 0), t=(4.0, ground_y(4.0, 2.6), 2.6)) for i, p in enumerate(bags)]))
 

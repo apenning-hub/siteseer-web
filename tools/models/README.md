@@ -7,7 +7,16 @@ The homepage 3D uses two GLB files in `public/models/`, built here:
 | `detail.glb` | `make_detail.py` | Placeholder window-opening detail: 12 layers from Sean's Vectary cards |
 | `site.glb` | `make_site.py` | Placeholder building site the detail sits on in the hero finale |
 
-Rebuild both with `npm run models`. This generates raw GLBs into `out/` (git-ignored) and compresses them into `public/models/` with `compress.mjs`, which applies tangents, WebP textures at 512 px and meshopt geometry. Check a file with `node tools/models/validate.mjs public/models/detail.glb`.
+Rebuild both with `npm run models`.
+
+## How the detail stays light
+
+- **Displacement is baked offline.** `make_site.py` samples the mud and sand displacement maps and moves the ground and sand vertices. The browser gets ordinary compressed geometry and never downloads a displacement map.
+- **Bevels are real geometry.** Bricks, timber, pallets and bags are chamfered boxes (`chamfer_box` in `glb.py`), so their edges catch light.
+- **ARM maps** (AO, roughness, metalness in one file) are used as both glTF occlusion and metallic-roughness textures.
+- **UVs compress to 16 bits.** World-space UVs are remapped into [0,1] over a 64-tile span, and `KHR_texture_transform` restores the tiling.
+- **No stored tangents.** three.js derives them in the shader.
+- **Texture sizes:** colour maps at 512 px (detail) and 768 px (site); normal and ARM maps at half that. This generates raw GLBs into `out/` (git-ignored) and compresses them into `public/models/` with `compress.mjs`, which applies tangents, WebP textures at 512 px and meshopt geometry. Check a file with `node tools/models/validate.mjs public/models/detail.glb`.
 
 ## Naming rule (the site code depends on it)
 

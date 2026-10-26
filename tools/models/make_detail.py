@@ -9,7 +9,7 @@ Run: python3 make_detail.py out.glb
 """
 import math, sys
 
-from glb import Glb
+from glb import Glb, chamfer_box
 
 # ---- wall build-up (z, from inside to outside) -------------------------------
 LINING = (0.0, 0.013)          # 13 mm plasterboard
@@ -55,7 +55,7 @@ def bricks(x0, x1, y0, y1, z0, z1, skip=lambda x0, x1, y0, y1: False):
         while x < x1:
             bx0, bx1 = max(x, x0), min(x + 0.23, x1)
             if bx1 - bx0 > 0.02 and not skip(bx0, bx1, y, yt):
-                out.append(box(bx0, bx1, y, yt, z0, z1))
+                out.append(chamfer_box(bx0, bx1, y, yt, z0, z1, 0.004))
             x += 0.24
         y += 0.086
         course += 1
@@ -78,7 +78,12 @@ def layer(key, name, rgba, parts, metal=0.0, rough=0.8, extra=()):
 notch = lambda bx0, bx1, by0, by1: in_opening(bx0, bx1, by0, by1) or (bx0 < -0.5 and by1 < 1.45) or (bx0 < -0.7 and by1 < 1.9)
 brick_parts = bricks(W0, W1, 0, H, *BRICK, skip=notch)
 # Mortar: one slab behind each brick course, 5 mm proud of the cavity face, filling the joints.
-mortar = [box(p[0][0][0] - 0.005, p[0][4][0] + 0.005, p[0][0][1] - 0.005, p[0][3][1] + 0.005, BRICK[0] + 0.004, BRICK[1] - 0.006) for p in brick_parts]
+def _extent(part, k):
+    return min(v[k] for v in part[0]), max(v[k] for v in part[0])
+
+
+mortar = [box(_extent(p, 0)[0] - 0.005, _extent(p, 0)[1] + 0.005, _extent(p, 1)[0] - 0.005, _extent(p, 1)[1] + 0.005,
+              BRICK[0] + 0.004, BRICK[1] - 0.006) for p in brick_parts]
 layer('L01', 'External brick wall', (0.66, 0.27, 0.18, 1), brick_parts, extra=[('mortar', (0.74, 0.72, 0.68, 1), mortar)])
 
 # 2 Internal steel framing: studs at 450 centres, jamb studs, plates, nogging
@@ -103,14 +108,14 @@ tray = [box(OX0 - 0.1, OX1 + 0.1, SILL - 0.12, SILL - 0.115, STUD[1], BRICK[1])]
 layer('L04', 'Head lintel + sill flashing', (0.42, 0.45, 0.48, 1), lintel + tray, metal=0.85, rough=0.45)
 
 # 5 Brick sill on edge, sloped ~15 degrees to shed water outward
-sill = [box(x, x + 0.076, SILL - 0.11, SILL - 0.0, BRICK[0], BRICK[1] + 0.05,
+sill = [chamfer_box(x, x + 0.076, SILL - 0.11, SILL - 0.0, BRICK[0], BRICK[1] + 0.05, 0.004,
             rot_x=math.radians(15), pivot=(SILL - 0.11, BRICK[0]))
         for x in [OX0 - 0.06 + i * 0.086 for i in range(12)] if x + 0.076 <= OX1 + 0.07]
 layer('L05', 'Angled brickwork sill', (0.64, 0.28, 0.19, 1), sill)
 
 # 6 Timber sill trimmer and head trimmer forming the rough opening
 layer('L06', 'Timber sill and head frame', (0.85, 0.70, 0.49, 1),
-      [box(OX0, OX1, SILL - 0.045, SILL, *STUD), box(OX0, OX1, HEAD, HEAD + 0.045, *STUD)])
+      [chamfer_box(OX0, OX1, SILL - 0.045, SILL, *STUD, 0.003), chamfer_box(OX0, OX1, HEAD, HEAD + 0.045, *STUD, 0.003)])
 
 # 7 Aluminium window frame sitting in the cavity zone
 fz = (0.09, 0.16)
