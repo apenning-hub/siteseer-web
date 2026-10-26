@@ -1,40 +1,52 @@
 ---
+import { Picture } from 'astro:assets';
 import Stop from './Stop.astro';
+import { render } from '../lib/renders';
 
 interface Member { name: string; role: string; text: string }
 interface Props {
-  team: { heading: string; lede: string; expertise: { title: string; text: string }[]; groups: { title: string; members: Member[] }[] };
+  team: {
+    heading: string; lede: string;
+    expertise: { title: string; text: string; image?: string; alt?: string }[];
+    groups: { title: string; members: Member[] }[];
+  };
   alt?: boolean;
 }
 const { team, alt = false } = Astro.props;
-// The first group (the founders) is the feature; any later groups are set
-// as a compact supporting row beneath it.
+// The founders (first group) are the feature cards; later groups, such as the
+// university research team, follow as smaller cards.
 const [lead, ...rest] = team.groups;
 ---
 <section class:list={['band', { alt }]} id="team" aria-labelledby="team-h">
   <div class="wrap">
     <h2 class="h2 rv" id="team-h"><Stop text={team.heading} /></h2>
     <p class="lede rv">{team.lede}</p>
+    <ul class="expertise">
+      {team.expertise.map((e) => (
+        <li class="rv">
+          {e.image && <Picture class="ex-img" src={render(e.image)} alt={e.alt ?? ''} widths={[400, 640, 900]} sizes="(min-width: 801px) 31vw, 100vw" formats={['avif', 'webp']} />}
+          <b>{e.title}</b><span>{e.text}</span>
+        </li>
+      ))}
+    </ul>
     {lead && (
-      <div class="founders">
-        {lead.members.map((m) => (
-          <article class="founder rv">
-            <p class="role">{m.role}</p>
-            <h3>{m.name}</h3>
-            <p>{m.text}</p>
-          </article>
-        ))}
+      <div class="pgroup">
+        <h3>{lead.title}</h3>
+        <div class="founders">
+          {lead.members.map((m) => (
+            <article class="founder rv"><p class="role">{m.role}</p><h4>{m.name}</h4><p>{m.text}</p></article>
+          ))}
+        </div>
       </div>
     )}
-    <ul class="expertise">
-      {team.expertise.map((e) => <li class="rv"><b>{e.title}</b><span>{e.text}</span></li>)}
-    </ul>
     {rest.map((g) => (
-      <div class="supporting rv">
+      <div class="pgroup">
         <h3>{g.title}</h3>
-        <ul>
-          {g.members.map((m) => <li><b>{m.name}</b>, {m.role}. {m.text}</li>)}
-        </ul>
+        <div class="people">
+          {g.members.map((m) => (
+            <article class="person rv"><h4>{m.name}</h4><p class="role">{m.role}</p><p>{m.text}</p></article>
+          ))}
+        </div>
       </div>
     ))}
   </div>

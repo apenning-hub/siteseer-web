@@ -481,6 +481,8 @@ collections:
                 fields:
                   - { name: title, label: Title, widget: string }
                   - { name: text, label: Text, widget: text }
+                  - { name: image, label: Image file, widget: string, required: false, hint: 'A render in src/images/renders, e.g. render-63.jpg.' }
+                  - { name: alt, label: Image description, widget: string, required: false }
               - name: groups
                 label: Groups
                 widget: list

@@ -198,7 +198,8 @@ html:not(.js) .steps{ display:none; }
 .pill b{ position:absolute; inset:0; width:0; background:rgba(21,18,15,.08); }
 .pill span{ position:relative; }
 .pill[aria-current=true]{ background:var(--ink); color:#fff; }
-.pill[aria-current=true] b{ background:rgba(255,255,255,.2); }
+/* The active step's progress runs as a red bar along its foot. */
+.pill[aria-current=true] b{ top:auto; height:3px; background:var(--red); }
 .pp{ flex:none; width:34px; height:34px; border-radius:var(--r-dot); --r-focus:var(--r-dot); background:var(--ink) !important; color:#fff !important; font-size:var(--fs-meta) !important; display:grid; place-items:center; margin-left:var(--s2); }
 /* Inspection points, the info card, and the Hierarchy panel (styled after the
    SiteSeer viewer's own panel). */
@@ -253,6 +254,8 @@ html:not(.js) .steps{ display:none; }
 .band{ padding:var(--band-y) 0; }
 /* .alt is the second ground: soft grey between paper sections. */
 .alt{ background:var(--soft); }
+/* A short logo-red bar above every section heading. */
+.band .h2::before,.upcoming h2::before{ content:''; display:block; width:48px; height:6px; background:var(--red); margin-bottom:var(--s5); }
 .h2{ font:800 clamp(30px,4.2vw,60px)/1.04 var(--font-display); text-transform:uppercase; letter-spacing:var(--tr-snug); max-width:18ch; }
 .lede{ font:400 clamp(18px,1.6vw,22px)/1.5 Inter, sans-serif; color:var(--card-ink); max-width:46ch; margin:var(--s5) 0 0; }
 .center{ text-align:center; }
@@ -322,8 +325,9 @@ html:not(.js) .rv{ opacity:1; transform:none; }
 /* Research team */
 /* The three fields the team spans: the point of the section, so they lead. */
 .expertise{ list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); gap:var(--s4); margin-top:var(--s7); }
-.expertise li{ border-top:3px solid var(--red); padding-top:var(--s4); }
-.expertise b{ display:block; font:800 var(--fs-sub)/1.15 var(--font-display); text-transform:uppercase; margin-bottom:var(--s2); }
+.expertise li{ display:flex; flex-direction:column; gap:var(--s2); }
+.expertise img.ex-img{ display:block; width:100%; height:auto; aspect-ratio:16/10; object-fit:cover; border-radius:var(--r6); box-shadow:var(--sh-1); margin-bottom:var(--s3); }
+.expertise b{ display:block; font:800 var(--fs-sub)/1.15 var(--font-display); text-transform:uppercase; }
 .expertise span{ font-size:var(--fs-body); line-height:1.55; color:var(--card-ink); }
 .people{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:var(--s4); }
 .person{ background:#fff; border-radius:var(--r6); padding:var(--s5) var(--s6); box-shadow:var(--sh-1); }
@@ -331,18 +335,13 @@ html:not(.js) .rv{ opacity:1; transform:none; }
 .person .role{ font:600 var(--fs-ui) Inter, sans-serif; color:var(--muted); margin:var(--s1) 0 var(--s3); }
 .person p:last-child{ font-size:var(--fs-body); line-height:1.55; color:var(--card-ink); }
 
-/* Founders lead the team section; the research team is a supporting row. */
-.founders{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:var(--s4); margin-top:var(--s7); }
+/* Founders are the feature cards; the research team follows in smaller cards. */
+.founders{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:var(--s4); }
 .founder{ background:#fff; border-radius:var(--r6); padding:var(--s6); box-shadow:var(--sh-1); }
 .founder::before{ content:''; display:block; width:40px; height:4px; background:var(--red); margin-bottom:var(--s4); }
 .founder .role{ font:600 var(--fs-ui) Inter, sans-serif; color:var(--muted); }
-.founder h3{ font:800 clamp(24px,2.4vw,34px)/1.05 var(--font-display); text-transform:uppercase; margin:var(--s2) 0 var(--s3); }
+.founder h4{ font:800 clamp(24px,2.4vw,34px)/1.05 var(--font-display); text-transform:uppercase; margin:var(--s2) 0 var(--s3); }
 .founder p:last-child{ font-size:var(--fs-lead); line-height:1.5; color:var(--card-ink); max-width:40ch; }
-.supporting{ margin-top:var(--s7); padding-top:var(--s5); border-top:1px solid var(--line); }
-.supporting h3{ font:600 var(--fs-ui) Inter, sans-serif; color:var(--muted); margin-bottom:var(--s3); }
-.supporting ul{ list-style:none; display:grid; gap:var(--s2); }
-.supporting li{ font-size:var(--fs-ui); line-height:1.5; color:var(--card-ink); }
-.supporting b{ color:var(--ink); font-weight:600; }
 
 /* Contact */
 .cta-row{ display:flex; gap:var(--s3); justify-content:center; flex-wrap:wrap; margin-top:var(--s6); }

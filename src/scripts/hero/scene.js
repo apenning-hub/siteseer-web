@@ -104,9 +104,24 @@ export function createScene(hero) {
   const sph = new THREE.Spherical();
   let tween = null;
 
+  // Keep a subject sphere (the whole wall, by default) inside the frame, with
+  // room left for a side panel on desktop. The camera stands at least as far
+  // back as that needs; a step's own distance can only push it further.
+  let fit = { c: new THREE.Vector3(0, 1.1, 0.13), r: 1.5 };
+  const setFit = (f) => { fit = f && { c: new THREE.Vector3(...f.c), r: f.r }; };
+  function fitDistance() {
+    if (!fit) return 0;
+    const c = renderer.domElement;
+    const w = c.clientWidth * (hero.clientWidth > 900 ? 0.78 : 0.94), h = c.clientHeight * 0.9;
+    if (!w || !h) return 0;
+    const v = THREE.MathUtils.degToRad(camera.fov) / 2;
+    const half = Math.min(v, Math.atan(Math.tan(v) * (w / h)));
+    return (fit.c.distanceTo(cam.t) + fit.r) / Math.sin(half);
+  }
   function applyCam() {
     // Narrow screens stack the copy over the model, so stand further back.
-    sph.set(cam.r * (hero.clientWidth > 900 ? 1.05 : 1.25), THREE.MathUtils.degToRad(cam.polar), THREE.MathUtils.degToRad(cam.az));
+    const r = Math.max(cam.r * (hero.clientWidth > 900 ? 1.05 : 1.25), fitDistance());
+    sph.set(r, THREE.MathUtils.degToRad(cam.polar), THREE.MathUtils.degToRad(cam.az));
     camera.position.setFromSpherical(sph).add(cam.t);
     controls.target.copy(cam.t);
   }
@@ -149,7 +164,7 @@ export function createScene(hero) {
   }
 
   return {
-    renderer, scene, camera, controls, sun, ground, render,
+    renderer, scene, camera, controls, sun, ground, render, setFit,
     camTo, tickCamera, applyCam, adoptControls, toScreen,
     stopTween: () => { tween = null; },
     tweening: () => !!tween,

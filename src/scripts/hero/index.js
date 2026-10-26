@@ -59,6 +59,8 @@ export async function mountHero(hero) {
     }
     if (s.kind === 'build' && !reduce) L.startBuild();
     else L.finishBuild();
+    // Every beat frames the whole wall, except the finale, which frames the site.
+    S.setFit(finale ? null : { c: [0, 1.1, 0.13], r: 1.5 });
     S.camTo(s.cam, finale ? 3400 : 1500);
   }
 
