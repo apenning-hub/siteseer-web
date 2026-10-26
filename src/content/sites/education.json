@@ -43,38 +43,24 @@
       {
         "word": "Accurate",
         "line": "Modelled to the last flashing.",
-        "kind": "inspect",
+        "kind": "focus",
         "cam": {
           "t": [
-            0.2,
-            1.1,
+            0.4,
+            1.35,
             0.2
           ],
-          "az": -34,
-          "polar": 74,
-          "r": 5.2
+          "az": -40,
+          "polar": 70,
+          "r": 5.4
         },
-        "hold": 6000,
         "looks": [
           {
             "t": 0,
-            "look": "xray",
+            "look": "focus",
             "focus": [
-              4,
-              12
+              4
             ]
-          }
-        ],
-        "inspect": [
-          {
-            "at": [
-              0.3,
-              0.69,
-              0.27
-            ],
-            "kicker": "Hidden in the wall",
-            "title": "Cavity tray flashing",
-            "text": "Under the sill and over the lintel, flashings catch water in the cavity and send it out through the weep holes. Once the brick is laid, you never see them."
           }
         ]
       },
@@ -195,7 +181,6 @@
     ]
   },
   "problem": {
-    "eyebrow": "The problem",
     "heading": "You can't take a cohort onto a building site.",
     "lede": "When it's impossible to get learners onto a construction site to connect theory to practice, SiteSeer is the solution. We put a real building into a game engine, at every stage of its construction.",
     "points": [
@@ -217,7 +202,6 @@
     "caption": "Inside SiteSeer: a two-storey house, part way through the build."
   },
   "how": {
-    "eyebrow": "How it works",
     "heading": "Pause the build. Walk in.",
     "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
     "points": [
@@ -253,7 +237,6 @@
     ]
   },
   "access": {
-    "eyebrow": "Where it runs",
     "heading": "Meet learners where they are.",
     "lede": "In the lab, inside your learning platform, on their own laptop or on their phone.",
     "closing": "It's all possible with SiteSeer.",
@@ -288,7 +271,6 @@
     ]
   },
   "results": {
-    "eyebrow": "Proven. Better.",
     "heading": "A decade in real classrooms.",
     "lede": "Over the last decade SiteSeer has been used by more than a thousand learners. Their experience shaped what it is now.",
     "stats": [
@@ -322,7 +304,6 @@
     ]
   },
   "team": {
-    "eyebrow": "Research team",
     "heading": "The people behind it.",
     "lede": "SiteSeer comes out of construction and architecture teaching research.",
     "members": [
@@ -339,7 +320,6 @@
     ]
   },
   "partners": {
-    "eyebrow": "Partners",
     "heading": "Who we work with.",
     "order": [
       "adelaide-university",
@@ -351,7 +331,6 @@
     ]
   },
   "contact": {
-    "eyebrow": "Your first look",
     "heading": "See it for yourself.",
     "lede": "Book a guided demo, or talk to us about running a pilot with your cohort.",
     "email": "sean.pickersgill@adelaide.edu.au",

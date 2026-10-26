@@ -11,12 +11,10 @@ const site = (await getEntry('sites', AUDIENCE))!.data;
 
 const HEAD = {
   education: {
-    eyebrow: 'The SiteSeer blog',
     heading: 'Construction education, in focus.',
     lede: 'Research-led, plain-English writing on the skills shortage, digital learning, and the tertiary, TAFE and school landscape.',
   },
   industry: {
-    eyebrow: 'The SiteSeer blog',
     heading: 'Building, in focus.',
     lede: 'Writing on how buildings are understood, sequenced and built right the first time.',
   },
@@ -27,7 +25,6 @@ const comingSoon = AUDIENCE === 'industry' && posts.length < 3;
 <Base title="Blog: SiteSeer" description={HEAD.lede}>
   <section class="band page-top">
     <div class="wrap">
-      <p class="eyebrow">{HEAD.eyebrow}</p>
       <h1 class="h2"><Stop text={HEAD.heading} /></h1>
       <p class="lede">{HEAD.lede}</p>
       <div class="bloglist">

@@ -140,7 +140,7 @@ export async function mountHero(hero) {
       if (k === 1) toReal = null;
     }
     if (!dragging) S.tickCamera(now, dt, playing);
-    overlay.update(steps[step], now - stepStart, !S.tweening() && !dragging && !reduce, dt, look?.look);
+    overlay.update(steps[step], now - stepStart, !S.tweening() && !dragging && !reduce, dt, look?.look, look?.focus);
     S.controls.update();
     S.render();
     if (++frames === 3) {

@@ -43,38 +43,24 @@
       {
         "word": "Accurate",
         "line": "Matched 1-to-1 with what gets built.",
-        "kind": "inspect",
+        "kind": "focus",
         "cam": {
           "t": [
-            0.2,
-            1.1,
+            0.4,
+            1.35,
             0.2
           ],
-          "az": -34,
-          "polar": 74,
-          "r": 5.2
+          "az": -40,
+          "polar": 70,
+          "r": 5.4
         },
-        "hold": 6000,
         "looks": [
           {
             "t": 0,
-            "look": "xray",
+            "look": "focus",
             "focus": [
-              4,
-              12
+              4
             ]
-          }
-        ],
-        "inspect": [
-          {
-            "at": [
-              0.3,
-              0.69,
-              0.27
-            ],
-            "kicker": "Hidden in the wall",
-            "title": "Cavity tray flashing",
-            "text": "Under the sill and over the lintel, flashings catch water in the cavity and send it out through the weep holes. Once the brick is laid, you never see them."
           }
         ]
       },
@@ -185,7 +171,6 @@
     ]
   },
   "problem": {
-    "eyebrow": "The problem",
     "heading": "RFIs and defects are expensive.",
     "lede": "Most start with someone on site not understanding how a detail goes together, because drawings don't show the sequence. SiteSeer trains your team on the actual building, at every stage, before they build it.",
     "points": [
@@ -207,7 +192,6 @@
     "caption": "A portal frame connection, bolted as it is fabricated."
   },
   "how": {
-    "eyebrow": "How it works",
     "heading": "Pause the build. Walk in.",
     "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
     "points": [
@@ -243,7 +227,6 @@
     ]
   },
   "uses": {
-    "eyebrow": "What your team gets",
     "heading": "Training on the building they're about to build.",
     "lede": "Not a generic course: your project, at every stage.",
     "items": [
@@ -270,7 +253,6 @@
     ]
   },
   "access": {
-    "eyebrow": "Where it runs",
     "heading": "In the office and on site.",
     "lede": "On the machines your team already has, at the desk and at the slab edge.",
     "ways": [
@@ -297,7 +279,6 @@
     ]
   },
   "results": {
-    "eyebrow": "Background",
     "heading": "Proven in the classroom, now on site.",
     "lede": "SiteSeer began in construction education, where a building has to make sense to someone who has never seen it built. That's what a site team needs too.",
     "stats": [
@@ -327,7 +308,6 @@
     ]
   },
   "team": {
-    "eyebrow": "Research team",
     "heading": "The people behind it.",
     "lede": "SiteSeer comes out of construction and architecture teaching research.",
     "members": [
@@ -344,7 +324,6 @@
     ]
   },
   "partners": {
-    "eyebrow": "Partners",
     "heading": "Who we work with.",
     "order": [
       "bates-smart",
@@ -356,7 +335,6 @@
     ]
   },
   "contact": {
-    "eyebrow": "Your project",
     "heading": "See it on your build.",
     "lede": "Book a walkthrough, or talk to us about training your team on a live project.",
     "email": "sean.pickersgill@adelaide.edu.au",

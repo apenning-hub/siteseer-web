@@ -223,12 +223,12 @@ collections:
                     widget: list
                     collapsed: true
                     required: false
-                    hint: Changes during the step, at a time in ms. White model, building-system colours, or x-ray with some layers held solid.
+                    hint: Changes during the step, at a time in ms. White model, building-system colours, or the white model with some layers picked out in colour.
                     fields:
                       - { name: t, label: From (ms), widget: number, value_type: int }
-                      - { name: look, label: Look, widget: select, options: [white, systems, xray] }
+                      - { name: look, label: Look, widget: select, options: [white, systems, focus] }
                       - name: focus
-                        label: Layers held solid in x-ray (1–12)
+                        label: Layers picked out (1–12)
                         widget: list
                         required: false
                         field: { name: n, label: Layer, widget: number, value_type: int }
@@ -314,9 +314,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string
@@ -355,9 +352,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string
@@ -382,9 +376,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string
@@ -427,9 +418,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string
@@ -452,9 +440,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string
@@ -487,7 +472,6 @@ collections:
             collapsed: true
             required: false
             fields:
-              - { name: eyebrow, label: Eyebrow, widget: string }
               - { name: heading, label: Heading, widget: string }
               - { name: lede, label: Intro, widget: text }
               - name: members
@@ -503,9 +487,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string
@@ -518,9 +499,6 @@ collections:
             widget: object
             collapsed: true
             fields:
-              - name: eyebrow
-                label: Eyebrow
-                widget: string
               - name: heading
                 label: Heading
                 widget: string

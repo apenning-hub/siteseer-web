@@ -4,7 +4,7 @@ import { Picture } from 'astro:assets';
 import { render } from '../lib/renders';
 
 interface Props {
-  problem: { eyebrow: string; heading: string; lede: string; points: { title: string; text: string }[]; image: string; alt: string; caption: string };
+  problem: { heading: string; lede: string; points: { title: string; text: string }[]; image: string; alt: string; caption: string };
   alt?: boolean;
 }
 const { problem: p, alt = false } = Astro.props;
@@ -13,7 +13,6 @@ const { problem: p, alt = false } = Astro.props;
   <div class="wrap">
     <div class="two">
       <div>
-        <p class="eyebrow rv">{p.eyebrow}</p>
         <h2 class="h2 rv" id="problem-h"><Stop text={p.heading} /></h2>
         <p class="lede rv">{p.lede}</p>
         <ol class="points">

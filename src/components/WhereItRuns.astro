@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 type Icon = 'lab' | 'lms' | 'laptop' | 'phone' | 'tablet' | 'browser' | 'office';
 interface Props {
-  access: { eyebrow: string; heading: string; lede: string; closing?: string; ways: { icon: Icon; title: string; text: string; platforms?: string[] }[] };
+  access: { heading: string; lede: string; closing?: string; ways: { icon: Icon; title: string; text: string; platforms?: string[] }[] };
   alt?: boolean;
 }
 const { access, alt = false } = Astro.props;
@@ -26,7 +26,6 @@ const logoFor = (name: string) => (existsSync(join(process.cwd(), 'public/logos'
 ---
 <section class:list={['band', { alt }]} id="access" aria-labelledby="access-h">
   <div class="wrap">
-    <p class="eyebrow rv">{access.eyebrow}</p>
     <h2 class="h2 rv" id="access-h"><Stop text={access.heading} /></h2>
     <p class="lede rv">{access.lede}</p>
     <div class="cards">

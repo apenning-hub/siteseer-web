@@ -6,7 +6,7 @@ import { render } from '../lib/renders';
 
 interface Img { image: string; alt: string; caption: string }
 interface Props {
-  how: { eyebrow: string; heading: string; lede: string; points: { title: string; text: string }[]; strip: Img[] };
+  how: { heading: string; lede: string; points: { title: string; text: string }[]; strip: Img[] };
   alt?: boolean;
 }
 const { how, alt = false } = Astro.props;
@@ -16,7 +16,6 @@ const { how, alt = false } = Astro.props;
     <div class="two" style="align-items:stretch">
       <StageTile />
       <div style="align-self:center">
-        <p class="eyebrow rv">{how.eyebrow}</p>
         <h2 class="h2 rv" id="how-h"><Stop text={how.heading} /></h2>
         <p class="lede rv">{how.lede}</p>
         <ol class="points">

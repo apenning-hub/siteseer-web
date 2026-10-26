@@ -2,7 +2,7 @@
 import Stop from './Stop.astro';
 import { getCollection } from 'astro:content';
 
-interface Props { partners: { eyebrow: string; heading: string; order: string[] }; alt?: boolean }
+interface Props { partners: { heading: string; order: string[] }; alt?: boolean }
 const { partners, alt = false } = Astro.props;
 const all = await getCollection('partners');
 const shown = partners.order.map((id) => {

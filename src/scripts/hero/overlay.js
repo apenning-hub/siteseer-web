@@ -55,7 +55,7 @@ export function createOverlay({ hero, toScreen, layers }) {
 
   // step: the current step's data; t: ms since it began; settled: the camera
   // has arrived and nobody is dragging. Returns the pull that is active now.
-  function update(step, t, settled, dt, look) {
+  function update(step, t, settled, dt, look, focus = []) {
     const points = step.inspect && settled ? step.inspect : [];
     const active = points.length ? points[Math.min(points.length - 1, Math.floor(Math.max(0, t - CARD_DELAY) / CARD_EACH))] : null;
     while (pinEls.length < points.length) {
@@ -81,11 +81,13 @@ export function createOverlay({ hero, toScreen, layers }) {
     panel.classList.toggle('on', !!step.pulls && settled);
     // Systems legend: shown in the systems look. Rows light up as their
     // system's layers land.
-    const showLegend = look === 'systems';
+    const showLegend = look === 'systems' || look === 'focus';
     legend.classList.toggle('on', showLegend);
     for (const r of sysRows) {
       r.li.classList.toggle('lit', r.layers.some(layers.landed));
+      r.li.classList.toggle('active', look === 'focus' && r.layers.some((n) => focus.includes(n)));
     }
+    legend.classList.toggle('focusing', look === 'focus');
     for (const r of rows) r.li.classList.toggle('off', r.layers.some(layers.isOut));
 
     if (active) setCard(active, active.at);

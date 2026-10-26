@@ -36,8 +36,8 @@ const heroStep = z.object({
   cam: z.object({ t: vec3, az: z.number(), polar: z.number(), r: z.number() }),
   hold: z.number().optional(),
   // How the model looks during the step, changing at t ms: the white model,
-  // building-system colours, or an x-ray with `focus` layers held solid.
-  looks: z.array(z.object({ t: z.number(), look: z.enum(['white', 'systems', 'xray']), focus: z.array(z.number().int()).optional() })).optional(),
+  // building-system colours, or the white model with `focus` layers in colour.
+  looks: z.array(z.object({ t: z.number(), look: z.enum(['white', 'systems', 'focus']), focus: z.array(z.number().int()).optional() })).optional(),
   inspect: z.array(z.object({ at: vec3, kicker: z.string(), title: z.string(), text: z.string() })).optional(),
   pulls: z.array(z.object({
     t: z.number(), dur: z.number(), layers: z.array(z.number().int()), dv: z.tuple([z.number(), z.number()]),
@@ -55,28 +55,28 @@ const sites = defineCollection({
     meta: z.object({ title: z.string(), description: z.string() }),
     nav: z.object({ cta: z.string(), ctaShort: z.string().optional() }),
     hero: z.object({ kicker: z.string(), statement: z.string(), primary: z.string(), secondary: z.string(), steps: z.array(heroStep).min(1) }),
-    problem: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point) }).merge(image),
-    how: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point), strip: z.array(image) }),
+    problem: z.object({ heading: z.string(), lede: z.string(), points: z.array(point) }).merge(image),
+    how: z.object({ heading: z.string(), lede: z.string(), points: z.array(point), strip: z.array(image) }),
     access: z.object({
-      eyebrow: z.string(), heading: z.string(), lede: z.string(), closing: z.string().optional(),
+      heading: z.string(), lede: z.string(), closing: z.string().optional(),
       ways: z.array(z.object({
         icon: z.enum(['lab', 'lms', 'laptop', 'phone', 'tablet', 'browser', 'office']),
         title: z.string(), text: z.string(), platforms: z.array(z.string()).optional(),
       })),
     }),
-    uses: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), items: z.array(point.extend({ tag: z.string() })) }).optional(),
+    uses: z.object({ heading: z.string(), lede: z.string(), items: z.array(point.extend({ tag: z.string() })) }).optional(),
     results: z.object({
-      eyebrow: z.string(), heading: z.string(), lede: z.string(),
+      heading: z.string(), lede: z.string(),
       stats: z.array(z.object({ num: z.string(), suffix: z.string().optional(), cap: z.string() })),
       outcomes: z.array(point),
     }),
     team: z.object({
-      eyebrow: z.string(), heading: z.string(), lede: z.string(),
+      heading: z.string(), lede: z.string(),
       members: z.array(z.object({ name: z.string(), role: z.string(), text: z.string() })),
     }).optional(),
-    partners: z.object({ eyebrow: z.string(), heading: z.string(), order: z.array(z.string()).min(1) }),
+    partners: z.object({ heading: z.string(), order: z.array(z.string()).min(1) }),
     contact: z.object({
-      eyebrow: z.string(), heading: z.string(), lede: z.string(), email: z.string().email(),
+      heading: z.string(), lede: z.string(), email: z.string().email(),
       primary: z.object({ label: z.string(), subject: z.string() }),
       secondary: z.object({ label: z.string(), subject: z.string() }),
     }),

@@ -2,12 +2,11 @@
 import Stop from './Stop.astro';
 
 interface Member { name: string; role: string; text: string }
-interface Props { team: { eyebrow: string; heading: string; lede: string; members: Member[] }; alt?: boolean }
+interface Props { team: { heading: string; lede: string; members: Member[] }; alt?: boolean }
 const { team, alt = false } = Astro.props;
 ---
 <section class:list={['band', { alt }]} id="team" aria-labelledby="team-h">
   <div class="wrap">
-    <p class="eyebrow rv">{team.eyebrow}</p>
     <h2 class="h2 rv" id="team-h"><Stop text={team.heading} /></h2>
     <p class="lede rv">{team.lede}</p>
     <div class="people">

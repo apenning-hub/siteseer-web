@@ -9,8 +9,6 @@ import { systemOf } from './systems.js';
 // wherever the exporter nests it. See tools/models/README.md.
 const LAYER = /^L(\d\d)_(?!pin$)/;
 const METAL = new Set([2, 3, 4, 7, 12]);
-// The layers held solid in the x-ray look: the logo red.
-const HELD = new THREE.Color(0xff0000);
 // Construction order for the build-up (layer numbers).
 export const ORDER = [2, 6, 3, 1, 4, 5, 7, 11, 12, 8, 10, 9];
 
@@ -51,7 +49,7 @@ export function createLayers(root) {
         // Three looks the model moves between (see setLook):
         //   white   - the plain presentation model
         //   systems - each layer in its building system's colour
-        //   xray    - everything ghosted except the layers being shown
+        //   focus   - the white model with `focus` layers in their system colour
         white: new THREE.Color(glass ? 0xdfe8ea : metal ? 0xc4bfb8 : 0xebe5dd),
         system: new THREE.Color(systemOf(n)?.color ?? '#c7c7cc'),
         roughness: glass ? 0.1 : metal ? 0.4 : 0.7,
@@ -75,10 +73,10 @@ export function createLayers(root) {
   function setLook(look, focus = [], instant = false) {
     each((L, n) => {
       const held = focus.includes(n);
-      L.xrTo = look === 'xray' && !held ? 1 : 0;
+      L.xrTo = 0;
       for (const m of L.meshes) {
         const u = m.userData;
-        u.target.copy(look === 'systems' ? u.system : look === 'xray' && held ? HELD : u.white);
+        u.target.copy(look === 'systems' || (look === 'focus' && held) ? u.system : u.white);
         if (instant) m.material.color.copy(u.target);
       }
       if (instant) L.xr = L.xrTo;
