@@ -12,14 +12,28 @@
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:spacing": "node scripts/check-spacing.mjs",
     "check:a11y": "npx --yes @axe-core/cli http://localhost:4321/ http://localhost:4321/blog/ http://localhost:4321/blog/the-site-access-bottleneck/ --exit",
-    "test": "node --test \"tests/**/*.test.mjs\""
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "build:education": "SITE_AUDIENCE=education astro build",
+    "build:industry": "SITE_AUDIENCE=industry astro build",
+    "deploy:education": "npm run build:education && wrangler pages deploy dist --project-name siteseer-education --branch main",
+    "deploy:industry": "npm run build:industry && wrangler pages deploy dist --project-name siteseer-industry --branch main",
+    "models": "python3 tools/models/make_detail.py tools/models/out/detail.glb && python3 tools/models/make_site.py tools/models/out/site.glb && node tools/models/compress.mjs tools/models/out/detail.glb public/models/detail.glb && node tools/models/compress.mjs tools/models/out/site.glb public/models/site.glb"
   },
   "dependencies": {
-    "astro": "^5.6.0"
+    "astro": "^5.6.0",
+    "three": "^0.169.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@gltf-transform/core": "^4.1.1",
+    "@gltf-transform/extensions": "^4.1.1",
+    "@gltf-transform/functions": "^4.1.1",
+    "gltf-validator": "^2.0.0-dev.3.10",
+    "meshoptimizer": "^0.22.0",
+    "mikktspace": "^1.1.1",
+    "sharp": "^0.33.5",
     "typescript": "^5.7.0",
+    "wrangler": "^4.152.0",
     "yaml": "^2.9.0"
   }
 }
