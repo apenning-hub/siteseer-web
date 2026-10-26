@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "slug": "adelaide-university",
+      "name": "Adelaide University",
+      "role": "Teaching and online delivery",
+      "group": "Partner",
+      "blurb": "Piloting SiteSeer in undergraduate architecture and construction courses, and through AU Online with people who study entirely online.",
+      "logo": "adelaide-university.svg"
+    },
+    {
+      "slug": "tafe-sa",
+      "name": "TAFE SA",
+      "role": "Vocational partner",
+      "group": "Partner",
+      "blurb": "Demonstrating SiteSeer across vocational construction pathways.",
+      "logo": "tafe-sa.svg"
+    },
+    {
+      "slug": "unreal-academic-partner",
+      "name": "Unreal Engine Academic Partner",
+      "role": "Technology",
+      "group": "Partner",
+      "blurb": "Built in Unreal Engine, under Epic's academic partner program.",
+      "logo": "unreal-academic-partner.svg"
+    },
+    {
+      "slug": "icc",
+      "name": "ICC",
+      "role": "Venture support",
+      "group": "Supported by",
+      "blurb": "Took part in the Innovation & Collaboration Centre's venture programs.",
+      "logo": "icc.png"
+    },
+    {
+      "slug": "bates-smart",
+      "name": "Bates Smart",
+      "role": "Industry support",
+      "group": "Supported by",
+      "blurb": "Guidance from practice on how a build is documented and sequenced.",
+      "logo": "bates-smart.svg"
+    },
+    {
+      "slug": "csiro-on",
+      "name": "CSIRO ON",
+      "role": "Research translation",
+      "group": "Supported by",
+      "blurb": "Part of CSIRO's ON program for moving research into practice.",
+      "logo": "csiro.svg"
+    }
+  ]
+}

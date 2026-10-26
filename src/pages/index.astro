@@ -1,306 +1,36 @@
 ---
+// One homepage, two audiences. SITE_AUDIENCE picks the copy file; the
+// sections are shared. Grounds alternate paper / soft grey after the hero.
 import Base from '../layouts/Base.astro';
-import { Picture } from 'astro:assets';
-import { getCollection, getEntry } from 'astro:content';
-import productHero from '../images/product-hero.png';
-import productProcess from '../images/product-process.jpg';
+import Hero3D from '../components/Hero3D.astro';
+import Problem from '../components/Problem.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import UseCases from '../components/UseCases.astro';
+import WhereItRuns from '../components/WhereItRuns.astro';
+import Results from '../components/Results.astro';
+import Partners from '../components/Partners.astro';
+import Contact from '../components/Contact.astro';
+import Upcoming from '../components/Upcoming.astro';
+import { getEntry } from 'astro:content';
+import { AUDIENCE } from '../lib/audience';
 
-// ── SWAP IMAGES HERE ── drop a file in src/images/ and import it above.
-// landscape = window/desktop shots · portrait = phone screenshots
-//
-// These are ESM imports, NOT URL strings built from BASE_URL. That is the whole
-// point: an import goes through astro:assets, which emits AVIF/WebP derivatives,
-// a srcset, and intrinsic width/height on every <img> (the thing that stops the
-// page reflowing as images load). A `${BASE_URL}images/…` string bypasses all of
-// it and ships the 2.6 MB original. Never reintroduce one.
-//
-// NOTE (a11y, spec §5): SEVEN of the eight slots below are the same file,
-// product-hero.png — the hero window, both "every device" phones and its centre
-// window, and all three "first look" phones. (An earlier version of this comment
-// said six; the built HTML shows seven.) They are one screenshot repeated, so
-// their alt text cannot be accurate until real distinct images exist. Do not
-// invent descriptions — replace the images.
+const entry = await getEntry('sites', AUDIENCE);
+if (!entry) throw new Error(`No site copy for "${AUDIENCE}": check src/content/sites/${AUDIENCE}.json`);
+const site = entry.data;
 
-// ── RESPONSIVE SIZING ──
-// Every window and phone screen crops with `object-fit:cover` inside a
-// fixed-height box, so the width the browser actually paints is NOT the width of
-// the box — it is however wide the image must be for its *height* to fill.
-// product-hero.png is 1866×972 (ratio 1.92), so the painted widths are:
-//
-//   hero .win-shot        ≤884 × 440 box  → paints ~884px wide
-//   every-device .window   560 × 330 box  → paints ~634px wide
-//   .phone (220 wide)      220 × 472 box  → paints ~906px wide
-//   .phonerow centre phone 240 × 515 box  → paints ~988px wide
-//
-// One ladder spans all four, and because those seven slots share one placeholder
-// file, one shared `sizes` makes every slot resolve to the SAME candidate — so
-// the browser downloads a single derivative for the whole page rather than one
-// per slot. 992 is the 1× rung (covers the widest painted width, 988); 1866 is
-// the source width and doubles as the 2× rung. `sizes:992px` slightly
-// over-states the two window slots, which costs nothing: those bytes are already
-// in cache from the phones.
-const HERO_WIDTHS = [992, 1866];
-const HERO_SIZES = '992px';
-const FORMATS: ('avif' | 'webp')[] = ['avif', 'webp'];
-// The <img> inside <picture> is only ever reached by a browser that supports
-// neither AVIF nor WebP, i.e. pre-2020 Safari. JPEG, not the source PNG: the
-// PNG is fully opaque (verified — alpha channel present but unused), so nothing
-// is lost, and it keeps a ~1 MB dead PNG out of the build output.
-const FALLBACK = 'jpeg' as const;
-
-/** Shared props for the seven slots showing product-hero.png. alt is per-slot. */
-const heroShot = { src: productHero, widths: HERO_WIDTHS, sizes: HERO_SIZES, formats: FORMATS, fallbackFormat: FALLBACK };
-
-// ── COPY LIVES IN src/content/home/*.json ── so a non-technical author can edit
-// it through the CMS. Nothing below should ever be re-inlined here: the JSON is
-// the single source of truth and the Zod schemas in src/content.config.ts guard
-// its shape. See src/content/home/README.md.
-//
-// getCollection() makes no ordering promise, and every one of these is an
-// ordered list, so sort by the numeric id the file() parser assigned.
-const byIndex = (a: { id: string }, b: { id: string }) => Number(a.id) - Number(b.id);
-
-const hero = (await getEntry('hero', 'hero'))!.data;
-const pillars = (await getCollection('pillars')).sort(byIndex).map((e) => e.data);
-const capabilities = (await getCollection('capabilities')).sort(byIndex).map((e) => e.data);
-const outcomes = (await getCollection('outcomes')).sort(byIndex).map((e) => e.data);
-const stats = (await getCollection('stats')).sort(byIndex).map((e) => e.data);
-const partners = (await getCollection('partners')).sort(byIndex).map((e) => e.data);
-const roadmap = (await getEntry('roadmap', 'roadmap'))!.data;
-const roadmapA = roadmap.rowA;
-const roadmapB = roadmap.rowB;
-
-/**
- * hero.lead is the only content field carrying markup: inline `**bold**`, so the
- * author gets a Bold button in the CMS instead of typing a tag. It must be
- * *converted*, not interpolated, or the asterisks print in the largest sentence
- * on the page.
- *
- * Escape first. This string is written by a CMS, so it is untrusted input being
- * handed to set:html — escaping before converting means the only tag that can
- * ever reach the page is the <b> this function produces.
- *
- * Inline bold is the entire grammar the README permits; a markdown library would
- * be several hundred kilobytes to do this one replace.
- */
-const inlineBold = (s: string) =>
-  s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+// Grounds alternate paper / soft grey down the page; `uses` only exists on the
+// industry site, so the alternation is counted as the sections render.
+let n = 0;
+const alt = () => n++ % 2 === 0;
 ---
 <Base>
-  <!-- HERO -->
-  <section class="band band-red grain hero tc">
-    <div class="wrap" style="position:relative;z-index:2;max-width:920px;">
-      <span class="kick reveal d1"><span class="ln"></span>{hero.kick}<span class="ln"></span></span>
-      <h1 class="h1 druk">{hero.headline.map((line, i) => <span class={`reveal d${i + 2}`}>{line}</span>)}</h1>
-      <p class="lead reveal d4" set:html={inlineBold(hero.lead)}></p>
-      <div class="reveal d5" style="display:flex;gap:var(--s3);justify-content:center;flex-wrap:wrap;">
-        <a class="btn btn-onred btn-lg" href="#contact">Start a pilot →</a>
-        <a class="btn btn-ghostred btn-lg" href="#contact">Join the waitlist</a>
-      </div>
-      <div class="proof reveal d6">{hero.proof}</div>
-    </div>
-    {/* The two 84s are LEFT OFF THE SCALE deliberately, and they are one value,
-        not two: the -84px bottom margin here and the 84px spacer div below the
-        window are a matched pair. The negative margin pulls the following
-        sibling up by 84px and the spacer puts exactly that back, so the red
-        band ends flush with the window's bottom edge — they cancel, and they
-        only stay correct while they are equal. Snapping them to --s8 would
-        imply each can be retuned on its own, which is the one thing that would
-        break them. (They also cancel to a no-op: removing both would render
-        identically. Left in place — that is a structural edit, not a token
-        one.) The 50px above them is now --s7. */}
-    <div class="wrap reveal d6" style="position:relative;z-index:2;max-width:980px;margin:var(--s7) auto -84px;">
-      <div class="window">
-        <div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — structural steel · ground floor</span></div>
-        <Picture
-          {...heroShot}
-          class="win-shot"
-          loading="eager"
-          fetchpriority="high"
-          alt="A SiteSeer construction environment on desktop, showing a partially framed building with its structure exposed"
-        />
-      </div>
-    </div>
-    <div style="height:84px;"></div>
-  </section>
-
-  <!-- EXPERTISE -->
-  <section class="band" id="expertise">
-    <div class="wrap">
-      <div class="eyebrow">What we do</div>
-      <h2 class="sh druk" style="max-width:14ch">Experts in construction digital learning<span class="dot">.</span></h2>
-      <div class="pillars">
-        {pillars.map((p) => (
-          <div class="glass-light glass pill"><div class="no">{p.no}</div><h3>{p.h}</h3><p>{p.p}</p></div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- PROVEN -->
-  <section class="band band-ink" id="proven">
-    <div class="wrap">
-      <div class="eyebrow">Proven. Better.</div>
-      <div class="split">
-        <div>
-          <h2 class="sh druk">A decade of real<br />classroom results<span class="dot">.</span></h2>
-          <p class="stext">When it's impossible to get students onto a construction site to connect theory to practice, SiteSeer is the solution — safe, repeatable, and on the devices they already carry.</p>
-        </div>
-        <div class="statstrip">
-          {stats.map((s) => (
-            <div class="statc glass"><div class="num">{s.num}</div><div class="cap">{s.cap}</div></div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- EVERY DEVICE -->
-  <section class="band tc" id="platform">
-    <div class="wrap narrow">
-      <div class="eyebrow">Everything, everywhere</div>
-      <h2 class="sh druk">On every device<span class="dot">.</span></h2>
-      <p class="stext">Stream the whole build on a personal laptop — no headset, no lab, no booking a site visit. The same environment, on every device.</p>
-      <div class="chips"><div class="chip">✔ Windows</div><div class="chip">✔ macOS</div><div class="chip soon">iOS <span class="tag">SOON</span></div><div class="chip soon">Android <span class="tag">SOON</span></div></div>
-    </div>
-    <div class="wrap">
-      <div class="devices">
-        <div class="phone"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
-        <div class="window"><div class="win-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="win-pill">siteseer — desktop</span></div><Picture {...heroShot} class="win-shot win-shot-sm" alt="SiteSeer running on a desktop" /></div>
-        <div class="phone"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CAPABILITIES -->
-  <section class="band band-red grain tc" id="capabilities">
-    <div class="wrap">
-      <div class="eyebrow">Why institutions choose SiteSeer</div>
-      <h2 class="sh druk">Where gaming, education &amp; construction meet<span class="dot">.</span></h2>
-      {/* was style="margin-top:38px" — a 6px nudge off `.fgrid`'s own
-          margin-top:var(--s6). 38 sits between --s6 and --s7 and maps to
-          neither, and the nearest step IS the component default, so the
-          override is deleted rather than snapped. */}
-      <div class="fgrid">
-        {capabilities.map((c) => (
-          <div class="glass fitem"><div class="ic" aria-hidden="true">{c.ic}</div><h3>{c.h}</h3><p>{c.p}</p></div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- BUILT FROM THE GROUND UP -->
-  <section class="band">
-    <div class="wrap">
-      <div class="split">
-        <div>
-          <div class="eyebrow">Built from the ground up</div>
-          <h2 class="sh druk">Meticulously accurate<span class="dot">.</span></h2>
-          <p class="stext">Purpose-built for students of all ages and experience levels, on construction-grade models — better than a real visit, because the information is accessible at <b>any</b> stage of the build.</p>
-          <div class="fgrid" style="grid-template-columns:1fr 1fr;margin-top:var(--s6);">
-            <div class="glass-light glass fitem"><div class="ic" aria-hidden="true">◳</div><h3>Construction-grade</h3><p>Modelled to real detail, every trade.</p></div>
-            <div class="glass-light glass fitem"><div class="ic" aria-hidden="true">⇆</div><h3>Tailorable depth</h3><p>Tune the experience to the cohort.</p></div>
-          </div>
-        </div>
-        <div class="framed">
-          {/* The only slot that scales with its container rather than cropping:
-              `.framed img` is width:100%/height:auto, so the painted width IS
-              the column width — ~502px in the two-column `.split` at 1200px,
-              full-bleed once `.split` collapses at 880px. Hence a real ladder
-              and a real `sizes`, unlike the cover-cropped slots above. */}
-          <Picture
-            src={productProcess}
-            width={1000}
-            widths={[400, 640, 1000, 1280, 1680]}
-            sizes="(min-width:1200px) 502px, (min-width:881px) 45vw, calc(100vw - 48px)"
-            formats={FORMATS}
-            fallbackFormat={FALLBACK}
-            alt="A residential build shown at successive construction stages, from footings through frame to lock-up"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- OUTCOMES -->
-  <section class="band band-red grain tc" id="outcomes">
-    <div class="wrap narrow">
-      <div class="eyebrow">Job-ready graduates, built here</div>
-      <h2 class="sh druk">Your future in construction starts here<span class="dot">.</span></h2>
-      <div class="fgrid">
-        {outcomes.map((o) => (
-          <div class="glass fitem"><div class="ic" aria-hidden="true">{o.ic}</div><h3>{o.h}</h3><p>{o.p}</p></div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- FIRST LOOK -->
-  <section class="band band-ink tc" id="demo">
-    <div class="wrap narrow"><div class="eyebrow" style="color:var(--red-on-ink);opacity:1">Your first look</div><h2 class="sh druk">See it for yourself<span class="dot">.</span></h2><p class="stext">Explore a demo and start imagining how SiteSeer fits your program.</p></div>
-    <div class="wrap"><div class="phonerow">
-      <div class="phone reveal d2"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
-      <div class="phone reveal d3"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
-      <div class="phone reveal d4"><div class="scr"><Picture {...heroShot} alt="SiteSeer running on a phone" /></div></div>
-    </div></div>
-    <div class="wrap narrow"><div style="display:flex;gap:var(--s3);justify-content:center;margin-top:var(--s7);flex-wrap:wrap;"><a class="btn btn-red btn-lg" href="#contact">Start a pilot →</a><a class="btn btn-onred btn-lg" href="#contact">Join the waitlist</a></div></div>
-  </section>
-
-  <!-- PARTNERS -->
-  <!-- Heading is deliberately neutral. An earlier draft read "Backed by", which
-       claimed a funding relationship that does not exist. The blurbs are still
-       awaiting the owner's sign-off — they are factual claims about real
-       organisations (plan Task 11 item 5). -->
-  <section class="band" id="partners">
-    <div class="wrap">
-      <div class="eyebrow reveal d1">Partners</div>
-      <h2 class="sh druk reveal d1">Who we work with<span class="dot">.</span></h2>
-      {[
-        { group: 'Partner', label: 'Partners' },
-        { group: 'Supported by', label: 'Supported by' },
-      ].map(({ group, label }) => (
-        <div class="pgroup">
-          <h3 class="pgroup-label">{label}</h3>
-          <div class="fgrid">
-            {partners.filter((p) => p.group === group).map((p, i) => (
-              <div class={`glass-light glass fitem reveal d${Math.min(i + 2, 6)}`}>
-                <div class="prole">{p.role}</div>
-                <h4>{p.name}</h4>
-                <p>{p.blurb}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  </section>
-
-  <!-- ROADMAP -->
-  <section class="band tc" id="roadmap">
-    <div class="wrap"><div class="eyebrow">On the roadmap</div><h2 class="sh druk">Upcoming features<span class="dot">.</span></h2></div>
-    {/* Each row is its content twice over, because `scrollx` translates by -50%
-        and the second copy is what slides in behind the first — remove it and
-        the loop jumps. It is a duplicate for the eye only: without
-        aria-hidden a screen reader announces all 44 spans as 44 separate
-        roadmap items when there are 22. The copies must stay in the same
-        element and the same order for the animation to be seamless, so the
-        marker goes on the spans rather than on a wrapper. */}
-    <div class="marquee">
-      <div class="mrow">
-        {roadmapA.map((f) => <span>{f}</span>)}
-        {roadmapA.map((f) => <span aria-hidden="true">{f}</span>)}
-      </div>
-      <div class="mrow rev">
-        {roadmapB.map((f) => <span>{f}</span>)}
-        {roadmapB.map((f) => <span aria-hidden="true">{f}</span>)}
-      </div>
-    </div>
-    <button class="marquee-toggle" type="button" aria-pressed="false" data-marquee-toggle>
-      Pause scrolling
-    </button>
-  </section>
+  <Hero3D hero={site.hero} />
+  <Problem problem={site.problem} alt={alt()} />
+  <HowItWorks how={site.how} alt={alt()} />
+  {site.uses && <UseCases uses={site.uses} alt={alt()} />}
+  <WhereItRuns access={site.access} alt={alt()} />
+  <Results results={site.results} alt={alt()} />
+  <Partners partners={site.partners} alt={alt()} />
+  <Contact contact={site.contact} alt={alt()} />
+  <Upcoming upcoming={site.upcoming} alt={alt()} />
 </Base>

@@ -1,0 +1,72 @@
+---
+// The animated 3D hero. Everything a reader needs (what SiteSeer is, the
+// buttons, every step's word and line) is in the HTML; the model and the
+// sequence are added by src/scripts/hero/ once the page is idle.
+import { Image } from 'astro:assets';
+import still from '../images/hero-still.png';
+
+interface Step { word: string; line: string }
+interface Props {
+  hero: { kicker: string; statement: string; primary: string; secondary: string; steps: Step[] };
+}
+const { hero } = Astro.props;
+// Escape `<` so copy containing "</script>" can't close the JSON block early.
+const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
+---
+<section class="hero" id="hero" aria-labelledby="hero-h" data-detail="/models/detail.glb" data-site="/models/site.glb">
+  <Image class="hero-still" src={still} alt="" loading="eager" widths={[600, 1000, 1400]} sizes="(min-width: 901px) 56vw, 100vw" />
+  <div class="copy">
+    <!-- The page heading is kept for screen readers and search; visually the
+         rotating word leads. -->
+    <h1 class="sr" id="hero-h">{hero.kicker}</h1>
+    <p class="word" id="word" aria-hidden="true">
+      {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.word}<i>.</i></span>)}
+    </p>
+    <p class="line" id="line" aria-hidden="true">
+      {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.line}</span>)}
+    </p>
+    <ul class="sr">{hero.steps.map((s) => <li>{s.word}: {s.line}</li>)}</ul>
+    <p class="what">{hero.statement}</p>
+    <a class="btn r" href="#contact">{hero.primary}</a><a class="btn g" href="#how">{hero.secondary}</a>
+  </div>
+  <div class="steps" id="steps">
+    {hero.steps.map((s, i) => (
+      <button class="pill" type="button" aria-current={i === 0 ? 'true' : 'false'}><b></b><span>{s.word}</span></button>
+    ))}
+    <button class="pp" type="button" aria-label="Pause the animation">❚❚</button>
+  </div>
+  <div id="pins3d" aria-hidden="true"></div>
+  <div class="icard" id="icard" role="note"></div>
+  <div class="lpanel" id="lpanel" aria-hidden="true">
+    <div class="lp-h">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5Z" /><path d="m3 13 9 5 9-5" /></svg>
+      Hierarchy
+    </div>
+    <div class="tabs"><span class="on">Layers</span><span>Objects</span><span>Tags</span></div>
+    <ul>
+      <li data-layers="1,5">Brick veneer<span class="sw"></span></li>
+      <li data-layers="7,11,12">Window<span class="sw"></span></li>
+      <li data-layers="3">Wall ties<span class="sw"></span></li>
+      <li data-layers="2,6">Frame<span class="sw"></span></li>
+      <li data-layers="8,9,10">Lining<span class="sw"></span></li>
+    </ul>
+  </div>
+  <script type="application/json" id="hero-steps" set:html={stepsJson} />
+</section>
+
+<script>
+  // three.js only loads once the page is idle, so it never holds up the copy.
+  // If WebGL is unavailable the still image stays.
+  const hero = document.getElementById('hero');
+  if (hero) {
+    const start = () =>
+      import('../scripts/hero/index.js')
+        .then((m) => m.mountHero(hero))
+        .catch((err) => {
+          console.error('SiteSeer hero:', err);
+          hero.classList.add('no3d');
+        });
+    if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1500 });
+    else setTimeout(start, 200);
+  }
+</script>

@@ -1,0 +1,36 @@
+---
+import Stop from './Stop.astro';
+import { Picture } from 'astro:assets';
+import StageTile from './StageTile.astro';
+import { render } from '../lib/renders';
+
+interface Img { image: string; alt: string; caption: string }
+interface Props {
+  how: { eyebrow: string; heading: string; lede: string; points: { title: string; text: string }[]; strip: Img[] };
+  alt?: boolean;
+}
+const { how, alt = false } = Astro.props;
+---
+<section class:list={['band', { alt }]} id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="two" style="align-items:stretch">
+      <StageTile />
+      <div style="align-self:center">
+        <p class="eyebrow rv">{how.eyebrow}</p>
+        <h2 class="h2 rv" id="how-h"><Stop text={how.heading} /></h2>
+        <p class="lede rv">{how.lede}</p>
+        <ol class="points">
+          {how.points.map((pt, i) => <li class="rv"><span class="n" aria-hidden="true">{i + 1}</span><span><b>{pt.title}</b>{pt.text}</span></li>)}
+        </ol>
+      </div>
+    </div>
+    <div class="strip">
+      {how.strip.map((s) => (
+        <figure class="shot rv">
+          <Picture src={render(s.image)} alt={s.alt} widths={[400, 640, 900]} sizes="(min-width: 801px) 31vw, 100vw" formats={['avif', 'webp']} />
+          <figcaption>{s.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>

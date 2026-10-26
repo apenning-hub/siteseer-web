@@ -79,144 +79,80 @@ function countRules(css) {
 }
 
 /**
- * The pairs below were cross-checked against src/styles/global.css directly
- * (not trusted from the spec table as-is). Findings:
+ * Every text/background pair on the two-audience homepage and the blog
+ * (Oct 2026 redesign). Red is kept for the logo and key text; the grounds are
+ * --paper, --soft (the `.alt` sections) and white cards, so text is tested on
+ * each ground it actually appears on.
  *
- * - Every alpha and every rendered px size in the spec table matches the
- *   stylesheet exactly (checked each rgba()/opacity value and font-size by
- *   hand against the relevant rule).
- * - `.eyebrow`, `.prose a`, `.btn-onred label` and the `.btn-red label`
- *   background currently read `var(--red)` in the stylesheet, not
- *   `var(--red-deep)`. This is expected, not a table error: the fixture
- *   comment in tests/parse-css.test.mjs already documents "--red ... Passes
- *   AA only at large sizes — never use --red for body text", i.e. the palette
- *   fix is expected to repoint these onto --red-deep (which already exists).
- *   These pairs intentionally test the target token, not today's declaration.
- * - `.stext` on an `--ink` background is ambiguous: `.band-ink .stext` and
- *   `.band-red .stext` share one rule at alpha .90, while `.foot .stext` is a
- *   separate rule at alpha .78. The spec's 0.90 matches the `.band-ink`
- *   variant exactly, so that's the pairing implemented below; `.foot .stext`
- *   (alpha .78) is a distinct, uncovered pair, not a wrong value in this one.
+ * The hero's ground is a radial gradient from near-white to #efe9e0 at its
+ * edges; its copy sits at the left, so the darker edge stop is the worst case
+ * and is what the hero rows test against.
  *
- * COMPLETENESS SWEEP (second pass, after the `.foot .stext` gap above was
- * confirmed real): a full re-read of every `color:` declaration in the
- * stylesheet surfaced ten more real, rendered pairs the original 20 didn't
- * cover. Four of them are currently-failing bugs that would otherwise ship
- * unnoticed — this materially changes the "the first failure will be a
- * missing token" framing, since plain `--red` (as opposed to `--red-deep`)
- * fails AA at small sizes today, independent of any missing token:
- *
- *   - `.foot .stext`  — white/.78 on `--ink`. Required by the coordinator.
- *     Distinct from `.stext (on ink)` above (that's `.band-ink`'s .90 rule).
- *   - `.win-pill`     — literal `#8a8a8a` on literal `#0e0e10` (mock browser
- *     chrome pill). Neither colour is a token, so nothing here depends on
- *     the palette fix — included for completeness, not because Task 4
- *     touches it.
- *   - `.wm .n`        — plain opaque `--ink` on `--paper`. Sounds like it
- *     should be redundant with `.navlinks a`, but that row has alpha .62;
- *     this is the *only* row testing the fully-opaque ink/paper pair, which
- *     is also effectively the site's implicit `body` default.
- *   - `.btn-ink`      — plain opaque white on `--ink`. Same reasoning: every
- *     other white-on-ink row is translucent (.60–.90); this is the only
- *     fully-opaque one.
- *   - `.pill .no`     — plain `--red` (not `--red-deep`) on `--paper`.
- *     FAILS today at 4.10:1. `.back-link` (below) shares this exact colour
- *     pair; `.sh .dot` also shares it but is large text (needs only 3:1, so
- *     it passes) and is a single decorative glyph, not included separately.
- *   - `.back-link`    — same `--red`/`--paper` pair as `.pill .no`, listed
- *     separately because it's a different, real, named element ("← Back to
- *     blog") a reader would otherwise assume is unchecked. FAILS at 4.10:1.
- *   - `.chip .tag`    — plain `--red` on white (the `.chip` background).
- *     FAILS at 4.31:1.
- *   - `.tagpill`      — plain `--red` text on `.tagpill`'s own background,
- *     which is `rgba(230,51,42,.08)` — i.e. `--red` at 8% composited over
- *     the white `.postcard` behind it, not over `--paper` directly. FAILS at
- *     3.85:1 — the tint is so faint it barely helps.
- *   - `.chip.soon`    — asked for by the coordinator. It used `opacity:.6`
- *     on the whole element, which this file modelled for the ink text but
- *     not for the nested `.tag`, faded to 2.90:1 — axe caught it, this table
- *     didn't. The chip now sets `color:var(--muted)` instead, so the label and
- *     the `.tag` inside it are both plain pairs on the chip's white ground.
- *   - `#demo .eyebrow` — overridden inline in index.astro to `--red-on-ink`
- *     on the `--ink` band. Inline styles are invisible to the stylesheet
- *     parser, so this row is the only thing that checks it.
- *   - `.eyebrow (on band-ink)` — `.band-ink .eyebrow,.band-red .eyebrow`
- *     sets white/.85 (not `--red-deep`) when `.eyebrow` sits on a band. Only
- *     the `--ink` variant is computable today (`--band-red-light` doesn't
- *     exist yet, and would just be another instance of the already-caught
- *     missing-token failure).
- *
- * Deliberately NOT added (real, but redundant or unresolvable without
- * guessing at markup this file doesn't show):
- *   - `.mrow span` / `.post-meta` — same `--muted`/`--paper` pair already
- *     covered five times over.
- *   - `.sh .dot` (base and `.band-ink`/`.band-red` variants) and
- *     `.mrow span::before` — single decorative glyphs, not body content.
- *   - `.btn-ghostred` — background `rgba(255,255,255,.12)` composited over
- *     whatever band it's placed on in the markup, which isn't visible from
- *     the CSS alone. Guessing the backdrop would be inventing a pairing, not
- *     reading one off the stylesheet — flagged here rather than guessed.
+ * Translucent fills (pill tracks, tag tints) are composited with blend() over
+ * the ground they sit on rather than guessed.
  */
+const HERO_EDGE = '#efe9e0';
+const tint = (fgToken, alpha, over) => (tokens) => blend(resolveSimple(fgToken, tokens), resolveSimple(over, tokens), alpha);
 const PAIRS = [
-  { label: '.eyebrow',           fg: '--red-deep',   bg: '--paper', px: 11, bold: true },
-  { label: '.prose a',           fg: '--red-deep',   bg: '--paper', px: 18, bold: false },
-  { label: '.stext',             fg: '--muted',      bg: '--paper', px: 16,   bold: false },
-  { label: '.pill p',            fg: '--muted',      bg: '--paper', px: 14, bold: false },
-  { label: '.pc-desc',           fg: '--muted',      bg: '--paper', px: 14,   bold: false },
-  { label: '.pc-meta',           fg: '--muted',      bg: '--paper', px: 12, bold: false },
-  { label: '.post .lede',        fg: '--muted',      bg: '--paper', px: 20,   bold: false },
-  { label: '.prose (body)',      fg: '--prose-ink',  bg: '--paper', px: 18, bold: false },
-  { label: '.navlinks a',        fg: '--ink',        bg: '--paper', px: 14,   bold: false, alpha: 0.62 },
-  { label: '.btn-onred label',   fg: '--red-deep',   bg: '#ffffff', px: 14,   bold: true },
-  { label: '.chip',              fg: '--ink',        bg: '#ffffff', px: 14, bold: true },
-  { label: '.btn-red label',     fg: '#ffffff',      bg: '--red-deep',        px: 14,   bold: true },
-  // Band text is opaque white (translucent white cannot reach AA on any red
-  // still recognisable as this brand — see :root comment). Every gradient
-  // stop is tested for every band text element, not just the (formerly
-  // mis-identified) lightest one, so no future stop reorder can hide the
-  // real worst case from this checker again.
-  { label: '.lead (on band, light stop)',  fg: '#ffffff', bg: '--band-red-light', px: 18,   bold: false },
-  { label: '.lead (on band, mid stop)',    fg: '#ffffff', bg: '--band-red-mid',   px: 18,   bold: false },
-  { label: '.lead (on band, deep stop)',   fg: '#ffffff', bg: '--band-red-deep',  px: 18,   bold: false },
-  { label: '.stext (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 16,   bold: false },
-  { label: '.stext (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 16,   bold: false },
-  { label: '.stext (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 16,   bold: false },
-  { label: '.proof (on band, light stop)', fg: '#ffffff', bg: '--band-red-light', px: 12,   bold: false },
-  { label: '.proof (on band, mid stop)',   fg: '#ffffff', bg: '--band-red-mid',   px: 12,   bold: false },
-  { label: '.proof (on band, deep stop)',  fg: '#ffffff', bg: '--band-red-deep',  px: 12,   bold: false },
-  { label: '.h1 (on band, light stop)',    fg: '#ffffff', bg: '--band-red-light', px: 40,   bold: false },
-  { label: '.h1 (on band, mid stop)',      fg: '#ffffff', bg: '--band-red-mid',   px: 40,   bold: false },
-  { label: '.h1 (on band, deep stop)',     fg: '#ffffff', bg: '--band-red-deep',  px: 40,   bold: false },
-  { label: '.stext (on ink)',    fg: '#ffffff',      bg: '--ink',             px: 16,   bold: false, alpha: 0.90 },
-  { label: '.statc .cap',        fg: '#ffffff',      bg: '--ink',             px: 11,   bold: false, alpha: 0.65 },
-  { label: '.credits',           fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.60 },
-  { label: '.fpartners',         fg: '#ffffff',      bg: '--ink',             px: 12,   bold: false, alpha: 0.80 },
-
-  // --- completeness sweep additions (see comment block above) ---
-  { label: '.foot .stext',            fg: '#ffffff',  bg: '--ink',    px: 16,   bold: false, alpha: 0.78 },
-  { label: '.win-pill',               fg: '#8a8a8a',  bg: '#0e0e10',  px: 11,   bold: false },
-  { label: '.wm .n',                  fg: '--ink',    bg: '--paper',  px: 16,   bold: false },
-  { label: '.btn-ink',                fg: '#ffffff',  bg: '--ink',    px: 14,   bold: true },
-  { label: '.pill .no',               fg: '--red-deep',    bg: '--paper',  px: 12,   bold: false },
-  { label: '.back-link',              fg: '--red-deep',    bg: '--paper',  px: 14, bold: false },
-  { label: '.chip .tag',              fg: '--red-deep',    bg: '#ffffff',  px: 11,   bold: true },
-  { label: '.eyebrow (on band-ink)',  fg: '#ffffff',  bg: '--ink',    px: 11, bold: true, alpha: 0.85 },
-  {
-    // `.tagpill`'s own background is `rgba(230,51,42,.08)` — the literal
-    // `--red` rgb composited at 8% over the white `.postcard` behind it (that
-    // tint is intentionally left on `--red`, not `--red-deep` — see :root
-    // comment). The text itself is `--red-deep`.
-    label: '.tagpill', px: 11, bold: true,
-    compute(tokens) {
-      const red = resolveSimple('--red', tokens);
-      const redDeep = resolveSimple('--red-deep', tokens);
-      const white = resolveSimple('#ffffff', tokens);
-      return { fg: redDeep, bg: blend(red, white, 0.08) };
-    },
-  },
-  { label: '.chip.soon',              fg: '--muted',       bg: '#ffffff',  px: 14, bold: true },
-  { label: '.chip.soon .tag',         fg: '--red-deep',    bg: '#ffffff',  px: 11, bold: true },
-  { label: '#demo .eyebrow',          fg: '--red-on-ink',  bg: '--ink',    px: 11, bold: true },
+  // nav and buttons
+  { label: '.navlinks a',            fg: '--ink',       bg: '--paper',  px: 14, bold: false },
+  { label: '.nav-cta',               fg: '#ffffff',     bg: '--red-deep', px: 14, bold: true },
+  { label: '.btn.r',                 fg: '#ffffff',     bg: '--red-deep', px: 16, bold: true },
+  { label: '.btn.g',                 fg: '--ink',       bg: HERO_EDGE,  px: 16, bold: true },
+  // hero copy, against the gradient's darkest stop
+  { label: '.hero h1',               fg: '--red-deep',  bg: HERO_EDGE,  px: 15, bold: true },
+  { label: '.line',                  fg: '--ink',       bg: HERO_EDGE,  px: 18, bold: false },
+  { label: '.what',                  fg: '--card-ink',  bg: HERO_EDGE,  px: 16, bold: false },
+  { label: '.pill[aria-current]',    fg: '#ffffff',     bg: '--ink',    px: 12, bold: true },
+  { label: '.pill', px: 12, bold: true, compute: (t) => ({ fg: resolveSimple('--ink', t), bg: tint('--ink', 0.06, HERO_EDGE)(t) }) },
+  // the hero's floating cards and Hierarchy panel
+  { label: '.icard .k',              fg: '--red-deep',  bg: '#ffffff',  px: 11, bold: true },
+  { label: '.icard p',               fg: '--card-ink',  bg: '#ffffff',  px: 14, bold: false },
+  { label: '.icard .rf',             fg: '--muted',     bg: '#ffffff',  px: 12, bold: true },
+  { label: '.lpanel .tabs span',     fg: '--muted',     bg: '--soft',   px: 11, bold: true },
+  { label: '.lpanel .tabs span.on',  fg: '#ffffff',     bg: '--red-deep', px: 11, bold: true },
+  { label: '.lpanel li.off',         fg: '--muted',     bg: '--soft',   px: 13, bold: true },
+  // section text, on paper and on the soft .alt ground
+  { label: '.eyebrow',               fg: '--red-deep',  bg: '--paper',  px: 13, bold: true },
+  { label: '.alt .eyebrow',          fg: '--red-deep',  bg: '--soft',   px: 13, bold: true },
+  { label: '.lede',                  fg: '--card-ink',  bg: '--paper',  px: 18, bold: false },
+  { label: '.alt .lede',             fg: '--card-ink',  bg: '--soft',   px: 18, bold: false },
+  { label: '.points li',             fg: '--card-ink',  bg: '--soft',   px: 17, bold: false },
+  { label: '.points .n',             fg: '--red-deep',  bg: '#ffffff',  px: 14, bold: true },
+  { label: '.shot figcaption',       fg: '--muted',     bg: '--soft',   px: 14, bold: false },
+  { label: '.seg button',            fg: '--ink',       bg: '#f1ece4',  px: 14, bold: true },
+  { label: '.seg button[pressed]',   fg: '#ffffff',     bg: '--ink',    px: 14, bold: true },
+  { label: '.closing',               fg: '--red-deep',  bg: '--soft',   px: 22, bold: true },
+  // white cards
+  { label: '.card p',                fg: '--card-ink',  bg: '#ffffff',  px: 15, bold: false },
+  { label: '.card .tag', px: 11, bold: true, compute: (t) => ({ fg: resolveSimple('--red-deep', t), bg: tint('--red', 0.08, '#ffffff')(t) }) },
+  { label: '.lms span',              fg: '--ink',       bg: '#ffffff',  px: 14, bold: true, alpha: 0.75 },
+  // Logo red (#FF0000) only where it is large: 3:1 is the bar there.
+  { label: '.stat .num',             fg: '--red',       bg: '#ffffff',  px: 40, bold: true },
+  { label: '.dot (headline stop)',   fg: '--red',       bg: '--soft',   px: 36, bold: true },
+  { label: '.word i (hero stop)',    fg: '--red',       bg: HERO_EDGE,  px: 40, bold: true },
+  { label: '.stat .cap',             fg: '--card-ink',  bg: '#ffffff',  px: 15, bold: true },
+  { label: '.outcomes p',            fg: '--card-ink',  bg: '--soft',   px: 16, bold: false },
+  { label: '.partner .role',         fg: '--red-deep',  bg: '#ffffff',  px: 11, bold: true },
+  { label: '.partner p',             fg: '--card-ink',  bg: '#ffffff',  px: 14, bold: false },
+  { label: '.upcoming h3',           fg: '--red-deep',  bg: '#ffffff',  px: 11, bold: true },
+  { label: '.upcoming li span',      fg: '--muted',     bg: '#ffffff',  px: 14, bold: false },
+  // footer
+  { label: '.site-foot',             fg: '--muted',     bg: '--paper',  px: 14, bold: false },
+  { label: '.site-foot a',           fg: '--red-deep',  bg: '--paper',  px: 14, bold: true },
+  { label: '.site-foot .draft', px: 11, bold: true, compute: (t) => ({ fg: resolveSimple('--red-deep', t), bg: tint('--red', 0.08, '--paper')(t) }) },
+  // blog
+  { label: '.pc-desc',               fg: '--muted',     bg: '#ffffff',  px: 14, bold: false },
+  { label: '.pc-meta',               fg: '--muted',     bg: '#ffffff',  px: 12, bold: false },
+  { label: '.pc-cat',                fg: '--red-deep',  bg: '#ffffff',  px: 11, bold: true },
+  { label: '.pc-cat (on soft)',      fg: '--red-deep',  bg: '--soft',   px: 11, bold: true },
+  { label: '.post .lede',            fg: '--ink',       bg: '--paper',  px: 20, bold: false },
+  { label: '.byline',                fg: '--muted',     bg: '--paper',  px: 14, bold: false },
+  { label: '.author-card span',      fg: '--card-ink',  bg: '--soft',   px: 14, bold: false },
+  { label: '.prose blockquote',      fg: '--ink',       bg: '--paper',  px: 24, bold: true },
+  { label: '.prose (body)',          fg: '--prose-ink', bg: '--paper',  px: 18, bold: false },
+  { label: '.prose a',               fg: '--red-deep',  bg: '--paper',  px: 18, bold: false },
+  { label: '.back-link',             fg: '--red-deep',  bg: '--paper',  px: 14, bold: true },
 ];
 
 /** Resolve a pair's colour spec (a `--token` name or a literal `#hex`) to RGB. */

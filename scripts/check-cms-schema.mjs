@@ -78,7 +78,8 @@ export function zodKeysFor(source, collectionName) {
     }
   }
 
-  const body = source.slice(objectStart + 'z.object({'.length, end);
+  // Line comments would otherwise be glued to the start of the next field.
+  const body = source.slice(objectStart + 'z.object({'.length, end).replace(/\/\/[^\n]*/g, '');
   const keys = [];
   for (const part of splitTopLevel(body)) {
     const match = part.match(/^\s*([A-Za-z_][\w]*)\s*:/);
@@ -87,8 +88,15 @@ export function zodKeysFor(source, collectionName) {
   return keys;
 }
 
-const COLLECTIONS = [
-  'blog', 'hero', 'pillars', 'capabilities', 'outcomes', 'stats', 'roadmap', 'partners',
+/**
+ * [CMS collection or file name, Zod collection name]. The two site files are
+ * separate entries in the CMS but share one `sites` schema.
+ */
+export const COLLECTIONS = [
+  ['blog', 'blog'],
+  ['education', 'sites'],
+  ['industry', 'sites'],
+  ['partners', 'partners'],
 ];
 
 // Running as a script rather than being imported by the tests.
@@ -100,9 +108,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let failures = 0;
   console.log('CMS / schema drift check\n');
 
-  for (const name of COLLECTIONS) {
+  for (const [name, zodName] of COLLECTIONS) {
     const cmsFields = fieldNamesFor(configYaml, name);
-    const zodKeys = zodKeysFor(schemas, name);
+    const zodKeys = zodKeysFor(schemas, zodName);
 
     if (!cmsFields) { console.log(`  ${name}: FAIL — no CMS collection`); failures += 1; continue; }
     if (!zodKeys) { console.log(`  ${name}: FAIL — no Zod schema`); failures += 1; continue; }

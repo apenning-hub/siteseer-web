@@ -1,41 +1,25 @@
 ---
-// Simplified header: 5 links + one CTA. Anchor links are absolute so they
-// work from blog pages too.
-const base = import.meta.env.BASE_URL; // "/" — no base path since the move to Cloudflare Pages
+// Header: wordmark, five section links and one call to action. Section links
+// are absolute (/#how) so they also work from the blog.
+interface Props { cta: string }
+const { cta } = Astro.props;
 const links = [
-  { label: 'Platform', href: `${base}#platform` },
-  { label: 'Evidence', href: `${base}#proven` },
-  { label: 'Partners', href: `${base}#partners` },
-  { label: 'Blog', href: `${base}blog` },
-  { label: 'Contact', href: `${base}#contact` },
+  { label: 'How it works', href: '/#how' },
+  { label: 'Where it runs', href: '/#access' },
+  { label: 'Track record', href: '/#results' },
+  { label: 'Partners', href: '/#partners' },
+  { label: 'Blog', href: '/blog/' },
 ];
 ---
-<header class="nav">
-  <div class="wrap nav-in">
-    <a class="brand" href={base} aria-label="SiteSeer Building Information, home">
-      <svg width="32" height="32" viewBox="0 0 34 34" aria-hidden="true">
-        <rect width="34" height="34" rx="9" fill="#e6332a" />
-        <path d="M8 16.5 L17 9 L26 16.5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linejoin="round" stroke-linecap="round" />
-        <line x1="10.5" y1="21.2" x2="23.5" y2="21.2" stroke="#fff" stroke-width="2.4" stroke-linecap="round" />
-        <line x1="10.5" y1="25.6" x2="23.5" y2="25.6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" />
-      </svg>
-      <span class="wm"><span class="n" style="display:block">SITESEER</span> <span class="t" style="display:block">BUILDING INFORMATION</span></span>
-    </a>
-    <button
-      class="navtoggle"
-      type="button"
-      aria-expanded="false"
-      aria-controls="navmenu"
-    >
-      <span class="navtoggle-box" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </span>
-      Menu
-    </button>
-    <nav class="navlinks" id="navmenu">
-      {links.map((l) => <a href={l.href}>{l.label}</a>)}
-      <a class="btn btn-red navlinks-cta" href={`${base}#contact`}>Start a pilot</a>
-    </nav>
-    <a class="btn btn-red nav-cta" href={`${base}#contact`}>Start a pilot</a>
-  </div>
+<header class="nav" id="nav">
+  <a class="brand" href="/">
+    <img src="/logo-notag.svg" alt="SiteSeer, home" width="175" height="28" />
+  </a>
+  <button class="menu" type="button" aria-expanded="false" aria-controls="navmenu">Menu</button>
+  <nav aria-label="Main">
+    <ul class="navlinks" id="navmenu">
+      {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+    </ul>
+  </nav>
+  <a class="nav-cta" href="/#contact">{cta}</a>
 </header>

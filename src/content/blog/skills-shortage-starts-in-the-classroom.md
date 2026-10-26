@@ -4,13 +4,16 @@ description: We treat the construction skills shortage as a recruitment problem.
 pubDate: 2026-04-15
 author: SiteSeer
 tags: ['Skills shortage', 'Policy', 'VET']
+audience: ['education', 'industry']
+image: render-58.jpg
+imageAlt: "Inside SiteSeer: a timber wall frame standing on a slab beside a site workbench"
 ---
 
 Construction trades have sat near the top of Australia's skills-priority lists for years, and successive workforce plans keep arriving at the same conclusion: we are not training enough people, fast enough, to the right standard. The usual policy levers — funding, apprenticeship incentives, migration — all target the *pipeline*. Fewer ask about the *teaching*.
 
 ## A throughput problem, not just an intake problem
 
-You can fund more places, but if students disengage, fail to connect theory to practice, or arrive at their first job underprepared, the shortage simply re-appears downstream. Completion and job-readiness are throughput problems, and throughput is decided in the classroom and the workshop — not on the recruitment poster.
+You can fund more places, but if learners disengage, fail to connect theory to practice, or arrive at their first job underprepared, the shortage simply re-appears downstream. Completion and job-readiness are throughput problems, and throughput is decided in the classroom and the workshop — not on the recruitment poster.
 
 This matters most in the parts of the system doing the heavy lifting: TAFEs, RTOs and the group training organisations (GTOs) that place apprentices with employers. They carry the volume, often with the tightest resourcing and the least access to live, high-quality teaching environments.
 
@@ -28,7 +31,7 @@ Put plainly: the sector needs to teach *more* people *better*, with tools that d
 
 ## Where digital learning fits
 
-This isn't an argument that software solves a workforce crisis. It's an argument that the classroom is a policy lever we under-use. Immersive, accurate, game-engine learning environments let one educator give a whole cohort a consistent, repeatable site experience — closing the gap between what a syllabus says and what a student has actually seen.
+This isn't an argument that software solves a workforce crisis. It's an argument that the classroom is a policy lever we under-use. Immersive, accurate, game-engine learning environments let one educator give a whole cohort a consistent, repeatable site experience — closing the gap between what a syllabus says and what a learner has actually seen.
 
 For RTOs, GTOs and TAFEs under pressure to lift completions and job-readiness, that's not a nice-to-have. It's leverage.
 

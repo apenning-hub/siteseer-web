@@ -1,0 +1,26 @@
+---
+import Stop from './Stop.astro';
+interface Props {
+  upcoming: { heading: string; intro: string; groups: { title: string; items: { title: string; text: string }[] }[] };
+  alt?: boolean;
+}
+const { upcoming, alt = false } = Astro.props;
+---
+<section class:list={['band', { alt }]} id="roadmap" aria-labelledby="roadmap-h">
+  <div class="wrap">
+    <div class="upcoming rv">
+      <div class="head">
+        <h2 id="roadmap-h"><Stop text={upcoming.heading} /></h2>
+        <p class="intro">{upcoming.intro}</p>
+      </div>
+      <div class="groups">
+        {upcoming.groups.map((g) => (
+          <div>
+            <h3>{g.title}</h3>
+            <ul>{g.items.map((i) => <li><b>{i.title}</b><span>{i.text}</span></li>)}</ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

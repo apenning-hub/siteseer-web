@@ -1,0 +1,22 @@
+---
+// "Pause the build": a small 3D wall that rebuilds to the chosen stage.
+// The stage buttons are the only control; nothing is tied to scroll.
+---
+<div class="stagecard rv">
+  <div class="model" id="stage-model" role="img" aria-label="A brick veneer wall with a window, shown at the selected construction stage" data-detail="/models/detail.glb" data-site="/models/site.glb"></div>
+  <div class="seg" role="group" aria-label="Construction stage">
+    <button type="button" aria-pressed="false">Footings</button><button type="button" aria-pressed="false">Frame</button><button type="button" aria-pressed="false">Lock-up</button><button type="button" aria-pressed="true">Fit-out</button>
+  </div>
+</div>
+<script>
+  const host = document.getElementById('stage-model');
+  // Only load three.js when the tile is close to the screen.
+  if (host && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      import('../scripts/stage.js').then((m) => m.mountStage(host)).catch((err) => console.error('SiteSeer stage:', err));
+    }, { rootMargin: '300px 0px' });
+    io.observe(host);
+  }
+</script>

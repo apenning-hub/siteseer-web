@@ -1,33 +1,63 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { getCollection, render } from 'astro:content';
+import PostCard from '../../components/PostCard.astro';
+import Contact from '../../components/Contact.astro';
+import { Picture } from 'astro:assets';
+import { getCollection, getEntry, render as renderPost } from 'astro:content';
+import { AUDIENCE } from '../../lib/audience';
+import { postsFor } from '../../lib/posts-core.mjs';
+import { render } from '../../lib/renders';
+import { authorFor, readingMinutes } from '../../lib/authors';
 
 export async function getStaticPaths() {
-  // Drafts still render in `npm run dev` so the author can preview them, but
-  // are never built into a production deploy. Without this filter a draft is
-  // hidden from the blog index while remaining live at a guessable URL.
-  const posts = await getCollection('blog', ({ data }) =>
-    import.meta.env.PROD ? !data.draft : true
-  );
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+  // Only this site's posts get pages. Drafts still render in `npm run dev` so
+  // the author can preview them, but are never built into a production deploy:
+  // without that, a draft is hidden from the blog index while remaining live
+  // at a guessable URL.
+  const posts = postsFor(await getCollection('blog'), AUDIENCE, { prod: import.meta.env.PROD });
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post, others: posts.filter((p) => p.id !== post.id).slice(0, 2) } }));
 }
 
-const { post } = Astro.props;
-const { Content } = await render(post);
-const fmt = (d: Date) => d.toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
-const base = import.meta.env.BASE_URL;
+const { post, others } = Astro.props;
+const { Content } = await renderPost(post);
+const d = post.data;
+const author = authorFor(d.author);
+const site = (await getEntry('sites', AUDIENCE))!.data;
+const fmt = (date: Date) => date.toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
+// The brand's red full stop, unless the title already ends in punctuation.
+const stops = !/[.?!]$/.test(d.title);
 ---
-<Base title={`${post.data.title} — SiteSeer`} description={post.data.description}>
-  <div class="wrap">
-  <article class="post">
-    <a class="back-link" href={`${base}blog`}>← All posts</a>
-    <div class="post-meta">
-      <span>{fmt(post.data.pubDate)}</span><span>·</span><span>{post.data.author}</span>
-      {post.data.tags.map((t) => <span class="tagpill">{t}</span>)}
+<Base title={`${d.title}: SiteSeer`} description={d.description}>
+  <article class="post page-top">
+    <div class="post-head">
+      <a class="back-link" href="/blog/">← All posts</a>
+      <div class="post-meta">
+        {d.tags[0] && <span class="pc-cat">{d.tags[0]}</span>}
+        <span>{fmt(d.pubDate)}</span><span aria-hidden="true">·</span><span>{readingMinutes(post.body)} min read</span>
+      </div>
+      <h1>{d.title}{stops && <span class="dot">.</span>}</h1>
+      <p class="lede">{d.description}</p>
+      <p class="byline">By <b>{author.name}</b>, {author.role}</p>
     </div>
-    <h1>{post.data.title}</h1>
-    <p class="lede">{post.data.description}</p>
+    {d.image && (
+      <figure class="post-figure">
+        <Picture src={render(d.image)} alt={d.imageAlt ?? ''} widths={[640, 1000, 1400]} sizes="(min-width: 1100px) 1000px, 100vw" formats={['avif', 'webp']} loading="eager" />
+      </figure>
+    )}
     <div class="prose"><Content /></div>
+    <aside class="author-card" aria-label="About the author">
+      <span class="pc-cat">Written by</span>
+      <b>{author.name}</b>
+      <span>{author.role}</span>
+    </aside>
   </article>
-  </div>
+  {others.length > 0 && (
+    <section class="band alt" aria-labelledby="more-h">
+      <div class="wrap">
+        <h2 class="eyebrow" id="more-h">More from the blog</h2>
+        <div class="bloglist two-up">{others.map((p) => <PostCard post={p} />)}</div>
+      </div>
+    </section>
+  )}
+  <Contact contact={site.contact} />
 </Base>

@@ -1,4 +1,48 @@
-# Beta launch checklist — the parts only Andrew can do
+# Launch checklist: the parts only Andrew can do
+
+## Two sites (October 2026): read this first
+
+The site now builds as **two sites from one repo**: `SITE_AUDIENCE=education`
+and `SITE_AUDIENCE=industry` (see `docs/superpowers/specs/2026-10-26-two-audience-sites-design.md`).
+That replaces the single `beta.siteseer.education` described in steps 1–2 below.
+The OAuth (step 3) and author invite (step 4) still apply, on the education domain.
+
+### A. Review deploys (done from the terminal)
+
+1. `npx wrangler login`, once. This opens a browser to sign in to Cloudflare.
+2. `npx wrangler pages project create siteseer-education --production-branch main`
+   and `npx wrangler pages project create siteseer-industry --production-branch main`, once each.
+3. `npm run deploy:education` and `npm run deploy:industry`. Each prints its
+   `*.pages.dev` URL. Re-run them to publish changes.
+
+### B. Subdomains (at IONOS, where siteseer.education's DNS lives)
+
+In each Pages project, go to **Custom domains → Set up a custom domain**, then add the matching CNAME at IONOS:
+
+| Pages project | Custom domain | IONOS record |
+|---|---|---|
+| `siteseer-education` | `education.siteseer.education` | CNAME `education` → `siteseer-education.pages.dev` |
+| `siteseer-industry` | `industry.siteseer.education` | CNAME `industry` → `siteseer-industry.pages.dev` |
+
+Check with `dig +short education.siteseer.education` and `curl -sI https://industry.siteseer.education | head -1`.
+
+### C. CMS sign-in
+
+The OAuth broker (`functions/api/auth`) is served from the **education** site. In step 3 below:
+- the Homepage URL is `https://education.siteseer.education`
+- the callback is `https://education.siteseer.education/api/auth/callback`
+- the encrypted env vars go on the `siteseer-education` Pages project
+
+The industry site's `/admin` signs in through the same broker (`base_url` in `public/admin/config.yml`).
+
+### D. Before promoting either site off review
+
+- Remove `<meta name="robots" content="noindex, nofollow">` from `src/layouts/Base.astro` and delete `public/robots.txt`.
+- Set the industry copy's `"draft": false` (`src/content/sites/industry.json`) once its wording has been reviewed. That removes the "Draft copy" note in the footer.
+
+---
+
+## Original single-site steps (beta.siteseer.education)
 
 Four setup steps that no amount of code can do from inside the repo. They block
 `beta.siteseer.education` going live, and they're independent of both Plan A and

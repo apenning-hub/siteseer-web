@@ -1,0 +1,29 @@
+---
+import Stop from './Stop.astro';
+import { Picture } from 'astro:assets';
+import { render } from '../lib/renders';
+
+interface Props {
+  problem: { eyebrow: string; heading: string; lede: string; points: { title: string; text: string }[]; image: string; alt: string; caption: string };
+  alt?: boolean;
+}
+const { problem: p, alt = false } = Astro.props;
+---
+<section class:list={['band', { alt }]} id="problem" aria-labelledby="problem-h">
+  <div class="wrap">
+    <div class="two">
+      <div>
+        <p class="eyebrow rv">{p.eyebrow}</p>
+        <h2 class="h2 rv" id="problem-h"><Stop text={p.heading} /></h2>
+        <p class="lede rv">{p.lede}</p>
+        <ol class="points">
+          {p.points.map((pt, i) => <li class="rv"><span class="n" aria-hidden="true">{i + 1}</span><span><b>{pt.title}</b>{pt.text}</span></li>)}
+        </ol>
+      </div>
+      <figure class="shot rv">
+        <Picture src={render(p.image)} alt={p.alt} widths={[480, 800, 1200]} sizes="(min-width: 901px) 46vw, 100vw" formats={['avif', 'webp']} />
+        <figcaption>{p.caption}</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>

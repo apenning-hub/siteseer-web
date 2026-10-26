@@ -1,0 +1,24 @@
+---
+import Stop from './Stop.astro';
+interface Props {
+  uses: { eyebrow: string; heading: string; lede: string; items: { tag: string; title: string; text: string }[] };
+  alt?: boolean;
+}
+const { uses, alt = false } = Astro.props;
+---
+<section class:list={['band', { alt }]} id="uses" aria-labelledby="uses-h">
+  <div class="wrap">
+    <p class="eyebrow rv">{uses.eyebrow}</p>
+    <h2 class="h2 rv" id="uses-h"><Stop text={uses.heading} /></h2>
+    <p class="lede rv">{uses.lede}</p>
+    <div class="cards">
+      {uses.items.map((u) => (
+        <article class="card rv">
+          <span class="tag">{u.tag}</span>
+          <h3><Stop text={u.title} /></h3>
+          <p>{u.text}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

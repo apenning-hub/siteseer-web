@@ -1,0 +1,7 @@
+---
+// A display headline's closing full stop, set in logo red (the brand's mark).
+interface Props { text: string }
+const { text } = Astro.props;
+const ends = text.endsWith('.');
+---
+{ends ? text.slice(0, -1) : text}{ends && <span class="dot">.</span>}
