@@ -24,8 +24,6 @@ const d = post.data;
 const author = authorFor(d.author);
 const site = (await getEntry('sites', AUDIENCE))!.data;
 const fmt = (date: Date) => date.toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
-// The brand's red full stop, unless the title already ends in punctuation.
-const stops = !/[.?!]$/.test(d.title);
 ---
 <Base title={`${d.title}: SiteSeer`} description={d.description}>
   <article class="post page-top">
@@ -35,7 +33,7 @@ const stops = !/[.?!]$/.test(d.title);
         {d.tags[0] && <span class="pc-cat">{d.tags[0]}</span>}
         <span>{fmt(d.pubDate)}</span><span aria-hidden="true">·</span><span>{readingMinutes(post.body)} min read</span>
       </div>
-      <h1>{d.title}{stops && <span class="dot">.</span>}</h1>
+      <h1>{d.title}</h1>
       <p class="lede">{d.description}</p>
       <p class="byline">By <b>{author.name}</b>, {author.role}</p>
     </div>

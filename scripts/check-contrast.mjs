@@ -129,8 +129,6 @@ const PAIRS = [
   { label: '.lms span',              fg: '--ink',       bg: '#ffffff',  px: 14, bold: true, alpha: 0.75 },
   // Logo red (#FF0000) only where it is large: 3:1 is the bar there.
   { label: '.stat .num',             fg: '--red',       bg: '#ffffff',  px: 40, bold: true },
-  { label: '.dot (headline stop)',   fg: '--red',       bg: '--soft',   px: 36, bold: true },
-  { label: '.word i (hero stop)',    fg: '--red',       bg: HERO_EDGE,  px: 40, bold: true },
   { label: '.stat .cap',             fg: '--card-ink',  bg: '#ffffff',  px: 15, bold: true },
   { label: '.outcomes p',            fg: '--card-ink',  bg: '--soft',   px: 16, bold: false },
   { label: '.partner .role',         fg: '--red-deep',  bg: '#ffffff',  px: 11, bold: true },

@@ -20,3 +20,8 @@ npm-debug.log*
 .wrangler/
 tools/models/out/
 dist-industry/
+
+# Druk Wide is a commercial font (Commercial Type). It is served by the live
+# sites but must not be redistributed in this public repo. Source:
+# 01_brand/graphics/fonts/Druk Wide Bold.ttf, converted to a Latin woff2 subset.
+public/fonts/*.woff2

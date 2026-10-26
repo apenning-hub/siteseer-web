@@ -37,6 +37,8 @@ The industry site's `/admin` signs in through the same broker (`base_url` in `pu
 
 ### D. Before promoting either site off review
 
+- **Druk Wide web licence.** The display font is git-ignored (public repo). Deploys must run from a machine that has `public/fonts/druk-wide-bold.woff2`; recreate it from `01_brand/graphics/fonts/Druk Wide Bold.ttf` (Latin subset, woff2) if needed. Without it the site falls back to Archivo. Confirm the web licence (about US$60 for one style at type.today) covers both domains.
+
 - Remove `<meta name="robots" content="noindex, nofollow">` from `src/layouts/Base.astro` and delete `public/robots.txt`.
 - Set the industry copy's `"draft": false` (`src/content/sites/industry.json`) once its wording has been reviewed. That removes the "Draft copy" note in the footer.
 

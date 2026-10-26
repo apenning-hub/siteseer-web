@@ -20,7 +20,7 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
          rotating word leads. -->
     <h1 class="sr" id="hero-h">{hero.kicker}</h1>
     <p class="word" id="word" aria-hidden="true">
-      {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.word}<i>.</i></span>)}
+      {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.word}</span>)}
     </p>
     <p class="line" id="line" aria-hidden="true">
       {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.line}</span>)}

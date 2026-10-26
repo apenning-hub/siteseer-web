@@ -1,7 +1,8 @@
 ---
-// A display headline's closing full stop, set in logo red (the brand's mark).
+// Display headlines end without a full stop (Andrew, 26 Oct 2026). The copy
+// keeps its punctuation for screen readers in running text; a trailing
+// full stop is dropped only from the display setting.
 interface Props { text: string }
 const { text } = Astro.props;
-const ends = text.endsWith('.');
 ---
-{ends ? text.slice(0, -1) : text}{ends && <span class="dot">.</span>}
+{text.endsWith('.') ? text.slice(0, -1) : text}
