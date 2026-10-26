@@ -28,6 +28,7 @@
     "@gltf-transform/core": "^4.1.1",
     "@gltf-transform/extensions": "^4.1.1",
     "@gltf-transform/functions": "^4.1.1",
+    "@types/node": "^22.20.5",
     "gltf-validator": "^2.0.0-dev.3.10",
     "meshoptimizer": "^0.22.0",
     "mikktspace": "^1.1.1",

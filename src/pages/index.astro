@@ -18,19 +18,19 @@ const entry = await getEntry('sites', AUDIENCE);
 if (!entry) throw new Error(`No site copy for "${AUDIENCE}": check src/content/sites/${AUDIENCE}.json`);
 const site = entry.data;
 
-// Sections in page order; `uses` only exists on the industry site.
-const sections = [
-  [Problem, { problem: site.problem }],
-  [HowItWorks, { how: site.how }],
-  ...(site.uses ? [[UseCases, { uses: site.uses }]] : []),
-  [WhereItRuns, { access: site.access }],
-  [Results, { results: site.results }],
-  [Partners, { partners: site.partners }],
-  [Contact, { contact: site.contact }],
-  [Upcoming, { upcoming: site.upcoming }],
-] as const;
+// Grounds alternate paper / soft grey down the page; `uses` only exists on the
+// industry site, so the alternation is counted as the sections render.
+let n = 0;
+const alt = () => n++ % 2 === 0;
 ---
 <Base>
   <Hero3D hero={site.hero} />
-  {sections.map(([Section, props], i) => <Section {...props} alt={i % 2 === 0} />)}
+  <Problem problem={site.problem} alt={alt()} />
+  <HowItWorks how={site.how} alt={alt()} />
+  {site.uses && <UseCases uses={site.uses} alt={alt()} />}
+  <WhereItRuns access={site.access} alt={alt()} />
+  <Results results={site.results} alt={alt()} />
+  <Partners partners={site.partners} alt={alt()} />
+  <Contact contact={site.contact} alt={alt()} />
+  <Upcoming upcoming={site.upcoming} alt={alt()} />
 </Base>
