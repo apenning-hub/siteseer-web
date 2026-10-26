@@ -236,7 +236,8 @@ test('it works on the real stylesheet, not just the fixture', () => {
     `expected at least 11 root tokens, got ${Object.keys(tokens).length}`);
   // The band reds went with the red section grounds (Oct 2026); the contrast
   // table now leans on --soft and --card-ink instead.
-  for (const t of ['--red', '--red-deep', '--ink', '--paper', '--soft', '--muted',
+  // One red since Oct 2026: --red-deep is gone.
+  for (const t of ['--red', '--ink', '--paper', '--soft', '--muted',
                    '--card-ink', '--prose-ink']) {
     assert.ok(t in tokens, `missing token ${t}`);
   }

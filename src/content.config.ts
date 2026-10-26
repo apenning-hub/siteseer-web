@@ -51,7 +51,7 @@ const sites = defineCollection({
   schema: z.object({
     draft: z.boolean(),
     meta: z.object({ title: z.string(), description: z.string() }),
-    nav: z.object({ cta: z.string() }),
+    nav: z.object({ cta: z.string(), ctaShort: z.string().optional() }),
     hero: z.object({ kicker: z.string(), statement: z.string(), primary: z.string(), secondary: z.string(), steps: z.array(heroStep).min(1) }),
     problem: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point) }).merge(image),
     how: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point), strip: z.array(image) }),

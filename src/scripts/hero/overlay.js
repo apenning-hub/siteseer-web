@@ -9,6 +9,7 @@ export function createOverlay({ hero, toScreen, layers }) {
   const pinsEl = hero.querySelector('#pins3d');
   const card = hero.querySelector('#icard');
   const panel = hero.querySelector('#lpanel');
+  const copy = hero.querySelector('.copy');
   const legend = hero.querySelector('#spanel');
   const sysRows = [...legend.querySelectorAll('li')].map((li) => ({ li, layers: li.dataset.layers.split(',').map(Number) }));
   const rows = [...panel.querySelectorAll('li')].map((li) => ({ li, layers: li.dataset.layers.split(',').map(Number) }));
@@ -41,9 +42,15 @@ export function createOverlay({ hero, toScreen, layers }) {
       return;
     }
     const [x, y] = toScreen(at);
-    // Sit beside the point; flip to its left if it would run off screen.
-    const left = x + 26 + w > hero.clientWidth - 16 ? x - 26 - w : x + 26;
-    card.style.transform = `translate(${Math.round(left)}px, ${Math.round(Math.min(Math.max(y - 30, 72), hero.clientHeight - h - 90))}px)`;
+    // Sit beside the point; flip to its left if it would run off screen, but
+    // never over the copy. On stacked (phone) layouts, stay below the copy.
+    const cr = copy.getBoundingClientRect(), hr = hero.getBoundingClientRect();
+    const stacked = hero.clientWidth <= 900;
+    let left = x + 26 + w > hero.clientWidth - 16 ? x - 26 - w : x + 26;
+    if (!stacked) left = Math.max(left, cr.right - hr.left + 16);
+    left = Math.min(Math.max(left, 16), hero.clientWidth - w - 16);
+    const minTop = stacked ? cr.bottom - hr.top + 12 : 72;
+    card.style.transform = `translate(${Math.round(left)}px, ${Math.round(Math.min(Math.max(y - 30, minTop), hero.clientHeight - h - 90))}px)`;
   }
 
   // step: the current step's data; t: ms since it began; settled: the camera

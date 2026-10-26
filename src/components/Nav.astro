@@ -1,8 +1,8 @@
 ---
 // Header: wordmark, five section links and one call to action. Section links
 // are absolute (/#how) so they also work from the blog.
-interface Props { cta: string }
-const { cta } = Astro.props;
+interface Props { cta: string; ctaShort?: string }
+const { cta, ctaShort } = Astro.props;
 const links = [
   { label: 'How it works', href: '/#how' },
   { label: 'Where it runs', href: '/#access' },
@@ -21,5 +21,5 @@ const links = [
       {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
     </ul>
   </nav>
-  <a class="nav-cta" href="/#contact">{cta}</a>
+  <a class="nav-cta" href="/#contact"><span class="long">{cta}</span><span class="short" aria-hidden="true">{ctaShort ?? cta}</span></a>
 </header>

@@ -28,7 +28,7 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
     </p>
     <ul class="sr">{hero.steps.map((s) => <li>{s.word}: {s.line}</li>)}</ul>
     <p class="what">{hero.statement}</p>
-    <a class="btn r" href="#contact">{hero.primary}</a><a class="btn g" href="#how">{hero.secondary}</a>
+    <div class="ctas"><a class="btn r" href="#contact">{hero.primary}</a><a class="btn g" href="#how">{hero.secondary}</a></div>
   </div>
   <div class="steps" id="steps">
     {hero.steps.map((s, i) => (

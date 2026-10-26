@@ -43,7 +43,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <Nav cta={site.data.nav.cta} />
+    <Nav cta={site.data.nav.cta} ctaShort={site.data.nav.ctaShort} />
     <main id="main">
       <slot />
     </main>

@@ -5,7 +5,8 @@
     "description": "A 3D construction site your learners walk through at any stage of the build. For construction and architecture courses, from high school to degree."
   },
   "nav": {
-    "cta": "Start a pilot"
+    "cta": "Start a pilot",
+    "ctaShort": "Pilot"
   },
   "hero": {
     "kicker": "SiteSeer Building Information",

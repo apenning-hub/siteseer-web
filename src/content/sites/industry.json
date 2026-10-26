@@ -5,7 +5,8 @@
     "description": "RFIs and defects cost the industry time and money. SiteSeer trains your team on the actual building in 3D, at every stage, before they build it."
   },
   "nav": {
-    "cta": "Book a walkthrough"
+    "cta": "Book a walkthrough",
+    "ctaShort": "Book a demo"
   },
   "hero": {
     "kicker": "SiteSeer Building Information",

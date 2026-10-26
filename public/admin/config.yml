@@ -138,6 +138,10 @@ collections:
               - name: cta
                 label: Button label
                 widget: string
+              - name: ctaShort
+                label: Button label on phones
+                widget: string
+                required: false
           - name: hero
             label: Hero
             widget: object
