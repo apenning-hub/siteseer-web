@@ -53,7 +53,7 @@ const sites = defineCollection({
     problem: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point) }).merge(image),
     how: z.object({ eyebrow: z.string(), heading: z.string(), lede: z.string(), points: z.array(point), strip: z.array(image) }),
     access: z.object({
-      eyebrow: z.string(), heading: z.string(), lede: z.string(), closing: z.string(),
+      eyebrow: z.string(), heading: z.string(), lede: z.string(), closing: z.string().optional(),
       ways: z.array(z.object({
         icon: z.enum(['lab', 'lms', 'laptop', 'phone', 'tablet', 'browser', 'office']),
         title: z.string(), text: z.string(), platforms: z.array(z.string()).optional(),

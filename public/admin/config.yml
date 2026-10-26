@@ -367,6 +367,7 @@ collections:
               - name: closing
                 label: Closing line
                 widget: string
+                required: false
               - name: ways
                 label: Ways in
                 widget: list

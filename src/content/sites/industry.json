@@ -5,12 +5,12 @@
     "description": "One 3D model of the building at every stage, for RFIs, defects, limitations and inductions."
   },
   "nav": {
-    "cta": "Talk to us"
+    "cta": "Book a walkthrough"
   },
   "hero": {
     "kicker": "SiteSeer Building Information",
-    "statement": "The building in 3D at every stage, from footings to fit-out. Raise RFIs, trace defects and record limitations against the exact element, before and during construction.",
-    "primary": "Talk to us",
+    "statement": "RFIs and defects, pinned to the 3D model at the stage they happen. SiteSeer shows the building at every stage, from footings to fit-out, so everyone looks at the same element.",
+    "primary": "Book a walkthrough",
     "secondary": "See how it works",
     "steps": [
       {
@@ -127,10 +127,10 @@
               -0.65,
               0.5
             ],
-            "kicker": "Limitation · Window head",
+            "kicker": "Design constraint · Window head",
             "title": "Head flashing",
             "text": "Recorded against the layer: the head detail relies on the flashing, not the sealant.",
-            "refs": "Recorded against layer 4"
+            "refs": "Recorded against the head flashing"
           }
         ]
       },
@@ -161,11 +161,11 @@
         "text": "Point at the element itself, at the stage it is built, instead of describing it."
       },
       {
-        "title": "Defects found while they're cheap.",
+        "title": "Defects traced to their cause.",
         "text": "Step back through the build to see what was covered up, and when."
       },
       {
-        "title": "Limitations written down.",
+        "title": "Design constraints written down.",
         "text": "Record what a detail can't do against the model, where the next person will find it."
       }
     ],
@@ -225,9 +225,9 @@
         "text": "Walk a defect back through the stages to where it started, and what covered it up."
       },
       {
-        "tag": "Limitations",
-        "title": "Write down what it can't do.",
-        "text": "Record a detail's limits against the model, where the next trade will see them."
+        "tag": "Design constraints",
+        "title": "Write down what it relies on.",
+        "text": "Record a detail's constraints against the model, where the next trade will see them."
       },
       {
         "tag": "Inductions",
@@ -240,10 +240,9 @@
     "eyebrow": "Where it runs",
     "heading": "In the office and on site.",
     "lede": "On the machines your team already has, at the desk and at the slab edge.",
-    "closing": "It's all possible with SiteSeer.",
     "ways": [
       {
-        "icon": "office",
+        "icon": "laptop",
         "title": "In the office",
         "text": "Runs on the Windows and macOS machines your team already uses."
       },
@@ -258,29 +257,25 @@
         "text": "Share a model with the browser viewer, with nothing to install."
       },
       {
-        "icon": "lab",
-        "title": "Training rooms",
-        "text": "Deploy the Unreal Engine build to training-room computers for inductions."
+        "icon": "office",
+        "title": "Site inductions",
+        "text": "Run it on any PC in the site office to walk new crews through the site."
       }
     ]
   },
   "results": {
-    "eyebrow": "Built on teaching",
-    "heading": "A decade of explaining buildings.",
+    "eyebrow": "Background",
+    "heading": "Proven in the classroom, now on site.",
     "lede": "SiteSeer began in construction education, where a building has to make sense to someone who has never seen it built. That's what a site team needs too.",
     "stats": [
       {
         "num": "1,000+",
-        "cap": "People trained on it"
+        "cap": "Construction learners over ten years"
       },
       {
         "num": "10",
         "suffix": "yrs",
         "cap": "In use"
-      },
-      {
-        "num": "0",
-        "cap": "Site-safety risk"
       }
     ],
     "outcomes": [
@@ -293,8 +288,8 @@
         "text": "Questions are raised against the model before the trade arrives."
       },
       {
-        "title": "A record that stays.",
-        "text": "RFIs, defects and limitations stay with the model after handover."
+        "title": "One place to look.",
+        "text": "The question, the element and the stage, together."
       }
     ]
   },
@@ -357,7 +352,7 @@
             "text": "Raise an issue from where you are standing."
           },
           {
-            "title": "Multiplayer environments",
+            "title": "Shared walkthroughs",
             "text": "Several people on the same site at once."
           }
         ]

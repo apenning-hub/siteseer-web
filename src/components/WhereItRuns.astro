@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 type Icon = 'lab' | 'lms' | 'laptop' | 'phone' | 'tablet' | 'browser' | 'office';
 interface Props {
-  access: { eyebrow: string; heading: string; lede: string; closing: string; ways: { icon: Icon; title: string; text: string; platforms?: string[] }[] };
+  access: { eyebrow: string; heading: string; lede: string; closing?: string; ways: { icon: Icon; title: string; text: string; platforms?: string[] }[] };
   alt?: boolean;
 }
 const { access, alt = false } = Astro.props;
@@ -45,6 +45,6 @@ const logoFor = (name: string) => (existsSync(join(process.cwd(), 'public/logos'
         </article>
       ))}
     </div>
-    <p class="closing rv">{access.closing}</p>
+    {access.closing && <p class="closing rv">{access.closing}</p>}
   </div>
 </section>
