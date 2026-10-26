@@ -9,9 +9,12 @@ export function audienceConfig(env) {
   const audience = env.SITE_AUDIENCE || 'education';
   if (!SITES[audience]) throw new Error(`SITE_AUDIENCE must be education or industry, got "${audience}"`);
   const otherKey = audience === 'education' ? 'industry' : 'education';
+  // Review deploys (SITE_REVIEW=1) live on Cloudflare's pages.dev addresses
+  // until the subdomains' DNS exists, so links between the two sites resolve.
+  const url = (key) => (env.SITE_REVIEW === '1' ? `https://siteseer-${key}.pages.dev` : SITES[key].site);
   return {
     audience,
-    site: SITES[audience].site,
-    other: { audience: otherKey, href: `${SITES[otherKey].site}/`, label: SITES[otherKey].label },
+    site: url(audience),
+    other: { audience: otherKey, href: `${url(otherKey)}/`, label: SITES[otherKey].label },
   };
 }

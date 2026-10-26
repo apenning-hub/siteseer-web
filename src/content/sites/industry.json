@@ -5,13 +5,12 @@
     "description": "RFIs and defects cost the industry time and money. SiteSeer trains your team on the actual building in 3D, at every stage, before they build it."
   },
   "nav": {
-    "cta": "Book a walkthrough",
-    "ctaShort": "Book a demo"
+    "cta": "Book a demo"
   },
   "hero": {
     "kicker": "SiteSeer Building Information",
     "statement": "Train your team on the building before they build it. RFIs and defects cost time and money; SiteSeer shows every stage in 3D, matched 1-to-1 with what gets built.",
-    "primary": "Book a walkthrough",
+    "primary": "Book a demo",
     "secondary": "See how it works",
     "steps": [
       {
@@ -193,7 +192,7 @@
   },
   "how": {
     "heading": "Pause the build. Walk in.",
-    "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
+    "lede": "Pick a stage under the wall and watch it build. In SiteSeer it's the same idea, on a whole building.",
     "points": [
       {
         "title": "We build the staged model.",
@@ -379,7 +378,7 @@
     "lede": "Book a walkthrough, or talk to us about training your team on a live project.",
     "email": "sean.pickersgill@adelaide.edu.au",
     "primary": {
-      "label": "Book a walkthrough",
+      "label": "Book a demo",
       "subject": "SiteSeer walkthrough (industry)"
     },
     "secondary": {

@@ -19,3 +19,9 @@ test('industry points across to education', () => {
 test('rejects an unknown audience', () => {
   assert.throws(() => audienceConfig({ SITE_AUDIENCE: 'retail' }), /SITE_AUDIENCE/);
 });
+
+test('review builds point at the pages.dev review sites until the subdomains exist', () => {
+  const c = audienceConfig({ SITE_AUDIENCE: 'industry', SITE_REVIEW: '1' });
+  assert.equal(c.site, 'https://siteseer-industry.pages.dev');
+  assert.equal(c.other.href, 'https://siteseer-education.pages.dev/');
+});

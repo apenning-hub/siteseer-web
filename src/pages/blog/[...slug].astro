@@ -53,7 +53,7 @@ const fmt = (date: Date) => date.toLocaleDateString('en-AU', { year: 'numeric', 
     <section class="band alt" aria-labelledby="more-h">
       <div class="wrap">
         <h2 class="more-h" id="more-h">More from the blog</h2>
-        <div class="bloglist two-up">{others.map((p) => <PostCard post={p} />)}</div>
+        <div class="bloglist two-up">{others.map((p) => <PostCard post={p} level={3} />)}</div>
       </div>
     </section>
   )}

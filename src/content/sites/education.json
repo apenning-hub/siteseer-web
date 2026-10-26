@@ -5,8 +5,7 @@
     "description": "A 3D construction site your learners walk through at any stage of the build. For construction and architecture courses, from high school to degree."
   },
   "nav": {
-    "cta": "Start a pilot",
-    "ctaShort": "Pilot"
+    "cta": "Start a pilot"
   },
   "hero": {
     "kicker": "SiteSeer Building Information",
@@ -203,7 +202,7 @@
   },
   "how": {
     "heading": "Pause the build. Walk in.",
-    "lede": "Pick a stage and step inside it. Try the buttons on the wall: this is the same idea, on a whole building.",
+    "lede": "Pick a stage under the wall and watch it build. In SiteSeer it's the same idea, on a whole building.",
     "points": [
       {
         "title": "Pick a stage.",
@@ -282,10 +281,6 @@
         "num": "10",
         "suffix": "yrs",
         "cap": "In real classrooms"
-      },
-      {
-        "num": "0",
-        "cap": "Site-safety risk"
       }
     ],
     "outcomes": [

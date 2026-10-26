@@ -6,18 +6,19 @@ import type { CollectionEntry } from 'astro:content';
 import { render } from '../lib/renders';
 import { readingMinutes } from '../lib/authors';
 
-interface Props { post: CollectionEntry<'blog'> }
-const { post } = Astro.props;
+interface Props { post: CollectionEntry<'blog'>; level?: 2 | 3 }
+const { post, level = 2 } = Astro.props;
+const H = `h${level}`;
 const d = post.data;
 const fmt = (date: Date) => date.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
 ---
 <a class="postcard" href={`/blog/${post.id}/`}>
   {d.image && (
-    <Picture class="pc-img" src={render(d.image)} alt={d.imageAlt ?? ''} widths={[400, 640, 800]} sizes="(min-width: 881px) 31vw, 100vw" formats={['avif', 'webp']} />
+    <Picture class="pc-img" src={render(d.image)} alt="" widths={[400, 640, 800]} sizes="(min-width: 881px) 31vw, 100vw" formats={['avif', 'webp']} />
   )}
   <div class="pc-body">
     {d.tags[0] && <span class="pc-cat">{d.tags[0]}</span>}
-    <h2>{d.title}</h2>
+    <H>{d.title}</H>
     <p class="pc-desc">{d.description}</p>
     <div class="pc-meta">{fmt(d.pubDate)} · {readingMinutes(post.body)} min read</div>
   </div>

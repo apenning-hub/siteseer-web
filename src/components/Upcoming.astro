@@ -15,12 +15,19 @@ const { upcoming, alt = false } = Astro.props;
       </div>
       <div class="groups">
         {upcoming.groups.map((g) => (
-          <div>
-            <h3>{g.title}</h3>
+          <details class="ugroup" open>
+            <summary><h3>{g.title}</h3></summary>
             <ul>{g.items.map((i) => <li><b>{i.title}</b><span>{i.text}</span></li>)}</ul>
-          </div>
+          </details>
         ))}
       </div>
     </div>
   </div>
 </section>
+
+<script>
+  // On phones the feature groups start folded, so the list isn't two screens long.
+  if (matchMedia('(max-width: 800px)').matches) {
+    document.querySelectorAll<HTMLDetailsElement>('.ugroup').forEach((d) => { d.open = false; });
+  }
+</script>

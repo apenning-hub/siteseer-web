@@ -8,7 +8,10 @@ export function createSite(loader, url, { scene, sun, ground, renderer }) {
   let root = null;
   const parts = [];
   let wanted = null; // a show() that arrived before the file did
-  const ready = loader.loadAsync(url).then((gltf) => {
+  // Fetched only when the finale first asks for it: most visitors never reach
+  // it, and it is the heaviest file on the page.
+  let ready = null;
+  const load = () => (ready ??= loader.loadAsync(url).then((gltf) => {
     root = gltf.scene;
     root.traverse((o) => { if (/^S_/.test(o.name)) parts.push({ node: o, meshes: [], baseY: o.position.y }); });
     for (const P of parts) {
@@ -23,7 +26,7 @@ export function createSite(loader, url, { scene, sun, ground, renderer }) {
     root.visible = false;
     scene.add(root);
     if (wanted) show(...wanted);
-  });
+  }));
 
   function setPart(P, k, drop) {
     P.node.position.y = P.baseY + (1 - k) * drop;
@@ -41,6 +44,7 @@ export function createSite(loader, url, { scene, sun, ground, renderer }) {
   function show(on, instant = false) {
     if (!root) {
       wanted = on ? [on, instant] : null;
+      if (on) load();
       return;
     }
     wanted = null;
@@ -70,5 +74,6 @@ export function createSite(loader, url, { scene, sun, ground, renderer }) {
     if (done) fadeIn = null;
   }
 
-  return { show, step, ready };
+  // Warm the file shortly before the finale so it's usually there in time.
+  return { show, step, preload: load };
 }

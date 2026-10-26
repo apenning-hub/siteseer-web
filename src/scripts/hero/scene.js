@@ -38,6 +38,8 @@ export function createScene(hero) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.domElement.className = 'hero-canvas';
+  // Decorative: the copy, step list and card text carry the content.
+  renderer.domElement.setAttribute('aria-hidden', 'true');
   hero.prepend(renderer.domElement);
 
   const scene = new THREE.Scene();

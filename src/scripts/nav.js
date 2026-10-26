@@ -33,6 +33,15 @@ if (header && toggle && panel) {
     if (event.target.closest('a')) setOpen(false);
   });
 
+  // Close when focus or a click moves outside the header (WCAG 2.4.11: the
+  // open panel would otherwise cover whatever gets focus next).
+  header.addEventListener('focusout', (event) => {
+    if (panel.classList.contains('open') && !header.contains(event.relatedTarget)) setOpen(false);
+  });
+  document.addEventListener('click', (event) => {
+    if (panel.classList.contains('open') && !header.contains(event.target)) setOpen(false);
+  });
+
   // Returning to desktop width must not leave a stale open state behind.
   window.matchMedia('(min-width: 961px)').addEventListener('change', (event) => {
     if (event.matches) setOpen(false);

@@ -6,7 +6,8 @@ import { Image } from 'astro:assets';
 import still from '../images/hero-still.png';
 import { SYSTEMS } from '../scripts/hero/systems.js';
 
-interface Step { word: string; line: string }
+interface Note { kicker: string; title: string; text: string }
+interface Step { word: string; line: string; inspect?: Note[]; pulls?: Note[] }
 interface Props {
   hero: { kicker: string; statement: string; primary: string; secondary: string; steps: Step[] };
 }
@@ -26,7 +27,15 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
     <p class="line" id="line" aria-hidden="true">
       {hero.steps.map((s, i) => <span class={i === 0 ? 'in' : ''}>{s.line}</span>)}
     </p>
-    <ul class="sr">{hero.steps.map((s) => <li>{s.word}: {s.line}</li>)}</ul>
+    <ul class="sr">
+      {hero.steps.map((s) => (
+        <li>{s.word}: {s.line}
+          {[...(s.inspect ?? []), ...(s.pulls ?? [])].length > 0 && (
+            <ul>{[...(s.inspect ?? []), ...(s.pulls ?? [])].map((n) => <li>{n.kicker}. {n.title}: {n.text}</li>)}</ul>
+          )}
+        </li>
+      ))}
+    </ul>
     <p class="what">{hero.statement}</p>
     <div class="ctas"><a class="btn r" href="#contact">{hero.primary}</a><a class="btn g" href="#how">{hero.secondary}</a></div>
   </div>
@@ -37,8 +46,8 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
     <button class="pp" type="button" aria-label="Pause the animation">❚❚</button>
   </div>
   <div id="pins3d" aria-hidden="true"></div>
-  <div class="icard" id="icard" role="note"></div>
-  <div class="lpanel spanel" id="spanel" aria-label="Building systems and the trades that build them">
+  <div class="icard" id="icard" aria-hidden="true"></div>
+  <div class="lpanel spanel" id="spanel" role="group" aria-label="Building systems and the trades that build them">
     <div class="lp-h">Systems and trades</div>
     <ul>
       {SYSTEMS.map((s) => (
@@ -75,7 +84,18 @@ const stepsJson = JSON.stringify(hero.steps).replace(/</g, '\\u003c');
           console.error('SiteSeer hero:', err);
           hero.classList.add('no3d');
         });
-    if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1500 });
+    // On Save-Data or a 2G-class connection, keep the still image and let the
+    // visitor choose to download the 3D (about 1 MB including three.js).
+    const conn = (navigator as any).connection;
+    const lean = conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType ?? ''));
+    if (lean) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn g load3d';
+      b.textContent = 'Load the 3D model (about 1 MB)';
+      b.addEventListener('click', () => { b.remove(); start(); });
+      hero.querySelector('.ctas')?.after(b);
+    } else if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 1500 });
     else setTimeout(start, 200);
   }
 </script>

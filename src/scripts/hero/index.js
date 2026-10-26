@@ -9,7 +9,10 @@ import { createSite } from './site.js';
 import { createOverlay } from './overlay.js';
 import { createSequence } from './sequence.js';
 
-const HOLD = 3600; // ms per step unless the step sets its own
+// ms per step unless the step sets its own; phones hold longer, since the
+// copy and the model are read one after the other rather than side by side.
+const HOLD = 3600;
+const PACE = matchMedia('(max-width: 900px)').matches ? 1.35 : 1;
 const RESUME_AFTER_DRAG = 6000;
 
 export async function mountHero(hero) {
@@ -19,7 +22,8 @@ export async function mountHero(hero) {
   const pills = [...hero.querySelectorAll('#steps .pill')];
   const pp = hero.querySelector('#steps .pp');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const seq = createSequence(steps, { hold: HOLD });
+  for (const s of steps) if (s.hold) s.hold *= PACE;
+  const seq = createSequence(steps, { hold: HOLD * PACE });
   const lastStep = steps.length - 1;
 
   const S = createScene(hero);
@@ -32,7 +36,9 @@ export async function mountHero(hero) {
   const site = createSite(loader, hero.dataset.site, S);
   const overlay = createOverlay({ hero, toScreen: S.toScreen, layers: L });
 
-  let step = -1, stepStart = 0, elapsed = 0, playing = false, dragging = false;
+  // stepT: ms into the current step. It advances only while playing, so Pause
+  // freezes the cards, layer pulls and looks as well as the sequence.
+  let step = -1, stepStart = 0, stepT = 0, elapsed = 0, playing = false, dragging = false;
   let look = null;
   // A step's look can change part-way through: `looks` is [{ t, look, focus }].
   const lookAt = (s, t) => (s.looks ?? []).findLast((l) => t >= l.t) ?? { look: 'white' };
@@ -41,6 +47,8 @@ export async function mountHero(hero) {
   function go(i) {
     step = i;
     stepStart = performance.now();
+    // Reduced motion: no clock runs, so open the step at its first card.
+    stepT = reduce ? 1600 : 0;
     const s = steps[i];
     words.forEach((e, k) => { e.className = k === i ? 'in' : e.classList.contains('in') ? 'out' : ''; });
     lines.forEach((e, k) => e.classList.toggle('in', k === i));
@@ -71,10 +79,12 @@ export async function mountHero(hero) {
     pp.setAttribute('aria-label', p ? 'Pause the animation' : ended ? 'Play it again' : 'Play the animation');
   }
 
+  // Choosing a step plays it from its start (reduced motion: shows it, paused).
   pills.forEach((b, i) => b.addEventListener('click', () => {
-    setPlaying(false);
+    clearTimeout(idle);
     elapsed = seq.startOf(i);
     go(i);
+    setPlaying(!reduce);
   }));
   pp.addEventListener('click', () => {
     clearTimeout(idle);
@@ -124,11 +134,13 @@ export async function mountHero(hero) {
     if (playing) {
       elapsed += dt;
       const at = seq.at(elapsed);
+      if (at.step >= lastStep - 1) site.preload();
       if (at.step !== step) go(at.step);
       pills[step].querySelector('b').style.width = `${(at.t / seq.holdOf(step)) * 100}%`;
       if (at.done) setPlaying(false);
     }
-    const want = lookAt(steps[step], reduce ? Infinity : now - stepStart);
+    if (playing) stepT += dt;
+    const want = lookAt(steps[step], reduce ? Infinity : stepT);
     if (want !== look && steps[step].kind !== 'finale') {
       look = want;
       L.setLook(want.look, want.focus ?? [], reduce);
@@ -142,7 +154,7 @@ export async function mountHero(hero) {
       if (k === 1) toReal = null;
     }
     if (!dragging) S.tickCamera(now, dt, playing);
-    overlay.update(steps[step], now - stepStart, !S.tweening() && !dragging && !reduce, dt, look?.look, look?.focus);
+    overlay.update(steps[step], stepT, !S.tweening() && !dragging, dt, look?.look, look?.focus);
     S.controls.update();
     S.render();
     if (++frames === 3) {

@@ -114,6 +114,9 @@
 }
 *{ box-sizing:border-box; margin:0; padding:0; }
 @media (prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth; } }
+/* Keep focused things clear of the fixed header. */
+html{ scroll-padding-top:calc(var(--nav-h) + var(--s4)); }
+.two > *{ min-width:0; }
 body{ font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:var(--ink); background:var(--paper); font-size:var(--fs-body); }
 a{ color:inherit; }
 .wrap{ max-width:1240px; margin:0 auto; padding:0 var(--gut); }
@@ -163,6 +166,7 @@ section[id]{ scroll-margin-top:var(--s9); }
   .navlinks a{ color:var(--ink); padding:var(--s3) 0; font-size:var(--fs-body); min-height:var(--tap); }
   .menu{ display:block; }
 }
+@media (max-width:360px){ .nav-cta{ display:none; } }
 @media (max-width:600px){ .nav{ gap:var(--s3); } .brand img{ height:22px; } .nav-cta{ padding:var(--s2) var(--s3); } .nav-cta .long{ display:none; } }
 @media (min-width:601px){ .nav-cta .short{ display:none; } }
 
@@ -229,11 +233,12 @@ html:not(.js) .steps{ display:none; }
 .lpanel li.off .sw::after{ left:2px; }
 /* Systems legend: the colours on the model, and who builds each system. */
 .spanel{ width:236px; }
-.spanel li{ justify-content:flex-start; align-items:flex-start; gap:var(--s3); opacity:.35; transition:opacity var(--dur-2), background var(--dur-2); }
-.spanel li.lit{ opacity:1; }
-.spanel.focusing li{ opacity:.35; }
-.spanel.focusing li.active{ opacity:1; background:var(--soft); }
-.spanel .sdot{ flex:none; width:12px; height:12px; border-radius:var(--r-dot); margin-top:var(--s1); }
+.spanel li{ justify-content:flex-start; align-items:flex-start; gap:var(--s3); transition:background var(--dur-2); }
+/* Not yet built: a grey swatch, text stays readable. */
+.spanel li:not(.lit) .sdot{ background:#c7c7cc !important; }
+.spanel.focusing li:not(.active) .sdot{ background:#c7c7cc !important; }
+.spanel.focusing li.active{ background:var(--soft); }
+.spanel .sdot{ flex:none; width:12px; height:12px; border-radius:var(--r-dot); box-shadow:inset 0 0 0 1.5px rgba(21,18,15,.45); margin-top:var(--s1); }
 .spanel b{ display:block; font:600 var(--fs-meta)/1.3 Inter, sans-serif; color:var(--ink); }
 .spanel small{ display:block; font:400 var(--fs-micro)/1.35 Inter, sans-serif; color:var(--muted); }
 @media (max-width:900px){
@@ -241,7 +246,7 @@ html:not(.js) .steps{ display:none; }
   .copy{ top:calc(var(--nav-h) + var(--s6)); transform:none; width:auto; right:var(--gut); }
   .btn{ padding:var(--s3) var(--s5); font-size:var(--fs-ui); }
   .hero .btn.g{ display:none; }
-  .steps{ bottom:var(--s5); right:var(--gut); flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+  .steps{ bottom:var(--s5); right:var(--gut); flex-wrap:wrap; row-gap:var(--s2); }
   .hero-canvas,.hero-still{ height:calc(58% - 80px); }
   .lpanel{ display:none; }
   .icard{ width:230px; }
@@ -353,6 +358,9 @@ html:not(.js) .rv{ opacity:1; transform:none; }
 .upcoming h2{ font:800 clamp(30px,3.4vw,48px)/1.02 var(--font-display); text-transform:uppercase; }
 .upcoming .intro{ color:var(--card-ink); font-size:var(--fs-body); line-height:1.55; max-width:44ch; }
 .upcoming .groups{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s6); margin-top:var(--s6); border-top:1px solid var(--line); padding-top:var(--s5); }
+.ugroup summary{ list-style:none; cursor:pointer; display:flex; align-items:center; min-height:var(--tap-min); }
+.ugroup summary::-webkit-details-marker{ display:none; }
+@media (max-width:800px){ .ugroup summary::after{ content:'+'; margin-left:auto; font:700 var(--fs-lead) Inter, sans-serif; } .ugroup[open] summary::after{ content:'–'; } .ugroup{ border-bottom:1px solid var(--line); padding:var(--s2) 0; } }
 .upcoming h3{ font:600 var(--fs-meta) Inter, sans-serif; color:var(--muted); }
 .upcoming ul{ list-style:none; display:grid; gap:var(--s3); }
 .upcoming li b{ display:block; font:600 var(--fs-body) Inter, sans-serif; }
@@ -439,7 +447,9 @@ p,li{ text-wrap:pretty; }
 .empty{ margin-top:var(--s6); color:var(--muted); }
 @media (max-width:880px){ .bloglist,.bloglist.two-up{ grid-template-columns:1fr; } }
 
-@media (pointer:coarse){ .pill,.pp{ min-height:44px; } .pp{ width:44px; } }
+/* Touch screens: every control at least 44px. */
+@media (pointer:coarse){ .pill,.pp,.btn,.nav-cta{ min-height:var(--tap); } .pp{ width:var(--tap); } .btn,.nav-cta{ display:inline-flex; align-items:center; } }
+.load3d{ margin-top:var(--s3); }
 
 /* Related posts heading on a post page. */
 .more-h{ font:700 var(--fs-sub) Inter, sans-serif; margin-bottom:var(--s2); }

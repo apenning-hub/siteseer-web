@@ -1,6 +1,7 @@
-// The audience is baked in at build time by astro.config.mjs (vite.define).
-import { audienceConfig } from './audience-core.mjs';
+// The audience config is computed once in astro.config.mjs from SITE_AUDIENCE
+// and SITE_REVIEW, and baked in at build time (vite.define).
+import type { audienceConfig } from './audience-core.mjs';
 
-export const { audience: AUDIENCE, site: SITE, other: OTHER } = audienceConfig({
-  SITE_AUDIENCE: import.meta.env.SITE_AUDIENCE,
-});
+declare const __AUDIENCE_CONFIG__: ReturnType<typeof audienceConfig>;
+
+export const { audience: AUDIENCE, site: SITE, other: OTHER } = __AUDIENCE_CONFIG__;
